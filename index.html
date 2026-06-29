@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brighton Heights School — Nurturing Excellence, Building Character</title>
+<meta name="description" content="Brighton Heights School, Lokoja — a premier boarding school providing world-class education for primary and secondary students in Kogi State, Nigeria."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+</head>
+<body>
+
+<!-- ═══════ ANNOUNCEMENT POPUP ═══════ -->
+<div id="ann-popup" role="status" aria-live="polite" aria-atomic="true">
+  <div class="ann-popup-top">
+    <div class="ann-popup-label">School Notice</div>
+    <button class="ann-popup-close" id="ann-popup-close" aria-label="Dismiss notice">✕</button>
+  </div>
+  <div id="ann-popup-title"></div>
+  <div id="ann-popup-body"></div>
+  <div class="ann-popup-date" id="ann-popup-date"></div>
+</div>
+
+<!-- ═══════ NAV ═══════ -->
+<nav id="mainNav">
+  <div class="nav-inner">
+    <a href="#home" class="brand">
+      <div class="bmark"><span>BHS</span></div>
+      <div class="bname">
+        <strong>Brighton Heights School</strong>
+        <small>Excellence &amp; Character</small>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#academics">Academics</a></li>
+      <li><a href="#admissions">Admissions</a></li>
+      <li><a href="#announcements">News</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="register.html" class="nbtn nbtn-solid">Apply Now</a>
+      <a href="student.html" class="nbtn nbtn-ghost">Student Login</a>
+    </div>
+    <div class="ham" id="hamBtn" onclick="toggleMobNav()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mob-overlay" id="mobOverlay"></div>
+<div class="mob-nav" id="mobNav">
+  <a href="#about" onclick="closeMobNav()">About</a>
+  <a href="#academics" onclick="closeMobNav()">Academics</a>
+  <a href="#admissions" onclick="closeMobNav()">Admissions</a>
+  <a href="#announcements" onclick="closeMobNav()">News</a>
+  <a href="#faq" onclick="closeMobNav()">FAQ</a>
+  <a href="#contact" onclick="closeMobNav()">Contact</a>
+  <div class="mob-divider"></div>
+  <div class="mob-cta">
+    <a href="register.html" class="solid">Apply Now</a>
+    <a href="student.html" class="ghost">Student Login</a>
+  </div>
+</div>
+
+<!-- ═══════ HERO ═══════ -->
+<header class="hero" id="home">
+  <div class="hero-bg-text">BHS</div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge"><span></span>Admissions Open — 2026/2027 Academic Session</div>
+      <h1>Nurturing <em>Excellence</em>,<br>Building Character</h1>
+      <p class="hero-sub">Brighton Heights School is a government-approved co-educational boarding institution committed to the holistic development of pupils across the primary and secondary levels of education, in full alignment with the national curriculum framework of the Federal Republic of Nigeria.</p>
+      <div class="hcta">
+        <a href="register.html" class="hbtn hbtn-p">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Apply for Admission
+        </a>
+        <a href="#about" class="hbtn hbtn-o">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Learn More
+        </a>
+      </div>
+    </div>
+    <!-- Glass stats panel -->
+    <div class="hero-glass">
+      <div class="hg-grid">
+        <div class="hg-item">
+          <div class="hg-num" id="statStudents">—</div>
+          <div class="hg-label">Total Students</div>
+        </div>
+        <div class="hg-item">
+          <div class="hg-num">25<span class="suf">+</span></div>
+          <div class="hg-label">Years of Excellence</div>
+        </div>
+        <div class="hg-item">
+          <div class="hg-num">80<span class="suf">+</span></div>
+          <div class="hg-label">Qualified Staff</div>
+        </div>
+        <div class="hg-item">
+          <div class="hg-num">98<span class="suf">%</span></div>
+          <div class="hg-label">WAEC Pass Rate</div>
+        </div>
+        <div class="hg-divider"></div>
+        <div class="hg-tagline">Kogi State's school of choice</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll down ↓</div>
+</header>
+
+<!-- ═══════ MARQUEE ═══════ -->
+<div class="marquee-wrap" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Excellence</span><span class="dot">·</span>
+    <span>Discipline</span><span class="dot">·</span>
+    <span>Primary School</span><span class="dot">·</span>
+    <span>JSS &amp; SSS</span><span class="dot">·</span>
+    <span>WAEC Preparation</span><span class="dot">·</span>
+    <span>NECO Results</span><span class="dot">·</span>
+    <span>JAMB Success</span><span class="dot">·</span>
+    <span>Boarding School Lokoja</span><span class="dot">·</span>
+    <span>Kogi State</span><span class="dot">·</span>
+    <span>Excellence</span><span class="dot">·</span>
+    <span>Discipline</span><span class="dot">·</span>
+    <span>Primary School</span><span class="dot">·</span>
+    <span>JSS &amp; SSS</span><span class="dot">·</span>
+    <span>WAEC Preparation</span><span class="dot">·</span>
+    <span>NECO Results</span><span class="dot">·</span>
+    <span>JAMB Success</span><span class="dot">·</span>
+    <span>Boarding School Lokoja</span><span class="dot">·</span>
+    <span>Kogi State</span><span class="dot">·</span>
+  </div>
+</div>
+
+<!-- ═══════ ABOUT ═══════ -->
+<section class="sec" id="about">
+  <div class="inner about-grid">
+    <div class="about-text rv-l">
+      <div class="eyebrow">About Us</div>
+      <h2>A Legacy of Excellence<br>Since the Year 2000</h2>
+      <p>Established in the year 2000 and duly accredited by the relevant educational authorities, Brighton Heights School has maintained a distinguished record of academic attainment and moral formation across its primary and secondary programmes. The institution operates in strict adherence to the policies and guidelines of the Federal Ministry of Education and the Kogi State Ministry of Education, Science and Technology.</p>
+      <div class="about-block">
+        <h3>Our Mission</h3>
+        <p>To deliver a structured, value-driven educational experience that equips every pupil with the intellectual capacity, ethical grounding, and personal discipline required to contribute meaningfully to national development and global progress.</p>
+      </div>
+      <div class="about-block">
+        <h3>Our Vision</h3>
+        <p>To be recognised as the foremost institution of basic and post-basic education in Kogi State, producing graduates of unimpeachable character, sound academic preparation, and demonstrated civic responsibility.</p>
+      </div>
+      <div class="about-block">
+        <h3>Core Values</h3>
+        <div class="values-list">
+          <span class="value-chip">Integrity</span>
+          <span class="value-chip">Excellence</span>
+          <span class="value-chip">Discipline</span>
+          <span class="value-chip">Respect</span>
+          <span class="value-chip">Innovation</span>
+          <span class="value-chip">Community</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-photo-wrap rv-r">
+      <div class="about-glass-card">
+        <div class="agc-item">
+          <div class="agc-num">25<span class="suf">+</span></div>
+          <div class="agc-label">Years Running</div>
+        </div>
+        <div class="agc-item">
+          <div class="agc-num">98<span class="suf">%</span></div>
+          <div class="agc-label">Pass Rate</div>
+        </div>
+        <div class="agc-item">
+          <div class="agc-num">80<span class="suf">+</span></div>
+          <div class="agc-label">Staff</div>
+        </div>
+        <div class="agc-item">
+          <div class="agc-num" id="aboutStudents">—</div>
+          <div class="agc-label">Students</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ACADEMICS ═══════ -->
+<section class="sec sec-alt" id="academics">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">Academics</div>
+      <h2>Our Academic <em>Programmes</em></h2>
+      <p>Brighton Heights School offers a structured sequence of learning across three tiers of formal education, each designed in conformity with the approved national curriculum.</p>
+    </div>
+    <div class="acad-grid">
+      <div class="acad-card rv">
+        <div class="acad-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <h3>Primary School</h3>
+        <div class="acad-range">Basic 1 – Basic 6</div>
+        <p>The primary programme provides the foundational framework upon which all subsequent learning is constructed. Instruction at this level develops functional literacy, numeracy, and scientific awareness in accordance with the approved 9-Year Basic Education Curriculum. Emphasis is placed on child-centred pedagogy, structured assessment, and the cultivation of responsible citizenship from an early stage.</p>
+        <div class="acad-subjects">
+          <span class="subj-chip">English Language</span><span class="subj-chip">Mathematics</span>
+          <span class="subj-chip">Basic Science &amp; Technology</span><span class="subj-chip">Social Studies</span>
+          <span class="subj-chip">Cultural &amp; Creative Arts</span>
+        </div>
+      </div>
+      <div class="acad-card rv" style="transition-delay:.1s">
+        <div class="acad-icon"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></div>
+        <h3>Junior Secondary School</h3>
+        <div class="acad-range">JSS 1 – JSS 3</div>
+        <p>The Junior Secondary programme completes the Basic Education cycle and prepares students for the Basic Education Certificate Examination (BECE). The curriculum is broad-based, introducing pupils to a range of disciplines including the sciences, humanities, and vocational subjects, while reinforcing analytical reasoning and independent study skills essential for senior secondary progression.</p>
+        <div class="acad-subjects">
+          <span class="subj-chip">Mathematics</span><span class="subj-chip">English Language</span>
+          <span class="subj-chip">Integrated Science</span><span class="subj-chip">French Language</span>
+          <span class="subj-chip">Computer Studies</span>
+        </div>
+      </div>
+      <div class="acad-card rv" style="transition-delay:.2s">
+        <div class="acad-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>Senior Secondary School</h3>
+        <div class="acad-range">SS 1 – SS 3</div>
+        <p>At the Senior Secondary level, students are enrolled in one of three approved elective clusters — Sciences, Humanities, or Commercial Studies — in preparation for the West African Senior School Certificate Examination (WASSCE), the National Examination Council (NECO) examinations, and the Unified Tertiary Matriculation Examination (UTME) conducted by JAMB. The school maintains dedicated examination preparation programmes and sustains a pass rate exceeding 98% at distinction level.</p>
+        <div class="acad-subjects">
+          <span class="subj-chip">Physics</span><span class="subj-chip">Chemistry</span>
+          <span class="subj-chip">Biology</span><span class="subj-chip">Economics</span>
+          <span class="subj-chip">Literature in English</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ANNOUNCEMENTS ═══════ -->
+<section class="sec" id="announcements">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">Latest News</div>
+      <h2>Official Notices &amp; <em>Announcements</em></h2>
+      <p>Kindly consult this section regularly for official communications, academic notices, and institutional updates from the school administration.</p>
+    </div>
+    <div class="ann-grid" id="annGrid">
+      <div class="ann-loading"><div class="spinner"></div>Loading announcements…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ADMISSIONS ═══════ -->
+<section class="sec sec-alt" id="admissions">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">Admissions</div>
+      <h2>Admission into <em>Brighton Heights</em></h2>
+      <p>The school operates a structured and transparent admissions procedure in compliance with the guidelines of the Kogi State Secondary Education Board. Prospective applicants are advised to follow the steps outlined below.</p>
+    </div>
+    <div class="adm-wrap">
+      <div class="adm-step active rv">
+        <div class="adm-step-head" onclick="toggleStep(this)">
+          <div class="adm-step-num">1</div>
+          <div class="adm-step-title">Submission of Application</div>
+          <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="adm-step-body">Prospective candidates are required to complete the official online application form, providing accurate bio-data, the desired class of entry, and valid parent or guardian contact information. Applications must be submitted in full before consideration can be extended. No physical visit to the school premises is required at this stage of the process.</div>
+      </div>
+      <div class="adm-step rv">
+        <div class="adm-step-head" onclick="toggleStep(this)">
+          <div class="adm-step-num">2</div>
+          <div class="adm-step-title">Payment of Application Fee</div>
+          <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="adm-step-body">Upon submission of the application form, candidates are required to remit the prescribed non-refundable application processing fee via the designated online payment platform. Proof of payment in the form of an electronically generated receipt will be issued automatically and should be retained by the applicant for official reference purposes.</div>
+      </div>
+      <div class="adm-step rv">
+        <div class="adm-step-head" onclick="toggleStep(this)">
+          <div class="adm-step-num">3</div>
+          <div class="adm-step-title">Submission of Required Documents</div>
+          <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="adm-step-body">Applicants are to upload certified copies of all required credentials through the admissions portal. These include: a certified birth certificate or declaration of age, two recent passport photographs, the most recent terminal academic report, and — for candidates seeking admission into JSS 1 via transfer or SS 1 — a duly signed transfer certificate from the previous institution. Submitted documents shall be reviewed by the admissions committee within five working days of receipt.</div>
+      </div>
+      <div class="adm-step rv">
+        <div class="adm-step-head" onclick="toggleStep(this)">
+          <div class="adm-step-num">4</div>
+          <div class="adm-step-title">Admission Decision</div>
+          <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="adm-step-body">The outcome of the admissions review shall be communicated to applicants via SMS and electronic mail. Successful candidates will receive a formal offer of provisional admission accompanied by a unique student registration number. Where an offer is made subject to the confirmation of final academic results, such conditions shall be clearly stated in the admission letter.</div>
+      </div>
+      <div class="adm-step rv">
+        <div class="adm-step-head" onclick="toggleStep(this)">
+          <div class="adm-step-num">5</div>
+          <div class="adm-step-title">Enrolment &amp; Portal Activation</div>
+          <svg class="adm-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="adm-step-body">Following acceptance of the offer of admission, candidates are required to complete the payment of applicable school fees in order to secure their placement. Upon confirmation of payment, login credentials for the Brighton Heights student portal will be issued, granting access to the academic timetable, examination results, and official school communications. Resumption schedules and hostel allocation details will be conveyed at this stage.</div>
+      </div>
+    </div>
+    <div class="adm-cta rv">
+      <a href="register.html" class="hbtn hbtn-p" style="background:var(--navy);color:#fff;box-shadow:0 4px 18px rgba(11,31,69,.25);border-radius:50px">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Start Your Application
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FAQ ═══════ -->
+<section class="sec" id="faq">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">FAQ</div>
+      <h2>Frequently Asked <em>Questions</em></h2>
+      <p>The following questions address matters commonly raised by prospective parents and guardians during the admissions process.</p>
+    </div>
+    <div class="faq-wrap rv">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>What is the school fees structure at Brighton Heights?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">School fees are structured according to the level of study — Primary, Junior Secondary, or Senior Secondary — and are further differentiated by boarding arrangement. A detailed schedule of tuition, boarding, and sundry charges is enclosed with each offer of admission. Prospective parents seeking advance information on the current fee schedule are advised to contact the school's Bursary Department directly.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Is Brighton Heights a day school or a full boarding school?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">Brighton Heights School operates principally as a full boarding institution for both primary and secondary pupils. The boarding structure is considered integral to the school's pastoral care model and its approach to academic oversight. Day student arrangements may be available for select classes subject to capacity and administrative approval — prospective parents are encouraged to direct such enquiries to the Admissions Office.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Does the school offer scholarships or fee concessions?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">The school operates a merit-based scholarship programme open to academically distinguished candidates, as well as a limited number of concessions for verified cases of financial exigency. Scholarship applications are reviewed on an annual basis by a duly constituted committee. Interested applicants are requested to submit a formal letter of application, together with relevant supporting documentation, to the Office of the Principal.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>What is the school's performance record in public examinations?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">Brighton Heights School has consistently returned a pass rate in excess of 98% in both the West African Senior School Certificate Examination (WASSCE) and the National Examination Council (NECO) examinations, with notable distinctions recorded in Mathematics, English Language, Biology, and Economics. The school's SS3 programme incorporates a structured examination preparedness curriculum administered throughout the final academic session.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Does the school provide preparation for the UTME conducted by JAMB?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">Yes. The school's Senior Secondary Three (SS3) programme incorporates structured preparatory classes for the Unified Tertiary Matriculation Examination (UTME), including simulated Computer-Based Test (CBT) sessions and subject-specific revision classes. Students also receive institutional guidance on JAMB registration procedures, choice of tertiary institution and course of study, and preparation for post-UTME screening exercises.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Can parents access their ward's academic records online?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">Yes. Brighton Heights School operates a secure digital portal through which parents and legal guardians may access terminal examination results, academic progress reports, and official school communications pertaining to their ward. Login credentials are issued to guardians following the successful completion of the enrolment process.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>What documents are required for the admissions process?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">The following documents are required for all applications: a certified copy of the candidate's birth certificate or sworn declaration of age; two recent passport photographs with a white background; the candidate's most recent terminal academic report; and, in the case of transfer applicants into JSS 1 or SS 1, a duly authenticated transfer certificate from the previous school of attendance. All documents must be submitted as clear, legible digital copies through the online admissions portal.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>What is the school's policy on mobile devices?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a">In accordance with the school's Student Conduct and Welfare Policy, the possession and use of personal mobile devices by boarding students is restricted during academic hours and supervised study periods. Supervised access may be permitted during designated periods as determined by the school administration. Full details of the mobile device policy are set out in the Student Handbook, which is issued to all students upon enrolment.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CONTACT ═══════ -->
+<section class="sec sec-alt" id="contact">
+  <div class="inner">
+    <div class="slabel rv">
+      <div class="eyebrow">Contact Us</div>
+      <h2>Contact the <em>School Administration</em></h2>
+      <p>Enquiries regarding admissions, academic matters, or institutional visits may be directed to the school's administrative office through any of the channels listed below.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card rv">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Address</h3>
+        <p>12 Heights Road, GRA<br/>Lokoja, Kogi State, Nigeria</p>
+      </div>
+      <div class="contact-card rv" style="transition-delay:.1s">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92z"/></svg></div>
+        <h3>Phone</h3>
+        <p><a href="tel:+2348000000000">+234 800 000 0000</a><br/><a href="tel:+2348000000001">+234 800 000 0001</a></p>
+      </div>
+      <div class="contact-card rv" style="transition-delay:.2s">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></svg></div>
+        <h3>Email</h3>
+        <p><a href="mailto:info@brightonheights.edu.ng">info@brightonheights.edu.ng</a><br/><a href="mailto:admissions@brightonheights.edu.ng">admissions@brightonheights.edu.ng</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PORTAL BANNER ═══════ -->
+<div class="portal-sec rv">
+  <div class="portal-banner">
+    <div class="portal-content">
+      <h2>Student &amp; Parent Portal</h2>
+      <p>Enrolled students and their parents or guardians may access examination results, official school notices, and academic records through the Brighton Heights digital portal.</p>
+      <div class="portal-btns">
+        <a href="student.html" class="pbtn pbtn-solid">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Student Login
+        </a>
+        <a href="register.html" class="pbtn pbtn-ghost">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          New Application
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-col">
+      <div class="foot-brand">
+        <div class="bmark"><span>BHS</span></div>
+        <strong>Brighton Heights School</strong>
+      </div>
+      <p>A government-approved co-educational boarding institution committed to academic excellence and the moral formation of young Nigerians. Located in Lokoja, Kogi State.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Quick Links</h4>
+      <a href="register.html">Apply Now</a>
+      <a href="student.html">Student Login</a>
+      <a href="#about">About Us</a>
+      <a href="#academics">Academics</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="foot-col">
+      <h4>Reach Us</h4>
+      <a href="tel:+2348000000000">+234 800 000 0000</a>
+      <a href="mailto:info@brightonheights.edu.ng">info@brightonheights.edu.ng</a>
+      <a>12 Heights Road, GRA<br>Lokoja, Kogi State</a>
+    </div>
+  </div>
+  <div class="foot-bottom">© <span id="yr"></span> Brighton Heights School. All rights reserved.</div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const cfg = {
+  apiKey:            "AIzaSyDLQQW9nApENo5h3rXmycrejx37cIXd1TM",
+  authDomain:        "school-8b30a.firebaseapp.com",
+  projectId:         "school-8b30a",
+  storageBucket:     "school-8b30a.firebasestorage.app",
+  messagingSenderId: "976076120343",
+  appId:             "1:976076120343:web:0cbe82390644492e975752"
+};
+const app = initializeApp(cfg);
+const db  = getFirestore(app);
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* nav shadow on scroll */
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* mobile nav */
+function _closeMob(){
+  document.getElementById('hamBtn').classList.remove('open');
+  document.getElementById('mobNav').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+window.toggleMobNav = function(){
+  const open = document.getElementById('mobNav').classList.contains('open');
+  if(open){ _closeMob(); }
+  else{
+    document.getElementById('hamBtn').classList.add('open');
+    document.getElementById('mobNav').classList.add('open');
+    document.getElementById('mobOverlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+};
+window.closeMobNav = _closeMob;
+document.getElementById('mobOverlay').addEventListener('click', _closeMob);
+
+/* scroll reveal */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.rv,.rv-l,.rv-r').forEach(el => observer.observe(el));
+
+/* admissions accordion */
+window.toggleStep = function(head){
+  const step = head.parentElement;
+  const isOpen = step.classList.contains('active');
+  document.querySelectorAll('.adm-step').forEach(s => s.classList.remove('active'));
+  if(!isOpen) step.classList.add('active');
+};
+
+/* faq */
+window.toggleFaq = function(q){
+  q.parentElement.classList.toggle('open');
+};
+
+/* student count */
+(async function loadStudentCount(){
+  try{
+    const snap = await getDocs(collection(db,'students'));
+    const count = snap.size.toLocaleString();
+    document.getElementById('statStudents').textContent = count;
+    const ab = document.getElementById('aboutStudents');
+    if(ab) ab.textContent = count;
+  } catch(e){
+    document.getElementById('statStudents').textContent = '—';
+    console.warn('Student count unavailable:', e.message);
+  }
+})();
+
+/* announcements */
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
+function formatDate(dStr){
+  if(!dStr) return '';
+  const d = new Date(dStr + 'T00:00:00');
+  if(isNaN(d)) return dStr;
+  return d.toLocaleDateString('en-NG', { month:'short', day:'numeric', year:'numeric' });
+}
+function truncate(str, n){
+  if(!str) return '';
+  return str.length > n ? str.slice(0, n).trim() + '…' : str;
+}
+function renderAnnouncements(items){
+  const grid = document.getElementById('annGrid');
+  if(!items.length){
+    grid.innerHTML = `<div class="ann-empty">No announcements at this time.</div>`;
+    return;
+  }
+  grid.innerHTML = items.map(a => `
+    <div class="ann-card">
+      ${a.pinned ? '<div class="ann-pin">📌 Pinned</div>' : ''}
+      <div class="ann-date">${formatDate(a.date)}</div>
+      <h3>${escapeHtml(a.title || 'Untitled')}</h3>
+      <p>${escapeHtml(truncate(a.body || '', 120))}</p>
+    </div>
+  `).join('');
+}
+(async function loadAnnouncements(){
+  const grid = document.getElementById('annGrid');
+  try{
+    let items;
+    try{
+      const snap = await getDocs(query(collection(db,'announcements'), orderBy('pinned','desc'), orderBy('date','desc'), limit(6)));
+      items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    } catch(indexErr){
+      console.warn('Composite index not ready, fallback:', indexErr.message);
+      const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc'), limit(12)));
+      items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      items.sort((a,b) => (b.pinned?1:0) - (a.pinned?1:0));
+      items = items.slice(0, 6);
+    }
+    renderAnnouncements(items);
+  } catch(e){
+    grid.innerHTML = `<div class="ann-empty">No announcements at this time.</div>`;
+    console.warn('Announcements unavailable:', e.message);
+  }
+})();
+
+/* ── announcement popup: shows most recent pinned notice ── */
+(async function loadPopup(){
+  try{
+    // Try to get pinned announcements ordered by date desc
+    let pinned = null;
+    try{
+      const snap = await getDocs(query(collection(db,'announcements'), orderBy('pinned','desc'), orderBy('date','desc'), limit(6)));
+      const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      pinned = items.find(a => a.pinned === true) || null;
+    } catch(indexErr){
+      const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc'), limit(12)));
+      const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      pinned = items.find(a => a.pinned === true) || null;
+    }
+    if(!pinned) return; // no pinned announcement — don't show popup
+    // Populate
+    document.getElementById('ann-popup-title').textContent = pinned.title || 'School Notice';
+    document.getElementById('ann-popup-body').textContent = truncate(pinned.body || '', 160);
+    document.getElementById('ann-popup-date').textContent = formatDate(pinned.date);
+    // Show immediately on load
+    const popup = document.getElementById('ann-popup');
+    popup.classList.add('visible');
+    // Close only when user dismisses
+    document.getElementById('ann-popup-close').addEventListener('click', () => {
+      popup.classList.remove('visible');
+    });
+  } catch(e){
+    console.warn('Popup unavailable:', e.message);
+  }
+})();
+</script>
+</body>
+</html>

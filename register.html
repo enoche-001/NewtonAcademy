@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admission Application — School Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="register.css"/>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="header-inner">
+    <div class="header-mark">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Admission Application</h1>
+      <p>School Management System</p>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- STEP INDICATOR -->
+  <div class="step-bar">
+    <div class="step-item active" id="stepItem1">
+      <div class="step-num">1</div>
+      <div class="step-label">Fill Application<span>Personal &amp; parent info</span></div>
+    </div>
+    <div class="step-item" id="stepItem2">
+      <div class="step-num">2</div>
+      <div class="step-label">Pay &amp; Submit<span>₦10,000 registration fee</span></div>
+    </div>
+  </div>
+
+  <!-- ══════════ SCREEN 1: APPLICATION FORM ══════════ -->
+  <div class="screen active" id="screen1">
+
+    <div class="form-alert err" id="formAlert">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="formAlertMsg"></span>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div><h2>Personal Information</h2><p>Details about the applicant</p></div>
+      </div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>First Name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="e.g. Amara" autocomplete="given-name"/>
+        </div>
+        <div class="fg">
+          <label>Last Name <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="e.g. Okonkwo" autocomplete="family-name"/>
+        </div>
+        <div class="fg">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob"/>
+        </div>
+        <div class="fg">
+          <label>Gender <span class="req">*</span></label>
+          <select id="gender">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>State of Origin <span class="req">*</span></label>
+          <input type="text" id="stateOfOrigin" placeholder="e.g. Lagos"/>
+        </div>
+        <div class="fg">
+          <label>LGA</label>
+          <input type="text" id="lga" placeholder="e.g. Ikeja"/>
+        </div>
+        <div class="fg">
+          <label>Nationality</label>
+          <input type="text" id="nationality" value="Nigerian"/>
+        </div>
+        <div class="fg">
+          <label>Blood Group</label>
+          <select id="bloodGroup">
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Genotype</label>
+          <select id="genotype">
+            <option value="">Select</option>
+            <option>AA</option><option>AS</option>
+            <option>SS</option><option>AC</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Class Applying For <span class="req">*</span></label>
+          <select id="classApplied">
+            <option value="">Select class</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-divider">Previous School</div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>Previous School Name</label>
+          <input type="text" id="prevSchool" placeholder="e.g. Sunshine Academy"/>
+        </div>
+        <div class="fg">
+          <label>Last Class Attended</label>
+          <input type="text" id="lastClass" placeholder="e.g. JSS3"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent / Guardian -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><h2>Parent / Guardian Information</h2><p>Contact details for the applicant's guardian</p></div>
+      </div>
+
+      <div class="form-grid g2">
+        <div class="fg">
+          <label>Father's Full Name</label>
+          <input type="text" id="fatherName" placeholder="e.g. Chukwudi Okonkwo"/>
+        </div>
+        <div class="fg">
+          <label>Mother's Full Name</label>
+          <input type="text" id="motherName" placeholder="e.g. Ngozi Okonkwo"/>
+        </div>
+        <div class="fg">
+          <label>Guardian Name <span class="hint" style="text-transform:none;font-weight:400;letter-spacing:0">(if different)</span></label>
+          <input type="text" id="guardianName" placeholder="Leave blank if same as above"/>
+        </div>
+        <div class="fg">
+          <label>Guardian Relationship</label>
+          <input type="text" id="guardianRelationship" placeholder="e.g. Uncle, Aunt"/>
+        </div>
+        <div class="fg">
+          <label>Primary Phone <span class="req">*</span></label>
+          <input type="tel" id="primaryPhone" placeholder="e.g. 08012345678"/>
+        </div>
+        <div class="fg">
+          <label>Secondary Phone</label>
+          <input type="tel" id="secondaryPhone" placeholder="e.g. 08098765432"/>
+        </div>
+        <div class="fg span-2">
+          <label>Email Address</label>
+          <input type="email" id="parentEmail" placeholder="e.g. parent@example.com"/>
+          <span class="hint">Used for payment receipt — leave blank if none</span>
+        </div>
+        <div class="fg span-2">
+          <label>Home Address</label>
+          <textarea id="homeAddress" placeholder="e.g. 12 Okafor Street, Surulere, Lagos"></textarea>
+        </div>
+        <div class="fg">
+          <label>Emergency Contact Name</label>
+          <input type="text" id="emergencyName" placeholder="e.g. Emeka Eze"/>
+        </div>
+        <div class="fg">
+          <label>Emergency Contact Phone</label>
+          <input type="tel" id="emergencyPhone" placeholder="e.g. 07011223344"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passport Photo + Documents -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <div><h2>Passport Photograph</h2><p>Upload a clear recent passport photo of the applicant</p></div>
+      </div>
+
+      <div class="fg" style="margin-bottom:20px">
+        <label>Passport Photo <span class="req">*</span></label>
+        <div id="passportDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:24px;text-align:center;cursor:pointer;background:var(--inp);transition:all .2s" onclick="document.getElementById('passportFileInput').click()">
+          <input type="file" id="passportFileInput" accept="image/*" style="display:none" onchange="handlePassportSelect(this)"/>
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;margin-bottom:8px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div style="font-size:.82rem;font-weight:600;color:var(--text)">Click to select passport photo</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:4px">JPG, PNG or WEBP · Max 1MB · Will be compressed automatically</div>
+        </div>
+
+        <!-- Preview -->
+        <div id="passportPreview" style="display:none;margin-top:12px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
+          <img id="passportThumb" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)" src="" alt="preview"/>
+          <div style="flex:1;min-width:0">
+            <div id="passportFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div id="passportFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <button onclick="clearPassport()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+        </div>
+        <div id="passportError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+      </div>
+
+      <!-- Other docs notice -->
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;">
+        <p style="font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:8px">📋 Other Required Documents — Bring Physically on Resumption</p>
+        <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:.78rem;color:var(--muted)">Birth certificate or sworn affidavit</li>
+          <li style="font-size:.78rem;color:var(--muted)">Previous school report card (last term)</li>
+          <li style="font-size:.78rem;color:var(--muted)">JSCE / BECE result <span style="color:var(--muted);font-style:italic">(SS1 applicants only)</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="nextBtn" onclick="goToStep2()">
+        Next: Proceed to Payment
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div><!-- /screen1 -->
+
+  <!-- ══════════ SCREEN 2: PAYMENT ══════════ -->
+  <div class="screen" id="screen2">
+
+    <div class="form-alert err" id="payAlert">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="payAlertMsg"></span>
+    </div>
+
+    <!-- Summary card -->
+    <div class="summary-card">
+      <div class="sc-label">Application Summary</div>
+      <div class="sc-name" id="summaryName">—</div>
+      <div class="sc-sub" id="summaryClass">—</div>
+      <div class="sc-meta">
+        <div class="sc-meta-item">
+          <div class="sc-mi-label">Primary Phone</div>
+          <div class="sc-mi-val" id="summaryPhone">—</div>
+        </div>
+        <div class="sc-meta-item">
+          <div class="sc-mi-label">Email</div>
+          <div class="sc-mi-val" id="summaryEmail">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fee box -->
+    <div class="fee-box">
+      <div class="fee-box-l">
+        <div class="fee-label">Registration Fee</div>
+        <div class="fee-name">One-time admission processing fee</div>
+      </div>
+      <div class="fee-amount">₦10,000</div>
+    </div>
+
+    <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Pay Registration Fee
+    </button>
+
+    <div class="pay-note">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Secured by Paystack · Your payment details are encrypted
+    </div>
+
+    <div class="btn-row" style="margin-top:18px;justify-content:flex-start">
+      <button class="btn btn-ghost" onclick="goBackToForm()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Form
+      </button>
+    </div>
+  </div><!-- /screen2 -->
+
+  <!-- ══════════ SCREEN 3: SUCCESS ══════════ -->
+  <div class="screen" id="screen3">
+    <div class="success-card">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Application Submitted!</h2>
+      <p class="s-sub">Your admission application has been received and is now under review.</p>
+
+      <div class="ref-box">
+        <div class="ref-label">Application Reference Number</div>
+        <div class="ref-number" id="refNumber">—</div>
+      </div>
+
+      <div class="success-details">
+        <div class="sd-row"><span>Applicant</span><span id="sucName">—</span></div>
+        <div class="sd-row"><span>Class Applied</span><span id="sucClass">—</span></div>
+        <div class="sd-row"><span>Parent Phone</span><span id="sucPhone">—</span></div>
+        <div class="sd-row"><span>Payment Status</span><span style="color:var(--ok);font-weight:700">✓ Paid</span></div>
+      </div>
+
+      <div class="contact-msg">
+        <strong>Keep your reference number safe.</strong><br/>
+        The school will contact you on <strong id="sucPhoneInline">—</strong> once your application is reviewed.
+      </div>
+
+      <button class="btn-restart" onclick="resetForm()">Apply for Another Student</button>
+    </div>
+  </div><!-- /screen3 -->
+
+</div><!-- /page-body -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+/* ═══════════════════════════════════════════
+   CONFIG — Replace placeholders before going live
+   ═══════════════════════════════════════════ */
+const PAYSTACK_PUBLIC_KEY = "pk_test_18ca2741786aa5eb29938cac8334563f20dd0e4b";
+const VERIFY_ENDPOINT     = "https://paystacktest.vercel.app/api/verify";
+
+/* ── Firebase (same project as admin.html + student.html) ── */
+const cfg = {
+  apiKey:            "AIzaSyDLQQW9nApENo5h3rXmycrejx37cIXd1TM",
+  authDomain:        "school-8b30a.firebaseapp.com",
+  projectId:         "school-8b30a",
+  storageBucket:     "school-8b30a.firebasestorage.app",
+  messagingSenderId: "976076120343",
+  appId:             "1:976076120343:web:0cbe82390644492e975752"
+};
+const app = initializeApp(cfg);
+const db  = getFirestore(app);
+
+const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
+
+let pendingDocId = null;
+let passportBase64 = null; // stores compressed Base64 string
+
+/* ══════════════════════════════════════════
+   PASSPORT PHOTO — Base64 via Canvas
+   ══════════════════════════════════════════ */
+window.handlePassportSelect = function(input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const errEl = document.getElementById('passportError');
+  errEl.style.display = 'none';
+
+  if(!file.type.startsWith('image/')){
+    errEl.textContent = 'Please select an image file (JPG, PNG, WEBP).';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+    errEl.textContent = 'File too large. Please select an image under 5MB.';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      // Compress via canvas — max 400x400, quality 0.75
+      const canvas = document.createElement('canvas');
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      if(w > h){ if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; } }
+      else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      passportBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+      // Show preview
+      const preview = document.getElementById('passportPreview');
+      document.getElementById('passportThumb').src = passportBase64;
+      document.getElementById('passportFileName').textContent = file.name;
+      const sizeKB = Math.round((passportBase64.length * 3/4) / 1024);
+      document.getElementById('passportFileSize').textContent = `Compressed: ~${sizeKB} KB`;
+      preview.style.display = 'flex';
+
+      // Style dropzone
+      document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
+      document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.clearPassport = function(){
+  passportBase64 = null;
+  document.getElementById('passportFileInput').value = '';
+  document.getElementById('passportPreview').style.display = 'none';
+  document.getElementById('passportDropzone').style.borderColor = '';
+  document.getElementById('passportDropzone').style.background = '';
+};
+/* ══════════════════════════════════════════
+   FORM VALIDATION
+   ══════════════════════════════════════════ */
+function getFormData(){
+  return {
+    firstName:       v('firstName'),
+    lastName:        v('lastName'),
+    dob:             v('dob'),
+    gender:          v('gender'),
+    stateOfOrigin:   v('stateOfOrigin'),
+    lga:             v('lga'),
+    nationality:     v('nationality') || 'Nigerian',
+    bloodGroup:      v('bloodGroup'),
+    genotype:        v('genotype'),
+    classApplied:    v('classApplied'),
+    prevSchool:      v('prevSchool'),
+    lastClass:       v('lastClass'),
+    fatherName:      v('fatherName'),
+    motherName:      v('motherName'),
+    guardianName:    v('guardianName'),
+    guardianRelationship: v('guardianRelationship'),
+    primaryPhone:    v('primaryPhone'),
+    secondaryPhone:  v('secondaryPhone'),
+    parentEmail:     v('parentEmail'),
+    homeAddress:     v('homeAddress'),
+    emergencyName:   v('emergencyName'),
+    emergencyPhone:  v('emergencyPhone')
+  };
+}
+
+function v(id){ return document.getElementById(id).value.trim(); }
+
+function validateForm(){
+  const d = getFormData();
+  if(!d.firstName)         return 'First name is required.';
+  if(!d.lastName)          return 'Last name is required.';
+  if(!d.dob)               return 'Date of birth is required.';
+  if(!d.gender)            return 'Please select a gender.';
+  if(!d.stateOfOrigin)     return 'State of origin is required.';
+  if(!d.classApplied)      return 'Please select the class applying for.';
+  if(!d.primaryPhone)      return 'Primary phone number is required.';
+  if(!passportBase64)      return 'Passport photograph is required.';
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   STEP NAVIGATION
+   ══════════════════════════════════════════ */
+window.goToStep2 = function(){
+  hideAlert('formAlert');
+  const err = validateForm();
+  if(err){ showAlert('formAlert', 'formAlertMsg', err); scrollToTop(); return; }
+
+  const d = getFormData();
+  const fullName = `${d.firstName} ${d.lastName}`;
+  document.getElementById('summaryName').textContent  = fullName;
+  document.getElementById('summaryClass').textContent = `Applying for ${d.classApplied}`;
+  document.getElementById('summaryPhone').textContent = d.primaryPhone;
+  document.getElementById('summaryEmail').textContent = d.parentEmail || '(not provided)';
+
+  showScreen(2);
+};
+
+window.goBackToForm = function(){
+  showScreen(1);
+};
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen'+n).classList.add('active');
+  updateStepBar(n);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function updateStepBar(n){
+  const s1 = document.getElementById('stepItem1');
+  const s2 = document.getElementById('stepItem2');
+  s1.className = 'step-item';
+  s2.className = 'step-item';
+  if(n === 1){ s1.classList.add('active'); }
+  if(n === 2){ s1.classList.add('done'); s2.classList.add('active'); }
+  if(n === 3){ s1.classList.add('done'); s2.classList.add('done'); }
+}
+
+/* ══════════════════════════════════════════
+   PAYSTACK PAYMENT
+   ══════════════════════════════════════════ */
+let _regPaymentInProgress = false;
+
+window.initiatePayment = function(){
+  hideAlert('payAlert');
+
+  if(PAYSTACK_PUBLIC_KEY.includes('REPLACE')){
+    showAlert('payAlert','payAlertMsg','Payment is not configured yet. Set PAYSTACK_PUBLIC_KEY first.');
+    return;
+  }
+  if(!window.PaystackPop){
+    showAlert('payAlert','payAlertMsg','Payment service failed to load. Please check your connection and refresh.');
+    return;
+  }
+  if(_regPaymentInProgress){
+    showAlert('payAlert','payAlertMsg','A payment is already being processed. Please wait.');
+    return;
+  }
+
+  const d = getFormData();
+  const fullName = `${d.firstName} ${d.lastName}`;
+  const email = d.parentEmail || `applicant.${Date.now()}@register.local`;
+
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Opening payment…';
+
+  const handler = window.PaystackPop.setup({
+    key:      PAYSTACK_PUBLIC_KEY,
+    email,
+    amount:   REGISTRATION_FEE_KOBO,
+    currency: 'NGN',
+    metadata: {
+      applicantName: fullName,
+      classApplied:  d.classApplied,
+      phone:         d.primaryPhone
+    },
+    callback: function(response){
+      _regPaymentInProgress = false;
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      verifyAndSubmit(response.reference);
+    },
+    onClose: function(){
+      _regPaymentInProgress = false;
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      showToast('Payment window closed. Try again when ready.', 'warn');
+    }
+  });
+  _regPaymentInProgress = true;
+  handler.openIframe();
+};
+
+async function verifyAndSubmit(reference){
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Verifying payment…';
+  showToast('Verifying payment…', 'warn');
+
+  try{
+    // Verify with Vercel endpoint
+    const verifyRes = await fetch(VERIFY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference })
+    });
+    const verifyData = await verifyRes.json();
+
+    if(!verifyRes.ok || !verifyData.status){
+      showAlert('payAlert','payAlertMsg',
+        'Payment verification failed. Please contact the school office with reference: ' + reference);
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      return;
+    }
+
+    // Validate verified amount = ₦10,000 (1,000,000 kobo)
+    const verifiedKobo = verifyData.data?.amount;
+    if(verifiedKobo && verifiedKobo !== REGISTRATION_FEE_KOBO){
+      showAlert('payAlert','payAlertMsg',
+        'Payment amount mismatch. Expected ₦10,000 but received ₦' + (verifiedKobo/100).toLocaleString() +
+        '. Contact the school office with reference: ' + reference);
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+      return;
+    }
+
+    // Payment verified — now build the full Firestore record
+    btn.innerHTML = '<span class="spinner"></span> Submitting application…';
+
+    const d = getFormData();
+    const fullName = `${d.firstName} ${d.lastName}`;
+
+    const docData = {
+      firstName:       d.firstName,
+      lastName:        d.lastName,
+      fullName,
+      dob:             d.dob,
+      gender:          d.gender,
+      stateOfOrigin:   d.stateOfOrigin,
+      lga:             d.lga,
+      nationality:     d.nationality,
+      bloodGroup:      d.bloodGroup,
+      genotype:        d.genotype,
+      classApplied:    d.classApplied,
+      prevSchool:      d.prevSchool,
+      lastClass:       d.lastClass,
+      fatherName:      d.fatherName,
+      motherName:      d.motherName,
+      guardianName:    d.guardianName,
+      guardianRelationship: d.guardianRelationship,
+      primaryPhone:    d.primaryPhone,
+      secondaryPhone:  d.secondaryPhone,
+      parentEmail:     d.parentEmail,
+      homeAddress:     d.homeAddress,
+      emergencyName:   d.emergencyName,
+      emergencyPhone:  d.emergencyPhone,
+      paystackReference: reference,
+      amountPaid:     verifiedKobo ? verifiedKobo / 100 : 10000,
+      paymentStatus:  'success',
+      passportPhoto:  passportBase64,
+      status:         'pending',
+      submittedAt:    serverTimestamp()
+    };
+
+    const newRef = await addDoc(collection(db, 'applications'), docData);
+    const finalDocId = newRef.id;
+
+    // Show success screen
+    document.getElementById('refNumber').textContent    = finalDocId;
+    document.getElementById('sucName').textContent      = fullName;
+    document.getElementById('sucClass').textContent     = d.classApplied;
+    document.getElementById('sucPhone').textContent     = d.primaryPhone;
+    document.getElementById('sucPhoneInline').textContent = d.primaryPhone;
+
+    showScreen(3);
+
+  } catch(e){
+    showAlert('payAlert','payAlertMsg','Submission failed: ' + e.message + '. Reference: ' + reference);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
+  }
+}
+
+/* ══════════════════════════════════════════
+   RESET
+   ══════════════════════════════════════════ */
+window.resetForm = function(){
+  // Clear inputs
+  ['firstName','lastName','dob','gender','stateOfOrigin','lga',
+   'bloodGroup','genotype','classApplied','prevSchool','lastClass',
+   'fatherName','motherName','guardianName','guardianRelationship',
+   'primaryPhone','secondaryPhone','parentEmail','homeAddress',
+   'emergencyName','emergencyPhone'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = id === 'nationality' ? 'Nigerian' : '';
+  });
+  document.getElementById('nationality').value = 'Nigerian';
+
+  clearPassport();
+  pendingDocId = null;
+  hideAlert('formAlert');
+  hideAlert('payAlert');
+  showScreen(1);
+};
+
+/* ══════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════ */
+function showAlert(alertId, msgId, msg){
+  document.getElementById(msgId).textContent = msg;
+  document.getElementById(alertId).classList.add('show');
+}
+function hideAlert(alertId){
+  document.getElementById(alertId).classList.remove('show');
+}
+
+function showToast(msg, type='ok'){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast t-'+type+' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove('show'), 3400);
+}
+
+function scrollToTop(){
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+
+
+// Expose for inline handlers
+window.showToast = showToast;
+
+// Step-1 done mark on step number
+document.getElementById('stepItem1').querySelector('.step-num').innerHTML =
+  `<svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg>`;
+// Reset to number immediately — only show check when done
+document.getElementById('stepItem1').querySelector('.step-num').textContent = '1';
+
+</script>
+</body>
+</html>
