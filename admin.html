@@ -374,10 +374,10 @@
               <tr>
                 <th>Date</th><th>Student Name</th><th>Reg Number</th><th>Class</th>
                 <th>Payment Type</th><th>Term</th><th>Session</th><th>Amount</th>
-                <th>Status</th><th>Reference</th>
+                <th>Status</th><th>Reference</th><th>Action</th>
               </tr>
             </thead>
-            <tbody id="payTbody"><tr><td colspan="10" class="empty"><p>Loading&#8230;</p></td></tr></tbody>
+            <tbody id="payTbody"><tr><td colspan="11" class="empty"><p>Loading&#8230;</p></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1629,18 +1629,21 @@ window.renderPayments = function(){
 
   const tbody = document.getElementById('payTbody');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="10" class="empty"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p>No payments found</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" class="empty"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p>No payments found</p></td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(p => {
     const status = (p.status||'pending').toLowerCase();
-    const badgeCls = status === 'success' ? 'b-green' : 'b-gold';
-    const badgeTxt = status === 'success' ? 'Success' : 'Pending';
+    const badgeCls = status === 'success' ? 'b-green' : status === 'needs_review' ? 'b-red' : 'b-gold';
+    const badgeTxt = status === 'success' ? 'Success' : status === 'needs_review' ? 'Needs Review' : 'Pending';
     const date = p.date ? (p.date.toDate ? formatDate(p.date.toDate().toISOString().split('T')[0]) : formatDate(p.date)) : '—';
     const amount = Number(p.amount||0).toLocaleString('en-NG', {style:'currency',currency:'NGN',minimumFractionDigits:0});
     const rawType = p.paymentType || p.type || p.paymenttype || '';
     const type = rawType === 'schoolFee' ? 'School Fee' : rawType === 'levy' ? 'Levy' : (rawType || '—');
+    const actionHtml = status === 'success'
+      ? '—'
+      : `<button class="btn btn-p btn-sm confirm-pay-btn" data-id="${p.id}">Mark Paid</button>`;
     return `<tr>
       <td style="white-space:nowrap">${date}</td>
       <td>${escapeHtml(p.studentName||p.name||'—')}</td>
@@ -1652,9 +1655,34 @@ window.renderPayments = function(){
       <td style="white-space:nowrap">${amount}</td>
       <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
       <td style="font-size:.75rem;color:var(--muted);word-break:break-all;max-width:140px">${escapeHtml(p.reference||p.paystackRef||'—')}</td>
+      <td>${actionHtml}</td>
     </tr>`;
   }).join('');
 };
+
+/* Manually confirm a pending/needs_review payment — used by the school
+   office when the automatic Paystack verify endpoint can't be reached or
+   an amount needs manual review. This is the fallback path so a payment
+   never gets stuck invisible to the admin. */
+document.getElementById('payTbody').addEventListener('click', async function(e){
+  const btn = e.target.closest('.confirm-pay-btn');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const payment = allPayments.find(p=>p.id===id);
+  if(!payment) return;
+  if(!confirm(`Mark this payment of ₦${Number(payment.amount||0).toLocaleString()} for ${payment.studentName||'this student'} as PAID?`)) return;
+  btn.disabled = true;
+  btn.textContent = 'Confirming…';
+  try{
+    await updateDoc(doc(db,'payments',id), { status: 'success', confirmedManually: true, confirmedAt: serverTimestamp() });
+    showToast('Payment marked as paid', 'success');
+    loadPayments();
+  } catch(err){
+    showToast('Could not update payment: '+err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Mark Paid';
+  }
+});
 
 window.exportPaymentsCSV = function(){
   const rows = [['Date','Student Name','Reg Number','Class','Item','Term','Session','Amount','Status','Reference']];

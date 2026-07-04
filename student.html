@@ -201,6 +201,7 @@
       <div class="info-item"><label>Item</label><span id="recItem">—</span></div>
       <div class="info-item"><label>Amount Paid</label><span id="recAmount">—</span></div>
     </div>
+    <p id="recStatusNote" style="display:none;margin:10px 0 0;font-size:.82rem;color:var(--warn);font-weight:600"></p>
     <div class="mactions">
       <button class="btn-cancel" id="closeReceiptBtn">Close</button>
       <button class="btn btn-p" id="printReceiptBtn">
@@ -509,10 +510,14 @@ window.loadPayments = async function(){
 };
 
 function findPayment(term, itemName){
+  // Match any payment that isn't explicitly failed — this includes 'success',
+  // 'pending' (verify endpoint didn't confirm yet) and 'needs_review' (amount
+  // mismatch). This prevents a student from being shown "UNPAID" and paying
+  // twice while a payment is still awaiting confirmation.
   return studentPayments.find(p =>
     p.term === term &&
     p.itemName === itemName &&
-    (p.status||'').toLowerCase() === 'success'
+    ['success','pending','needs_review'].includes((p.status||'').toLowerCase())
   );
 }
 
@@ -538,16 +543,25 @@ function renderPayments(feeBlocks){
     const rows = items.map(item=>{
       const payment = findPayment(term, item.itemName);
       const isPaid = !!payment;
+      const pStatus = (payment?.status||'').toLowerCase();
       const amountStr = '₦' + (item.amount||0).toLocaleString();
-      const actionHtml = isPaid
-        ? `<span class="badge b-green">PAID</span>
-           <button class="btn btn-edit btn-sm pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`
-        : `<span class="badge b-red">UNPAID</span>
+      let actionHtml;
+      if(pStatus === 'success'){
+        actionHtml = `<span class="badge b-green">PAID</span>
+           <button class="btn btn-edit btn-sm pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+      } else if(isPaid){
+        // pending or needs_review — awaiting office confirmation, but a
+        // receipt/proof-of-payment is still available to the student.
+        actionHtml = `<span class="badge b-gold">PROCESSING</span>
+           <button class="btn btn-edit btn-sm pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+      } else {
+        actionHtml = `<span class="badge b-red">UNPAID</span>
            <button class="btn btn-p btn-sm pay-now-btn"
              data-term="${escapeAttr(term)}"
              data-item="${escapeAttr(item.itemName)}"
              data-amount="${item.amount}"
              data-type="${escapeAttr(item.type)}">Pay Now</button>`;
+      }
       return `<div class="fee-item">
         <div class="fee-item-l"><strong>${escapeHtml(item.itemName)}</strong><span>${amountStr}</span></div>
         <div class="fee-item-r">${actionHtml}</div>
@@ -657,7 +671,7 @@ async function verifyAndRecordPayment(reference, term, itemName, amount, type){
     }
 
     // Always record the payment so the student is not left without a record
-    await addDoc(collection(db,'payments'), {
+    const newDocRef = await addDoc(collection(db,'payments'), {
       studentId: student.id,
       regNumber: student.regNumber,
       studentName: student.name,
@@ -679,6 +693,19 @@ async function verifyAndRecordPayment(reference, term, itemName, amount, type){
     } else {
       showToast('Payment recorded and pending confirmation. Reference: '+reference, 'success');
     }
+
+    // Add the freshly-created payment to local state immediately so the
+    // receipt can be opened without waiting on a fresh Firestore read
+    // (avoids a race where loadPayments() re-queries before the write is
+    // visible, which is what made the receipt/status appear to "not load").
+    studentPayments.push({
+      id: newDocRef.id,
+      studentId: student.id, regNumber: student.regNumber, studentName: student.name,
+      class: student.class, term, session: CURRENT_SESSION, type, itemName,
+      amount: confirmedAmount, reference, status: verifyStatus, date: new Date()
+    });
+
+    openReceipt(newDocRef.id);
     loadPayments();
   } catch(e){
     showToast('Payment was made but could not be saved. Please provide this reference to the school office: '+reference, 'error');
@@ -699,6 +726,18 @@ window.openReceipt = function(paymentId){
   document.getElementById('recTerm').textContent = `${payment.term||''} Term, ${payment.session||CURRENT_SESSION}`;
   document.getElementById('recItem').textContent = payment.itemName || '—';
   document.getElementById('recAmount').textContent = '₦' + (Number(payment.amount)||0).toLocaleString();
+
+  const statusNote = document.getElementById('recStatusNote');
+  const pStatus = (payment.status||'').toLowerCase();
+  if(pStatus === 'success'){
+    statusNote.style.display = 'none';
+  } else if(pStatus === 'needs_review'){
+    statusNote.textContent = 'Amount could not be auto-verified — this payment is being reviewed by the school office. Keep this receipt as proof of payment.';
+    statusNote.style.display = 'block';
+  } else {
+    statusNote.textContent = 'Pending confirmation — keep this receipt as proof of payment (Ref: ' + (payment.reference||'—') + ').';
+    statusNote.style.display = 'block';
+  }
 
   document.getElementById('moReceipt').classList.add('open');
 };
