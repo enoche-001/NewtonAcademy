@@ -23,6 +23,9 @@
   <div class="ann-popup-date" id="ann-popup-date"></div>
 </div>
 
+<!-- ═══════ SCROLL PROGRESS ═══════ -->
+<div id="scrollProgress" aria-hidden="true"></div>
+
 <!-- ═══════ NAV ═══════ -->
 <nav id="mainNav">
   <div class="nav-inner">
@@ -465,10 +468,14 @@ const db  = getFirestore(app);
 
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* nav shadow on scroll */
+/* nav shadow on scroll + scroll progress bar */
+const scrollProgressEl = document.getElementById('scrollProgress');
 window.addEventListener('scroll', () => {
   document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
-});
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  if(scrollProgressEl) scrollProgressEl.style.width = (isFinite(pct) ? pct : 0) + '%';
+}, { passive: true });
 
 /* mobile nav */
 function _closeMob(){
