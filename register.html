@@ -613,7 +613,7 @@ window.initiatePayment = function(){
   const rawPhone = (d.primaryPhone||'').replace(/[^0-9]/g,'');
   const email = (d.parentEmail && d.parentEmail.includes('@'))
     ? d.parentEmail
-    : `applicant${rawPhone || Date.now()}@brightonheights.edu.ng`;
+    : `applicant${rawPhone || Date.now()}@newtownacademy.edu.ng`;
 
   const btn = document.getElementById('payBtn');
   btn.disabled = true;

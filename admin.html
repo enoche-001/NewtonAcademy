@@ -879,7 +879,7 @@ window.confirmApprove = async function(){
     const classCount = stuSnap.docs.filter(d=>d.data().class===cls).length;
     const count = String(classCount+1).padStart(3,'0');
     const year = new Date().getFullYear();
-    const regNumber = `BHS/${year}/${cls}/${count}`;
+    const regNumber = `NA/${year}/${cls}/${count}`;
 
     const studentData = {
       firstName: a.firstName||'',
@@ -1094,7 +1094,7 @@ window.createStudentManually = async function(){
     const snap = await getDocs(collection(db, 'students'));
     const classCount = snap.docs.filter(d => d.data().class === cls).length;
     const year = new Date().getFullYear();
-    const regNumber = `BHS/${year}/${cls}/${String(classCount + 1).padStart(3, '0')}`;
+    const regNumber = `NA/${year}/${cls}/${String(classCount + 1).padStart(3, '0')}`;
 
     const session = document.getElementById('csSession').value;
     const payload = {
