@@ -50,89 +50,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 #loginScreen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
   padding:24px;background:var(--bg);
-  background-image:radial-gradient(ellipse at 60% 0%,rgba(37,99,235,.07) 0%,transparent 60%),
-                   radial-gradient(ellipse at 10% 100%,rgba(15,42,92,.06) 0%,transparent 50%);
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(37,99,235,.09) 0%,transparent 55%);
 }
-.lw{
-  display:flex;width:820px;max-width:96vw;min-height:500px;
-  border-radius:20px;overflow:hidden;
+.login-card{
+  width:400px;max-width:100%;
+  background:var(--surface);border-radius:20px;
   box-shadow:var(--shadow-lg);
+  padding:40px 36px 34px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
   animation:fadeUp .38s cubic-bezier(.22,.68,0,1.2) both;
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 
-/* Left panel — brand only, no clutter */
-.ll{
-  flex:0 0 44%;background:var(--sbg);
-  padding:52px 40px;
-  display:flex;flex-direction:column;justify-content:center;
-  position:relative;overflow:hidden;
+.login-mark{
+  width:64px;height:64px;border-radius:50%;overflow:hidden;
+  border:1px solid var(--border);flex-shrink:0;margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(13,27,46,.08);
 }
-.ll::before{
-  content:'';position:absolute;top:-80px;right:-80px;
-  width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(37,99,235,.25) 0%,transparent 70%);
-  pointer-events:none;
-}
-.ll::after{
-  content:'';position:absolute;bottom:-60px;left:-40px;
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%);
-  pointer-events:none;
-}
-.ll-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
-.ll-mark{
-  width:48px;height:48px;border-radius:13px;
-  background:rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,.16);
-  flex-shrink:0;
-}
-.ll-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round}
-.ll h1{
-  font-family:'DM Serif Display',serif;
-  font-size:1.75rem;color:#fff;line-height:1.15;
-  margin-bottom:5px;position:relative;z-index:1;
-  margin-top:22px;
-}
-.ll .sub{
-  font-size:.7rem;color:var(--s-muted);
-  letter-spacing:.12em;text-transform:uppercase;
-  position:relative;z-index:1;
-}
+.login-mark img{width:100%;height:100%;object-fit:cover;display:block}
+.login-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--ink);line-height:1.15}
+.login-tagline{font-size:.85rem;color:var(--muted);margin-top:7px;margin-bottom:26px;line-height:1.5;max-width:300px}
 
-/* These stay in the DOM for JS but are visually hidden via display:none below */
-.ll-feats{display:none}
-.ll-note{display:none}
-.lf,.lf-dot{display:none}
-
-/* Right panel — form */
-.lr{
-  flex:1;background:var(--surface);
-  padding:52px 48px;
-  display:flex;flex-direction:column;justify-content:center;
-}
-.lr-badge{
-  display:inline-flex;align-items:center;gap:7px;
-  background:var(--accent-light);border:1px solid var(--accent-mid);
-  color:var(--accent);font-size:.67rem;font-weight:700;
-  letter-spacing:.09em;text-transform:uppercase;
-  padding:5px 13px;border-radius:30px;margin-bottom:20px;
-}
-.lr-badge span{width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.lr h2{font-size:1.5rem;color:var(--ink);font-weight:700;margin-bottom:5px;letter-spacing:-.02em}
-.lr .desc{font-size:.84rem;color:var(--muted);margin-bottom:28px;line-height:1.5}
-.fg{margin-bottom:16px}
-.fg label{
-  display:block;font-size:.69rem;font-weight:700;
-  color:var(--navy2);margin-bottom:7px;
-  letter-spacing:.06em;text-transform:uppercase;
-}
+.fg{margin-bottom:12px;width:100%}
 .fg input{
-  width:100%;padding:12px 15px;
+  width:100%;padding:14px 16px;
   background:var(--inp);border:1.5px solid var(--border);
-  border-radius:var(--radius-sm);color:var(--text);
-  font-size:.9rem;font-family:'DM Sans',sans-serif;
+  border-radius:var(--radius);color:var(--text);
+  font-size:.95rem;font-family:'DM Sans',sans-serif;
   transition:border-color .18s,box-shadow .18s,background .18s;outline:none;
 }
 .fg input::placeholder{color:var(--faint)}
@@ -141,11 +85,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   box-shadow:0 0 0 3px rgba(37,99,235,.1);
 }
 .btn-login{
-  width:100%;padding:13px;
+  width:100%;padding:13px;margin-top:6px;
   background:var(--accent);color:#fff;
-  font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;
-  border:none;border-radius:var(--radius-sm);cursor:pointer;
-  margin-top:4px;transition:background .18s,transform .1s,box-shadow .18s;
+  font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;
+  border:none;border-radius:var(--radius);cursor:pointer;
+  transition:background .18s,transform .1s,box-shadow .18s;
   box-shadow:0 2px 8px rgba(37,99,235,.3);
   letter-spacing:.01em;
 }
@@ -153,28 +97,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-login:active{transform:scale(.99)}
 .btn-login:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
 .l-alert{
-  padding:11px 14px;border-radius:var(--radius-sm);
-  font-size:.8rem;margin-bottom:14px;
+  width:100%;padding:11px 14px;border-radius:var(--radius-sm);
+  font-size:.8rem;margin-bottom:14px;text-align:left;
   display:none;align-items:center;gap:8px;
   background:var(--err-bg);border:1px solid var(--err-b);color:var(--err);
 }
 .l-alert.show{display:flex}
-.sec-note{
-  display:flex;align-items:center;gap:8px;margin-top:16px;
-  padding:10px 13px;background:var(--bg);border-radius:var(--radius-sm);
-  border:1px solid var(--border);font-size:.74rem;color:var(--faint);
-}
-.sec-note svg{width:13px;height:13px;stroke:var(--faint);fill:none;stroke-width:2;flex-shrink:0}
 
-@media(max-width:640px){
-  #loginScreen{padding:16px;align-items:flex-start;padding-top:20px}
-  .lw{flex-direction:column;width:100%;max-width:100%;min-height:auto;border-radius:16px}
-  .ll{padding:28px 24px;flex:none}
-  .ll h1{font-size:1.4rem;margin-top:14px}
-  .lr{padding:28px 24px}
-  .lr h2{font-size:1.25rem}
-  .lr .desc{margin-bottom:20px}
-  .fg input{font-size:1rem;padding:13px 14px}
+@media(max-width:480px){
+  .login-card{padding:32px 24px 28px;border-radius:16px}
+  .fg input{font-size:1rem;padding:14px 15px}
   .btn-login{padding:14px;font-size:1rem}
 }
 

@@ -344,6 +344,7 @@ body{
   background-position:right 14px center;
   padding-right:38px;
 }
+.fg select:disabled{cursor:not-allowed;opacity:.6}
 
 .fg textarea{
   resize:vertical;
@@ -356,6 +357,9 @@ body{
   color:var(--muted);
   line-height:1.4;
 }
+
+.dob-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:420px){.dob-row{gap:6px}}
 
 /* ══════════════════════════════════════════════════════
    SECTION DIVIDER

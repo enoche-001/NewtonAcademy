@@ -12,30 +12,14 @@
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="lw">
-    <div class="ll">
-      <div>
-        <div class="ll-brand">
-          <div class="ll-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
-          <div><h1>Admin Portal</h1><p class="sub">School Management System</p></div>
-        </div>
-        <div class="ll-feats">
-          <div class="lf"><div class="lf-dot"></div><p>Manage applications, students, and academic results</p></div>
-          <div class="lf"><div class="lf-dot"></div><p>Configure termly fees, levies, and due dates</p></div>
-          <div class="lf"><div class="lf-dot"></div><p>Track payments and publish school announcements</p></div>
-        </div>
-      </div>
-      <div class="ll-note">Access is restricted to authorized school administrators.</div>
-    </div>
-    <div class="lr">
-      <div class="lr-badge"><span></span>Admin Access</div>
-      <h2>Welcome back</h2>
-      <p class="desc">Sign in to manage your school dashboard.</p>
-      <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
-      <div class="fg"><label>Admin Email</label><input type="email" id="emailIn" placeholder="admin@school.edu.ng" autocomplete="off"/></div>
-      <div class="fg"><label>Password</label><input type="password" id="pwIn" placeholder="Enter password"/></div>
-      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
-    </div>
+  <div class="login-card">
+    <div class="login-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy"/></div>
+    <h1 class="login-title">Newtown Academy</h1>
+    <p class="login-tagline">Admin Portal — log in to your admin account with your valid details.</p>
+    <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
+    <div class="fg"><input type="email" id="emailIn" placeholder="Email address" autocomplete="off"/></div>
+    <div class="fg"><input type="password" id="pwIn" placeholder="Password"/></div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Log In</button>
   </div>
 </div>
 
