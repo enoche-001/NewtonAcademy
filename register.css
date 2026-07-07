@@ -362,6 +362,42 @@ body{
 @media(max-width:420px){.dob-row{gap:6px}}
 
 /* ══════════════════════════════════════════════════════
+   CHECKLIST GRID — Hobbies / Sports
+══════════════════════════════════════════════════════ */
+.check-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:8px;
+  margin-top:4px;
+}
+.check-cb{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 12px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--inp);
+  font-size:.8rem;
+  font-weight:500;
+  color:var(--text-mid);
+  cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s;
+  user-select:none;
+}
+.check-cb input{
+  accent-color:var(--navy-lit);
+  width:15px;height:15px;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.check-cb:has(input:checked){
+  border-color:var(--accent);
+  background:var(--accent-lt);
+  color:var(--navy);
+}
+
+/* ══════════════════════════════════════════════════════
    SECTION DIVIDER
 ══════════════════════════════════════════════════════ */
 .section-divider{

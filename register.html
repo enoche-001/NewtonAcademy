@@ -37,13 +37,18 @@
     </div>
     <div class="step-item" id="stepItem3">
       <div class="step-num">3</div>
-      <div class="step-label">Documents<span>Passport photo</span></div>
+      <div class="step-label">Health<span>Interests &amp; wellbeing</span></div>
     </div>
     <div class="step-item" id="stepItem4">
       <div class="step-num">4</div>
+      <div class="step-label">Documents<span>Passport photo</span></div>
+    </div>
+    <div class="step-item" id="stepItem5">
+      <div class="step-num">5</div>
       <div class="step-label">Payment<span>₦10,000 fee</span></div>
     </div>
   </div>
+
 
   <!-- ══════════ SCREEN 1: APPLICATION FORM ══════════ -->
   <div class="screen active" id="screen1">
@@ -214,15 +219,72 @@
         Back
       </button>
       <button class="btn btn-primary" onclick="goPanelNext(2)">
-        Next: Documents
+        Next: Health &amp; Interests
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
     </div><!-- /panel2 -->
 
-    <!-- ═══ PANEL 3: DOCUMENTS ═══ -->
+    <!-- ═══ PANEL 3: HEALTH & INTERESTS ═══ -->
     <div class="wiz-panel" id="panel3">
-    <div class="wiz-kicker">Step 3 of 3 <span>Passport Photograph</span></div>
+    <div class="wiz-kicker">Step 3 of 5 <span>Health &amp; Interests</span></div>
+
+    <!-- Hobbies & Sports -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20M2 12h20"/></svg></div>
+        <div><h2>Hobbies &amp; Interests</h2><p>What does the applicant enjoy doing?</p></div>
+      </div>
+
+      <div class="fg">
+        <label>Hobbies <span class="hint" style="text-transform:none;font-weight:400;letter-spacing:0">(select all that apply)</span></label>
+        <div class="check-grid" id="hobbiesCheckboxes"></div>
+      </div>
+
+      <div class="fg" style="margin-top:18px">
+        <label>Favourite Sports <span class="hint" style="text-transform:none;font-weight:400;letter-spacing:0">(select all that apply)</span></label>
+        <div class="check-grid" id="sportsCheckboxes"></div>
+      </div>
+    </div>
+
+    <!-- Health Report -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div><h2>Health Report</h2><p>Help the school prepare for the applicant's wellbeing</p></div>
+      </div>
+
+      <div class="form-grid g2">
+        <div class="fg span-2">
+          <label>Allergies</label>
+          <textarea id="allergies" placeholder="e.g. Peanuts, Penicillin — leave blank if none"></textarea>
+        </div>
+        <div class="fg span-2">
+          <label>Health Challenges / Medical Conditions</label>
+          <textarea id="healthConditions" placeholder="e.g. Asthma, Epilepsy — leave blank if none"></textarea>
+        </div>
+        <div class="fg span-2">
+          <label>Current Medication</label>
+          <input type="text" id="medication" placeholder="e.g. Inhaler as needed — leave blank if none"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="justify-content:space-between">
+      <button class="btn btn-ghost" onclick="showPanel(2)">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <button class="btn btn-primary" onclick="goPanelNext(3)">
+        Next: Documents
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    </div><!-- /panel3 -->
+
+    <!-- ═══ PANEL 4: DOCUMENTS ═══ -->
+    <div class="wiz-panel" id="panel4">
+    <div class="wiz-kicker">Step 4 of 5 <span>Passport Photograph</span></div>
 
     <!-- Passport Photo + Documents -->
     <div class="form-card">
@@ -264,7 +326,7 @@
     </div>
 
     <div class="btn-row" style="justify-content:space-between">
-      <button class="btn btn-ghost" onclick="showPanel(2)">
+      <button class="btn btn-ghost" onclick="showPanel(3)">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Back
       </button>
@@ -273,7 +335,7 @@
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
-    </div><!-- /panel3 -->
+    </div><!-- /panel4 -->
   </div><!-- /screen1 -->
 
   <!-- ══════════ SCREEN 2: PAYMENT ══════════ -->
@@ -395,7 +457,10 @@ const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
 
 let pendingDocId = null;
 let passportBase64 = null; // stores compressed Base64 string
-let currentPanel = 1; // guided flow: 1 Applicant, 2 Guardian, 3 Documents
+let currentPanel = 1; // guided flow: 1 Applicant, 2 Guardian, 3 Health & Interests, 4 Documents
+
+const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
+const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
 
 /* ══════════════════════════════════════════
    DATE OF BIRTH — Day / Month / Year dropdowns
@@ -515,6 +580,22 @@ function onStateChange(){
 
 initDobDropdowns();
 initStateDropdown();
+buildCheckGrid('hobbiesCheckboxes', HOBBIES_LIST, 'hobby');
+buildCheckGrid('sportsCheckboxes', SPORTS_LIST, 'sport');
+
+function buildCheckGrid(containerId, list, name){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = list.map(item=>`
+    <label class="check-cb">
+      <input type="checkbox" name="${name}" value="${item}"/>
+      <span>${item}</span>
+    </label>
+  `).join('');
+}
+function getCheckedValues(containerId){
+  return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
+}
 
 /* ══════════════════════════════════════════
    PASSPORT PHOTO — Base64 via Canvas
@@ -604,7 +685,12 @@ function getFormData(){
     parentEmail:     v('parentEmail'),
     homeAddress:     v('homeAddress'),
     emergencyName:   v('emergencyName'),
-    emergencyPhone:  v('emergencyPhone')
+    emergencyPhone:  v('emergencyPhone'),
+    hobbies:         getCheckedValues('hobbiesCheckboxes'),
+    favoriteSports:  getCheckedValues('sportsCheckboxes'),
+    allergies:       v('allergies'),
+    healthConditions:v('healthConditions'),
+    medication:      v('medication')
   };
 }
 
@@ -622,6 +708,9 @@ function validatePanel1(){
 function validatePanel2(){
   if(!v('primaryPhone')) return 'Primary phone number is required.';
   return null;
+}
+function validatePanel3(){
+  return null; // Health & Interests — all fields optional
 }
 function validateForm(){
   const d = getFormData();
@@ -650,7 +739,7 @@ window.showPanel = function(n){
 
 window.goPanelNext = function(fromPanel){
   hideAlert('formAlert');
-  const err = fromPanel === 1 ? validatePanel1() : validatePanel2();
+  const err = fromPanel === 1 ? validatePanel1() : fromPanel === 2 ? validatePanel2() : validatePanel3();
   if(err){ showAlert('formAlert', 'formAlertMsg', err); scrollToTop(); return; }
   showPanel(fromPanel + 1);
 };
@@ -674,9 +763,9 @@ window.goToStep2 = function(){
 };
 
 window.goBackToForm = function(){
-  currentPanel = 3;
+  currentPanel = 4;
   document.querySelectorAll('.wiz-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel3').classList.add('active');
+  document.getElementById('panel4').classList.add('active');
   showScreen(1);
 };
 
@@ -684,13 +773,13 @@ function showScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen'+n).classList.add('active');
   if(n === 1)      updateStepBar(currentPanel);
-  else if(n === 2) updateStepBar(4);
-  else if(n === 3) updateStepBar(5);
+  else if(n === 2) updateStepBar(5);
+  else if(n === 3) updateStepBar(6);
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 function updateStepBar(n){
-  for(let i = 1; i <= 4; i++){
+  for(let i = 1; i <= 5; i++){
     const el = document.getElementById('stepItem'+i);
     const numEl = el.querySelector('.step-num');
     el.className = 'step-item';
@@ -704,7 +793,7 @@ function updateStepBar(n){
   }
   const fill = document.getElementById('stepTrackFill');
   if(fill){
-    const pct = Math.min(100, Math.max(0, (Math.min(n,4) - 1) / 3 * 100));
+    const pct = Math.min(100, Math.max(0, (Math.min(n,5) - 1) / 4 * 100));
     fill.style.width = pct + '%';
   }
 }
@@ -831,6 +920,11 @@ async function verifyAndSubmit(reference){
       homeAddress:     d.homeAddress,
       emergencyName:   d.emergencyName,
       emergencyPhone:  d.emergencyPhone,
+      hobbies:         d.hobbies,
+      favoriteSports:  d.favoriteSports,
+      allergies:       d.allergies,
+      healthConditions:d.healthConditions,
+      medication:      d.medication,
       paystackReference: reference,
       amountPaid:     verifiedKobo ? verifiedKobo / 100 : 10000,
       paymentStatus:  paymentStatus,
@@ -867,11 +961,14 @@ window.resetForm = function(){
    'bloodGroup','genotype','classApplied','prevSchool','lastClass',
    'fatherName','motherName','guardianName','guardianRelationship',
    'primaryPhone','secondaryPhone','parentEmail','homeAddress',
-   'emergencyName','emergencyPhone'].forEach(id => {
+   'emergencyName','emergencyPhone','allergies','healthConditions','medication'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.value = id === 'nationality' ? 'Nigerian' : '';
   });
   document.getElementById('nationality').value = 'Nigerian';
+
+  // Uncheck hobbies/sports
+  document.querySelectorAll('#hobbiesCheckboxes input, #sportsCheckboxes input').forEach(cb => cb.checked = false);
 
   // Reset DOB dropdowns
   document.getElementById('dobDay').value = '';

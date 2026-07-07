@@ -18,7 +18,7 @@
     <p class="login-tagline">Student Portal — log in to your student account with your valid details.</p>
     <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
     <div class="fg"><input type="text" id="regIn" placeholder="Registration number" autocomplete="off"/></div>
-    <div class="fg"><input type="password" id="pwIn" placeholder="Password"/></div>
+    <div class="fg"><input type="password" id="pwIn" placeholder="Password" autocomplete="off"/></div>
     <button class="btn-login" id="loginBtn">Log In</button>
   </div>
 </div>
@@ -33,6 +33,8 @@
     <nav class="sb-nav">
       <div class="nav-label">Academics</div>
       <div class="nav-item active" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-label">Updates</div>
+      <div class="nav-item" data-sec="announcements"><svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a2 2 0 1 1-3.2 2.4"/></svg>Announcements</div>
       <div class="nav-label">Finance</div>
       <div class="nav-item" data-sec="payments"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
       <div class="nav-label">Account</div>
@@ -99,28 +101,86 @@
         </div>
 
         <div id="resultCard" class="result-card" style="display:none">
-          <div class="rc-hdr">
-            <div>
-              <h2 id="rcName">—</h2>
-              <p id="rcClassLine">—</p>
-            </div>
-            <div class="rc-meta">
-              <div class="rc-tag">Session / Term</div>
-              <div id="rcTerm" style="font-weight:600">—</div>
+
+          <!-- SCHOOL HEADER -->
+          <div class="rc-school-hdr">
+            <img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest" class="rc-school-logo"/>
+            <div class="rc-school-info">
+              <h1>Newtown Academy</h1>
+              <p>Lokoja, Kogi State, Nigeria</p>
+              <span class="rc-report-label">Termly Report Sheet</span>
             </div>
           </div>
+
+          <!-- STUDENT DETAILS -->
+          <div class="rc-student-grid">
+            <div><span>Student Name</span><strong id="rcName">—</strong></div>
+            <div><span>Registration No.</span><strong id="rcReg">—</strong></div>
+            <div><span>Class</span><strong id="rcClass">—</strong></div>
+            <div><span>No. in Class</span><strong id="rcNumInClass">—</strong></div>
+            <div><span>Session / Term</span><strong id="rcTerm">—</strong></div>
+            <div><span>Overall Position</span><strong id="rcPosition">—</strong></div>
+            <div><span>Closing Date</span><strong id="rcClosingDate">—</strong></div>
+            <div><span>Next Term Begins</span><strong id="rcNextTerm">—</strong></div>
+          </div>
+
+          <!-- COGNITIVE DOMAIN -->
+          <div class="rc-section-title">Cognitive Domain — Academic Performance</div>
           <div class="twrap">
-            <table>
-              <thead><tr><th>Subject</th><th>Score</th><th>Grade</th><th>Remark</th></tr></thead>
+            <table class="rc-subj-table">
+              <thead>
+                <tr id="rcSubjHead">
+                  <th>Subject</th><th>Test 1</th><th>Test 2</th><th>Test 3</th><th>Exam</th><th>Total</th><th>Grade</th><th class="rc-pos-col">Position</th>
+                </tr>
+              </thead>
               <tbody id="rcTbody"></tbody>
             </table>
           </div>
-          <div class="res-footer">
-            <div><span>Position in Class</span><strong id="rcPosition">—</strong></div>
-            <div style="flex:1;min-width:200px"><span>Class Teacher's Remark</span><strong id="rcRemark">—</strong></div>
+
+          <!-- SUMMARY -->
+          <div class="rc-summary-grid" id="rcSummaryGrid">
+            <div><span>Overall Total</span><strong id="rcOverallTotal">—</strong></div>
+            <div><span>Average</span><strong id="rcAverage">—</strong></div>
+            <div><span>Percentage</span><strong id="rcPercentage">—</strong></div>
+            <div><span>Overall Grade</span><strong id="rcOverallGrade">—</strong></div>
+          </div>
+
+          <!-- GRADING KEY -->
+          <div id="rcGradingKeyBox">
+            <div class="rc-section-title">Grading Key</div>
+            <div class="rc-grading-key" id="rcGradingKey"></div>
+          </div>
+
+          <!-- DOMAINS -->
+          <div class="rc-domains-wrap" id="rcDomainsWrap">
+            <div id="rcAffectiveBox">
+              <div class="rc-section-title">Affective Domain</div>
+              <table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcAffectiveTbody"></tbody></table>
+            </div>
+            <div id="rcPsychomotorBox">
+              <div class="rc-section-title">Psychomotor Domain</div>
+              <table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcPsychomotorTbody"></tbody></table>
+            </div>
+          </div>
+          <p class="rc-scale-note">Key: 5 = Excellent &nbsp;·&nbsp; 4 = Very Good &nbsp;·&nbsp; 3 = Good &nbsp;·&nbsp; 2 = Fair &nbsp;·&nbsp; 1 = Poor</p>
+
+          <!-- REMARKS -->
+          <div class="rc-remarks-wrap" id="rcRemarksWrap">
+            <div id="rcTeacherRemarkBox"><span>Class Teacher's Remark</span><p id="rcTeacherRemark">—</p></div>
+            <div id="rcPrincipalRemarkBox"><span>Principal's Remark</span><p id="rcPrincipalRemark">—</p></div>
+          </div>
+
+          <!-- SIGNATURES -->
+          <div class="rc-sign-row" id="rcSignRow">
+            <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Class Teacher's Signature</span></div>
+            <div class="rc-stamp-box">School Stamp</div>
+            <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Principal's Signature</span></div>
+          </div>
+
+          <div class="res-footer no-print">
             <button class="btn btn-edit no-print" id="printResultBtn">
               <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Print
+              Print Result
             </button>
           </div>
         </div>
@@ -130,6 +190,13 @@
       <div class="section" id="sec-payments">
         <div id="payContainer">
           <div class="empty"><p>Loading payment information…</p></div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+      <div class="section" id="sec-announcements">
+        <div id="annContainer">
+          <div class="empty"><p>Loading announcements…</p></div>
         </div>
       </div>
 
@@ -143,24 +210,77 @@
               <p id="profSub">—</p>
             </div>
           </div>
-          <div class="section-sub" style="margin-top:0">Personal Information</div>
-          <div class="info-grid">
-            <div class="info-item"><label>Full Name</label><span id="pfFullName">—</span></div>
-            <div class="info-item"><label>Registration Number</label><span id="pfReg">—</span></div>
-            <div class="info-item"><label>Class</label><span id="pfClass">—</span></div>
-            <div class="info-item"><label>Date of Birth</label><span id="pfDob">—</span></div>
-            <div class="info-item"><label>Gender</label><span id="pfGender">—</span></div>
-            <div class="info-item"><label>State of Origin</label><span id="pfState">—</span></div>
-            <div class="info-item"><label>Blood Group</label><span id="pfBloodGroup">—</span></div>
-            <div class="info-item"><label>Genotype</label><span id="pfGenotype">—</span></div>
+
+          <div class="stage-nav">
+            <div class="stage-dot active" id="stageDot1" onclick="showProfileStage(1)"><span>1</span>Personal</div>
+            <div class="stage-dot" id="stageDot2" onclick="showProfileStage(2)"><span>2</span>Guardian</div>
+            <div class="stage-dot" id="stageDot3" onclick="showProfileStage(3)"><span>3</span>Health &amp; Interests</div>
           </div>
-          <hr class="info-divider"/>
-          <div class="section-sub">Parent / Guardian</div>
-          <div class="info-grid">
-            <div class="info-item"><label>Parent / Guardian Name</label><span id="pfParentName">—</span></div>
-            <div class="info-item"><label>Phone</label><span id="pfParentPhone">—</span></div>
-            <div class="info-item"><label>Email</label><span id="pfParentEmail">—</span></div>
-            <div class="info-item"><label>Home Address</label><span id="pfAddress">—</span></div>
+
+          <!-- STAGE 1: PERSONAL -->
+          <div class="profile-stage active" id="profStage1">
+            <div class="section-sub" style="margin-top:0">Personal Information</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Full Name</label><span id="pfFullName">—</span></div>
+              <div class="info-item"><label>Registration Number</label><span id="pfReg">—</span></div>
+              <div class="info-item"><label>Class</label><span id="pfClass">—</span></div>
+              <div class="info-item"><label>Date of Birth</label><span id="pfDob">—</span></div>
+              <div class="info-item"><label>Gender</label><span id="pfGender">—</span></div>
+              <div class="info-item"><label>State of Origin</label><span id="pfState">—</span></div>
+              <div class="info-item"><label>Blood Group</label><span id="pfBloodGroup">—</span></div>
+              <div class="info-item"><label>Genotype</label><span id="pfGenotype">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-p" onclick="showProfileStage(2)">Next: Guardian Info
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STAGE 2: GUARDIAN -->
+          <div class="profile-stage" id="profStage2">
+            <div class="section-sub" style="margin-top:0">Parent / Guardian</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Parent / Guardian Name</label><span id="pfParentName">—</span></div>
+              <div class="info-item"><label>Phone</label><span id="pfParentPhone">—</span></div>
+              <div class="info-item"><label>Email</label><span id="pfParentEmail">—</span></div>
+              <div class="info-item"><label>Home Address</label><span id="pfAddress">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-edit" onclick="showProfileStage(1)">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+              <button class="btn btn-p" onclick="showProfileStage(3)">Next: Health &amp; Interests
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STAGE 3: HEALTH & INTERESTS -->
+          <div class="profile-stage" id="profStage3">
+            <div class="section-sub" style="margin-top:0">Hobbies &amp; Favourite Sports</div>
+            <div class="info-item" style="margin-bottom:14px">
+              <label>Hobbies</label>
+              <div class="chip-wrap" id="pfHobbies"><span class="chip-empty">—</span></div>
+            </div>
+            <div class="info-item" style="margin-bottom:14px">
+              <label>Favourite Sports</label>
+              <div class="chip-wrap" id="pfSports"><span class="chip-empty">—</span></div>
+            </div>
+            <hr class="info-divider"/>
+            <div class="section-sub">Health Report</div>
+            <div class="info-grid">
+              <div class="info-item"><label>Allergies</label><span id="pfAllergies">—</span></div>
+              <div class="info-item"><label>Health Challenges</label><span id="pfHealthConditions">—</span></div>
+              <div class="info-item"><label>Current Medication</label><span id="pfMedication">—</span></div>
+            </div>
+            <div class="stage-btn-row">
+              <button class="btn btn-edit" onclick="showProfileStage(2)">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -200,7 +320,7 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
 // Same Firebase project used by admin.html (school-8b30a)
@@ -342,42 +462,75 @@ window.switchTab = (sec)=>{
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
-  const titles={results:'Results',payments:'Payments',profile:'Profile'};
-  const subs={results:'Your published academic results',payments:'View and pay your school fees',profile:'Your personal and parent information'};
+  const titles={results:'Results',announcements:'Announcements',payments:'Payments',profile:'Profile'};
+  const subs={results:'Your published academic results',announcements:'Latest news and notices from the school',payments:'View and pay your school fees',profile:'Your personal and parent information'};
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
 
   if(sec==='payments') loadPayments();
   if(sec==='profile') loadProfile();
+  if(sec==='announcements') loadAnnouncements();
 };
 window.openSidebar = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sbOv').classList.add('open'); };
 window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); };
 document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
 document.getElementById('sbOv').addEventListener('click', closeSidebar);
 
-/* ============ RESULTS ============ */
-function getGrade(score){
-  if(score>=75) return 'A1';
-  if(score>=70) return 'B2';
-  if(score>=65) return 'B3';
-  if(score>=60) return 'C4';
-  if(score>=55) return 'C5';
-  if(score>=50) return 'C6';
-  if(score>=45) return 'D7';
-  if(score>=40) return 'E8';
-  return 'F9';
+/* ============ RESULT SETTINGS ============ */
+const DEFAULT_RESULT_SETTINGS = {
+  assessment: { test1Max:20, test2Max:20, test3Max:20, examMax:60 },
+  gradingBands: [
+    { grade:'A1', min:80, max:100, remark:'Excellent' },
+    { grade:'B2', min:70, max:79,  remark:'Very Good' },
+    { grade:'B3', min:65, max:69,  remark:'Good' },
+    { grade:'C4', min:60, max:64,  remark:'Credit' },
+    { grade:'C5', min:55, max:59,  remark:'Credit' },
+    { grade:'C6', min:50, max:54,  remark:'Credit' },
+    { grade:'D7', min:45, max:49,  remark:'Pass' },
+    { grade:'E8', min:40, max:44,  remark:'Pass' },
+    { grade:'F9', min:0,  max:39,  remark:'Fail' }
+  ],
+  affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
+  psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
+  sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true }
+};
+let resultSettings = JSON.parse(JSON.stringify(DEFAULT_RESULT_SETTINGS));
+
+async function loadResultSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','resultSettings'));
+    if(snap.exists()){
+      const data = snap.data();
+      resultSettings = {
+        assessment: { ...DEFAULT_RESULT_SETTINGS.assessment, ...(data.assessment||{}) },
+        gradingBands: Array.isArray(data.gradingBands) && data.gradingBands.length ? data.gradingBands : DEFAULT_RESULT_SETTINGS.gradingBands,
+        affectiveTraits: Array.isArray(data.affectiveTraits) && data.affectiveTraits.length ? data.affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
+        psychomotorTraits: Array.isArray(data.psychomotorTraits) && data.psychomotorTraits.length ? data.psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
+        sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) }
+      };
+    }
+  } catch(e){
+    console.warn('Could not load result settings, using defaults:', e.message);
+  }
 }
-function gradeRemark(grade){
-  const map = { A1:'Excellent', B2:'Very Good', B3:'Good', C4:'Credit', C5:'Credit', C6:'Credit', D7:'Pass', E8:'Pass', F9:'Fail' };
-  return map[grade]||'';
+
+function subjectMaxTotal(){
+  const a = resultSettings.assessment;
+  return (Number(a.test1Max)||0)+(Number(a.test2Max)||0)+(Number(a.test3Max)||0)+(Number(a.examMax)||0);
+}
+function gradeFromPercentage(pct){
+  const bands = resultSettings.gradingBands;
+  for(const b of bands){ if(pct >= Number(b.min) && pct <= Number(b.max)) return b; }
+  return bands[bands.length-1] || { grade:'—', remark:'' };
 }
 function gradePillClass(grade){
   if(grade==='A1') return 'gp-a';
   if(grade==='B2'||grade==='B3') return 'gp-b';
-  if(grade==='C4'||grade==='C5'||grade==='C6'||grade==='D7'||grade==='E8') return 'gp-c';
-  return 'gp-f';
+  if(grade==='F9') return 'gp-f';
+  return 'gp-c';
 }
 
+/* ============ RESULTS ============ */
 window.loadResult = async function(){
   const btn = document.getElementById('resLoadBtn');
   const session = document.getElementById('resSession').value;
@@ -388,6 +541,8 @@ window.loadResult = async function(){
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Loading...';
 
   try{
+    await loadResultSettings();
+
     let docs = [];
     try{
       const snap = await getDocs(query(
@@ -399,7 +554,6 @@ window.loadResult = async function(){
       ));
       docs = snap.docs;
     } catch(e){
-      // Fallback: fetch all results for this student and filter client-side
       const snap2 = await getDocs(query(collection(db,'results'), where('studentId','==',student.id)));
       docs = snap2.docs.filter(d=>{
         const v = d.data();
@@ -425,31 +579,87 @@ window.loadResult = async function(){
 document.getElementById('resLoadBtn').addEventListener('click', loadResult);
 
 function renderResultCard(result, session, term){
+  const s = resultSettings.sections;
+  const subjectMax = subjectMaxTotal() || 100;
+
   document.getElementById('rcName').textContent = result.studentName || student.name;
-  document.getElementById('rcClassLine').textContent = `Class: ${result.class||student.class||'—'}`;
+  document.getElementById('rcReg').textContent = result.regNumber || student.regNumber || '—';
+  document.getElementById('rcClass').textContent = result.class || student.class || '—';
+  document.getElementById('rcNumInClass').textContent = result.numInClass || '—';
   document.getElementById('rcTerm').textContent = `${session} · ${term} Term`;
+  document.getElementById('rcPosition').textContent = result.overallPosition ? ordinal(result.overallPosition) : '—';
+  document.getElementById('rcClosingDate').textContent = result.closingDate || '—';
+  document.getElementById('rcNextTerm').textContent = result.nextTermBegins || '—';
 
   const scores = result.scores || {};
   const subjects = Object.keys(scores);
   const tbody = document.getElementById('rcTbody');
+  document.querySelector('.rc-pos-col').style.display = s.showSubjectPosition ? '' : 'none';
+  document.querySelectorAll('#rcTbody .rc-pos-cell').forEach(td=>{ td.style.display = s.showSubjectPosition ? '' : 'none'; });
 
   if(subjects.length === 0){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>No subject scores recorded.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty"><p>No subject scores recorded.</p></td></tr>`;
   } else {
     tbody.innerHTML = subjects.map(sub=>{
-      const score = Number(scores[sub]);
-      const grade = getGrade(score);
+      const sc = scores[sub] || {};
+      const grade = sc.grade || gradeFromPercentage(subjectMax>0?(sc.total||0)/subjectMax*100:0).grade;
       return `<tr>
         <td>${escapeHtml(sub)}</td>
-        <td>${escapeHtml(String(score))}</td>
+        <td>${sc.test1!==undefined?sc.test1:'—'}</td>
+        <td>${sc.test2!==undefined?sc.test2:'—'}</td>
+        <td>${sc.test3!==undefined?sc.test3:'—'}</td>
+        <td>${sc.exam!==undefined?sc.exam:'—'}</td>
+        <td><strong>${sc.total!==undefined?sc.total:'—'}</strong></td>
         <td><span class="grade-pill ${gradePillClass(grade)}">${grade}</span></td>
-        <td>${gradeRemark(grade)}</td>
+        <td class="rc-pos-cell" style="${s.showSubjectPosition?'':'display:none'}">${sc.position?ordinal(sc.position):'—'}</td>
       </tr>`;
     }).join('');
   }
 
-  document.getElementById('rcPosition').textContent = result.position || '—';
-  document.getElementById('rcRemark').textContent = result.classTeacherRemark || '—';
+  document.getElementById('rcOverallTotal').textContent = result.overallTotal!==undefined ? result.overallTotal : '—';
+  document.getElementById('rcAverage').textContent = result.average!==undefined ? result.average : '—';
+  document.getElementById('rcPercentage').textContent = result.percentage!==undefined ? result.percentage+'%' : '—';
+  const ogEl = document.getElementById('rcOverallGrade');
+  if(result.overallGrade){ ogEl.innerHTML = `<span class="grade-pill ${gradePillClass(result.overallGrade)}">${result.overallGrade}</span>`; }
+  else { ogEl.textContent = '—'; }
+
+  // Grading key
+  document.getElementById('rcGradingKeyBox').style.display = s.showGradingKey ? '' : 'none';
+  document.getElementById('rcGradingKey').innerHTML = resultSettings.gradingBands.map(b=>
+    `<div class="rc-key-item"><span class="grade-pill ${gradePillClass(b.grade)}">${b.grade}</span><span>${b.min}–${b.max}</span><span>${escapeHtml(b.remark||'')}</span></div>`
+  ).join('');
+
+  // Domains
+  document.getElementById('rcDomainsWrap').style.display = (s.showAffective || s.showPsychomotor) ? 'grid' : 'none';
+  document.getElementById('rcAffectiveBox').style.display = s.showAffective ? '' : 'none';
+  document.getElementById('rcPsychomotorBox').style.display = s.showPsychomotor ? '' : 'none';
+
+  const affective = result.affective || {};
+  document.getElementById('rcAffectiveTbody').innerHTML = resultSettings.affectiveTraits.map(t=>domainRow(t, affective[t])).join('');
+  const psychomotor = result.psychomotor || {};
+  document.getElementById('rcPsychomotorTbody').innerHTML = resultSettings.psychomotorTraits.map(t=>domainRow(t, psychomotor[t])).join('');
+
+  // Remarks
+  document.getElementById('rcRemarksWrap').style.display = (s.showTeacherRemark || s.showPrincipalRemark) ? 'grid' : 'none';
+  document.getElementById('rcTeacherRemarkBox').style.display = s.showTeacherRemark ? '' : 'none';
+  document.getElementById('rcPrincipalRemarkBox').style.display = s.showPrincipalRemark ? '' : 'none';
+  document.getElementById('rcTeacherRemark').textContent = result.classTeacherRemark || '—';
+  document.getElementById('rcPrincipalRemark').textContent = result.principalRemark || '—';
+
+  // Signatures
+  document.getElementById('rcSignRow').style.display = s.showSignatures ? 'flex' : 'none';
+}
+
+function domainRow(trait, val){
+  const v = Number(val)||0;
+  return `<tr><td>${escapeHtml(trait)}</td>${[5,4,3,2,1].map(n=>`<td>${v===n?'&#10003;':''}</td>`).join('')}</tr>`;
+}
+
+function ordinal(n){
+  n = Number(n);
+  if(!n) return '—';
+  const s=['th','st','nd','rd'], v=n%100;
+  return n+(s[(v-20)%10]||s[v]||s[0]);
 }
 
 window.printResult = function(){
@@ -460,6 +670,38 @@ document.getElementById('printResultBtn').addEventListener('click', printResult)
 
 /* ============ PAYMENTS ============ */
 let studentPayments = [];
+
+window.loadAnnouncements = async function(){
+  const box = document.getElementById('annContainer');
+  try{
+    const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc')));
+    let items = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    items.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0));
+
+    if(!items.length){
+      box.innerHTML = `
+        <div class="placeholder-box">
+          <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a2 2 0 1 1-3.2 2.4"/></svg>
+          <h3>No announcements yet</h3>
+          <p>Check back later for news and notices from the school.</p>
+        </div>`;
+      return;
+    }
+
+    box.innerHTML = items.map(a=>`
+      <div class="ann-card${a.pinned ? ' pinned':''}">
+        ${a.pinned ? '<div class="ann-pin">Pinned</div>' : ''}
+        <div class="ann-hdr">
+          <h3>${escapeHtml(a.title||'Untitled')}</h3>
+          <span class="ann-date">${formatDate(a.date)||''}</span>
+        </div>
+        <p class="ann-body">${escapeHtml(a.body||'')}</p>
+      </div>
+    `).join('');
+  } catch(e){
+    box.innerHTML = `<div class="empty"><p>Failed to load announcements: ${escapeHtml(e.message)}</p></div>`;
+  }
+};
 
 window.loadPayments = async function(){
   const container = document.getElementById('payContainer');
@@ -785,11 +1027,39 @@ window.loadProfile = async function(){
     document.getElementById('pfParentEmail').textContent = data.parentEmail || '—';
     document.getElementById('pfAddress').textContent = data.address || data.homeAddress || '—';
 
+    // Hobbies & Sports (chips)
+    const hobbiesEl = document.getElementById('pfHobbies');
+    const hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
+    hobbiesEl.innerHTML = hobbies.length
+      ? hobbies.map(h=>`<span class="chip">${escapeHtml(h)}</span>`).join('')
+      : '<span class="chip-empty">Not provided</span>';
+
+    const sportsEl = document.getElementById('pfSports');
+    const sports = Array.isArray(data.favoriteSports) ? data.favoriteSports : [];
+    sportsEl.innerHTML = sports.length
+      ? sports.map(s=>`<span class="chip">${escapeHtml(s)}</span>`).join('')
+      : '<span class="chip-empty">Not provided</span>';
+
+    // Health Report
+    document.getElementById('pfAllergies').textContent = data.allergies || 'None reported';
+    document.getElementById('pfHealthConditions').textContent = data.healthConditions || 'None reported';
+    document.getElementById('pfMedication').textContent = data.medication || 'None';
+
+    // Reset profile to first stage each time the tab opens
+    showProfileStage(1);
+
     // Cache parent email for Paystack checkout
     student.parentEmail = data.parentEmail || '';
   } catch(e){
     showToast('Failed to load profile: '+e.message, 'error');
   }
+};
+
+window.showProfileStage = function(n){
+  document.querySelectorAll('.profile-stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('profStage'+n)?.classList.add('active');
+  document.querySelectorAll('.stage-dot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('stageDot'+n)?.classList.add('active');
 };
 
 /* ============ HELPERS ============ */

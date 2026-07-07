@@ -18,7 +18,7 @@
     <p class="login-tagline">Admin Portal — log in to your admin account with your valid details.</p>
     <div class="l-alert" id="lAlert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="lMsg"></span></div>
     <div class="fg"><input type="email" id="emailIn" placeholder="Email address" autocomplete="off"/></div>
-    <div class="fg"><input type="password" id="pwIn" placeholder="Password"/></div>
+    <div class="fg"><input type="password" id="pwIn" placeholder="Password" autocomplete="off"/></div>
     <button class="btn-login" id="loginBtn" onclick="doLogin()">Log In</button>
   </div>
 </div>
@@ -38,6 +38,7 @@
       <div class="nav-label">Academics</div>
       <div class="nav-item" data-sec="students"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</div>
       <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-item" data-sec="resultSettings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Result Settings</div>
       <div class="nav-label">Finance</div>
       <div class="nav-item" data-sec="feeSettings"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fee Settings</div>
       <div class="nav-item" data-sec="payments"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
@@ -225,13 +226,19 @@
               </button>
             </div>
           </div>
+          <div class="form-row" style="margin-top:12px">
+            <div class="form-group" style="margin-bottom:0"><label>Term Closing Date</label><input type="date" id="resClosingDate"/></div>
+            <div class="form-group" style="margin-bottom:0"><label>Next Term Begins</label><input type="date" id="resNextTermDate"/></div>
+          </div>
         </div>
 
         <!-- Results table area -->
         <div id="resTableArea" style="display:none">
           <div style="overflow-x:auto" class="twrap">
             <table id="resTable">
-              <thead id="resThead"></thead>
+              <thead>
+                <tr><th>Reg No.</th><th>Student Name</th><th>Subjects Scored</th><th>Average</th><th>Overall Grade</th><th>Position</th><th>Status</th><th>Action</th></tr>
+              </thead>
               <tbody id="resTbody"></tbody>
             </table>
           </div>
@@ -240,9 +247,9 @@
               <label class="toggle"><input type="checkbox" id="resPublishToggle"/><span class="slider"></span></label>
               <span style="font-size:.83rem;color:var(--soft)">Publish results — students can view once published</span>
             </label>
-            <button class="btn btn-p" id="resSaveBtn" onclick="saveResults()" style="padding:10px 22px;justify-content:center">
-              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              Save Results
+            <button class="btn btn-edit" id="resRecalcBtn" onclick="recalcClassPositions()" style="padding:10px 18px;justify-content:center">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Recalculate Positions &amp; Publish State
             </button>
           </div>
         </div>
@@ -251,6 +258,77 @@
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           <h3>No active students found</h3>
           <p>There are no active students in the selected class.</p>
+        </div>
+      </div>
+
+      <!-- RESULT SETTINGS -->
+      <div class="section" id="sec-resultSettings">
+        <div class="sec-hdr"><div class="sec-hdr-l"><h2>Result Settings</h2><p>Configure grading, weights, and report sections</p></div></div>
+
+        <div class="card">
+          <h3>Assessment Weights</h3>
+          <div class="form-row" style="grid-template-columns:repeat(4,1fr)">
+            <div class="form-group"><label>Test 1 (max)</label><input type="number" min="0" id="rsTest1Max" value="20"/></div>
+            <div class="form-group"><label>Test 2 (max)</label><input type="number" min="0" id="rsTest2Max" value="20"/></div>
+            <div class="form-group"><label>Test 3 (max)</label><input type="number" min="0" id="rsTest3Max" value="20"/></div>
+            <div class="form-group"><label>Exam (max)</label><input type="number" min="0" id="rsExamMax" value="60"/></div>
+          </div>
+          <div class="fs-summary show" id="rsWeightNote">Subject total will be the sum of these four maximums. Grades are calculated from the percentage of this total, so they stay accurate even if the sum isn't 100.</div>
+        </div>
+
+        <div class="card">
+          <h3>Grading Key</h3>
+          <div id="rsGradeRows"></div>
+          <button class="btn-add-row" type="button" onclick="addGradeRow()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Grade Band
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Affective Domain Traits</h3>
+          <p class="fs-summary show">Rated on a 5 (Excellent) to 1 (Poor) scale on the student report.</p>
+          <div id="rsAffectiveRows"></div>
+          <button class="btn-add-row" type="button" onclick="addTraitRow('rsAffectiveRows')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Trait
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Psychomotor Domain Traits</h3>
+          <div id="rsPsychomotorRows"></div>
+          <button class="btn-add-row" type="button" onclick="addTraitRow('rsPsychomotorRows')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Trait
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Report Sections to Display</h3>
+          <div class="rs-toggle-grid">
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowAffective" checked/><span class="slider"></span></label><span>Affective Domain</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowPsychomotor" checked/><span class="slider"></span></label><span>Psychomotor Domain</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowSubjectPosition" checked/><span class="slider"></span></label><span>Subject Position Column</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowGradingKey" checked/><span class="slider"></span></label><span>Grading Key</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowTeacherRemark" checked/><span class="slider"></span></label><span>Teacher's Remark</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowPrincipalRemark" checked/><span class="slider"></span></label><span>Principal's Remark</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowSignatures" checked/><span class="slider"></span></label><span>Signatures &amp; Stamp</span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Quick Remarks</h3>
+          <p class="fs-summary show">One per line. These appear as quick-select options when entering remarks.</p>
+          <div class="form-group"><label>Teacher's Remark Bank</label><textarea id="rsTeacherRemarks" rows="4" placeholder="Excellent performance this term, keep it up!&#10;Good result, more effort needed in..."></textarea></div>
+          <div class="form-group"><label>Principal's Remark Bank</label><textarea id="rsPrincipalRemarks" rows="4" placeholder="A commendable result.&#10;Satisfactory result."></textarea></div>
+        </div>
+
+        <div class="fs-actions">
+          <button class="btn btn-p" id="rsSaveBtn" onclick="saveResultSettings()" style="flex:1;justify-content:center;padding:11px">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Result Settings
+          </button>
         </div>
       </div>
 
@@ -445,7 +523,7 @@
       <div class="form-group">
         <label>Login Password</label>
         <div class="pw-wrap">
-          <input type="password" id="apvPassword" placeholder="Set student password"/>
+          <input type="password" id="apvPassword" placeholder="Set student password" autocomplete="new-password"/>
           <button class="pw-toggle" type="button" onclick="togglePw('apvPassword',this)">
             <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -507,7 +585,7 @@
     <div class="form-group" style="margin-top:12px">
       <label>Login Password <span style="color:var(--err)">*</span></label>
       <div style="position:relative">
-        <input type="password" id="csPassword" placeholder="Set login password" style="width:100%;padding-right:40px"/>
+        <input type="password" id="csPassword" placeholder="Set login password" style="width:100%;padding-right:40px" autocomplete="new-password"/>
         <button onclick="togglePw('csPassword',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem">Show</button>
       </div>
     </div>
@@ -525,6 +603,56 @@
     </div>
   </div>
 </div>
+
+<!-- RESULT ENTRY MODAL -->
+<div class="mo" id="moResultEntry">
+  <div class="mbox mbox-xl">
+    <h3 id="reTitle">Enter Scores</h3>
+    <p class="mdesc" id="reSub"></p>
+
+    <div class="twrap re-subj-wrap">
+      <table class="re-subj-table">
+        <thead>
+          <tr><th>Subject</th><th>Test 1</th><th>Test 2</th><th>Test 3</th><th>Exam</th><th>Total</th><th>Grade</th></tr>
+        </thead>
+        <tbody id="reSubjTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="re-domains">
+      <div>
+        <div class="section-sub">Affective Domain</div>
+        <div id="reAffectiveRows" class="re-trait-rows"></div>
+      </div>
+      <div>
+        <div class="section-sub">Psychomotor Domain</div>
+        <div id="rePsychomotorRows" class="re-trait-rows"></div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px">
+      <label>Teacher's Remark</label>
+      <select id="reTeacherRemarkPick" style="margin-bottom:8px"><option value="">— Pick a quick remark (optional) —</option></select>
+      <textarea id="reTeacherRemark" rows="2" placeholder="Class teacher's remark"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Principal's Remark</label>
+      <select id="rePrincipalRemarkPick" style="margin-bottom:8px"><option value="">— Pick a quick remark (optional) —</option></select>
+      <textarea id="rePrincipalRemark" rows="2" placeholder="Principal's remark"></textarea>
+    </div>
+
+    <div class="re-summary-bar" id="reSummaryBar"></div>
+
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moResultEntry')">Cancel</button>
+      <button class="btn btn-p" id="reSaveBtn" onclick="saveStudentResult()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Result
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <!-- STUDENT EDIT MODAL -->
 <div class="mo" id="moStudent">
@@ -552,7 +680,7 @@
       <div class="form-group">
         <label>Password</label>
         <div class="pw-wrap">
-          <input type="password" id="stuPassword" placeholder="Leave blank to keep current"/>
+          <input type="password" id="stuPassword" placeholder="Leave blank to keep current" autocomplete="new-password"/>
           <button class="pw-toggle" type="button" onclick="togglePw('stuPassword',this)">
             <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -562,6 +690,19 @@
 
     <div class="section-sub">Elective Subjects</div>
     <div class="subj-grid" id="stuSubjects"></div>
+
+    <div class="section-sub">Hobbies</div>
+    <div class="subj-grid" id="stuHobbies"></div>
+
+    <div class="section-sub">Favourite Sports</div>
+    <div class="subj-grid" id="stuSports"></div>
+
+    <div class="section-sub">Health Report</div>
+    <div class="info-grid">
+      <div class="form-group" style="grid-column:1/-1"><label>Allergies</label><textarea id="stuAllergies" placeholder="Leave blank if none" style="width:100%;min-height:60px;padding:10px 13px;background:var(--inp);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.86rem;font-family:'DM Sans',sans-serif"></textarea></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Health Challenges / Medical Conditions</label><textarea id="stuHealthConditions" placeholder="Leave blank if none" style="width:100%;min-height:60px;padding:10px 13px;background:var(--inp);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.86rem;font-family:'DM Sans',sans-serif"></textarea></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Current Medication</label><input type="text" id="stuMedication" placeholder="Leave blank if none"/></div>
+    </div>
 
     <div class="mactions">
       <button class="btn btn-danger btn-sm" id="moStuDeactivateBtn" onclick="triggerDeactivate()" style="flex:none;padding:11px 16px">Deactivate</button>
@@ -591,7 +732,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
@@ -605,8 +746,14 @@ const cfg = {
 const app = initializeApp(cfg);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// Session-only auth persistence: nothing about this login is kept in local
+// storage on the device — the admin must re-enter their password every time
+// the browser is fully closed and reopened.
+setPersistence(auth, browserSessionPersistence).catch(()=>{});
 
 const CLASSES = ['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
+const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
+const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
 let allAnnouncements = [];
 
 /* ============ AUTH ============ */
@@ -654,8 +801,9 @@ window.switchTab = (sec)=>{
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
-  const titles={overview:'Overview',applications:'Applications',students:'Students',results:'Results',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
-  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',feeSettings:'Set termly fees, levies, and due dates per class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
+  const titles={overview:'Overview',applications:'Applications',students:'Students',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
+  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fees, levies, and due dates per class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
+  if(sec==='resultSettings') loadResultSettingsForm();
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
 };
@@ -808,6 +956,19 @@ window.viewApplication = function(id){
       <div class="info-item"><label>Emergency Contact</label><span>${escapeHtml(a.emergencyName||'—')}</span></div>
       <div class="info-item"><label>Emergency Phone</label><span>${escapeHtml(a.emergencyPhone||'—')}</span></div>
       <hr class="info-divider"/>
+      <div class="section-sub" style="grid-column:1/-1;margin-top:0">Health &amp; Interests</div>
+      <div class="info-item" style="grid-column:1/-1">
+        <label>Hobbies</label>
+        <span>${(a.hobbies&&a.hobbies.length) ? a.hobbies.map(escapeHtml).join(', ') : '—'}</span>
+      </div>
+      <div class="info-item" style="grid-column:1/-1">
+        <label>Favourite Sports</label>
+        <span>${(a.favoriteSports&&a.favoriteSports.length) ? a.favoriteSports.map(escapeHtml).join(', ') : '—'}</span>
+      </div>
+      <div class="info-item"><label>Allergies</label><span>${escapeHtml(a.allergies||'None reported')}</span></div>
+      <div class="info-item"><label>Health Challenges</label><span>${escapeHtml(a.healthConditions||'None reported')}</span></div>
+      <div class="info-item"><label>Current Medication</label><span>${escapeHtml(a.medication||'None')}</span></div>
+      <hr class="info-divider"/>
       <div class="info-item" style="grid-column:1/-1"><label>Uploaded Documents</label><span>${docLinks}</span></div>
     </div>
   `;
@@ -889,6 +1050,11 @@ window.confirmApprove = async function(){
       address:     a.homeAddress||'',
       emergencyName: a.emergencyName||'',
       emergencyPhone: a.emergencyPhone||'',
+      hobbies: a.hobbies||[],
+      favoriteSports: a.favoriteSports||[],
+      allergies: a.allergies||'',
+      healthConditions: a.healthConditions||'',
+      medication: a.medication||'',
       regNumber,
       photo:     a.passportPhoto||'',
       password:  pw,
@@ -982,6 +1148,11 @@ window.openStudentModal = function(docId){
   document.getElementById('stuGenotype').value   = s.genotype||'';
   document.getElementById('stuPassword').value   = '';
   buildSubjectCheckboxes('stuSubjects', s.subjects||[]);
+  buildChecklist('stuHobbies', HOBBIES_LIST, s.hobbies||[]);
+  buildChecklist('stuSports', SPORTS_LIST, s.favoriteSports||[]);
+  document.getElementById('stuAllergies').value = s.allergies||'';
+  document.getElementById('stuHealthConditions').value = s.healthConditions||'';
+  document.getElementById('stuMedication').value = s.medication||'';
   // Deactivate button label
   const isActive = (s.status||'active')==='active';
   document.getElementById('moStuDeactivateBtn').textContent = isActive?'Deactivate':'Reactivate';
@@ -1001,6 +1172,11 @@ window.saveStudentEdits = async function(){
     bloodGroup: document.getElementById('stuBloodGroup').value.trim(),
     genotype:   document.getElementById('stuGenotype').value.trim(),
     subjects:   getCheckedSubjects('stuSubjects'),
+    hobbies:    getCheckedSubjects('stuHobbies'),
+    favoriteSports: getCheckedSubjects('stuSports'),
+    allergies:  document.getElementById('stuAllergies').value.trim(),
+    healthConditions: document.getElementById('stuHealthConditions').value.trim(),
+    medication: document.getElementById('stuMedication').value.trim(),
     updatedAt:  serverTimestamp()
   };
   if(pw) payload.password = pw;
@@ -1122,6 +1298,15 @@ function buildSubjectCheckboxes(containerId, checked){
   wrap.innerHTML = ELECTIVES.map(s=>`
     <label class="subj-cb">
       <input type="checkbox" value="${escapeAttr(s)}" ${checked.includes(s)?'checked':''}/>
+      ${escapeHtml(s)}
+    </label>
+  `).join('');
+}
+function buildChecklist(containerId, list, checked){
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = list.map(s=>`
+    <label class="subj-cb">
+      <input type="checkbox" value="${escapeAttr(s)}" ${(checked||[]).includes(s)?'checked':''}/>
       ${escapeHtml(s)}
     </label>
   `).join('');
@@ -1379,12 +1564,207 @@ function showDlg(title, msg, onConfirm){
   document.getElementById('dlgOv').classList.add('show');
 }
 
+/* ============ RESULT SETTINGS ============ */
+const DEFAULT_RESULT_SETTINGS = {
+  assessment: { test1Max:20, test2Max:20, test3Max:20, examMax:60 },
+  gradingBands: [
+    { grade:'A1', min:80,  max:100, remark:'Excellent' },
+    { grade:'B2', min:70,  max:79,  remark:'Very Good' },
+    { grade:'B3', min:65,  max:69,  remark:'Good' },
+    { grade:'C4', min:60,  max:64,  remark:'Credit' },
+    { grade:'C5', min:55,  max:59,  remark:'Credit' },
+    { grade:'C6', min:50,  max:54,  remark:'Credit' },
+    { grade:'D7', min:45,  max:49,  remark:'Pass' },
+    { grade:'E8', min:40,  max:44,  remark:'Pass' },
+    { grade:'F9', min:0,   max:39,  remark:'Fail' }
+  ],
+  ratingScale: [ {v:5,label:'Excellent'},{v:4,label:'Very Good'},{v:3,label:'Good'},{v:2,label:'Fair'},{v:1,label:'Poor'} ],
+  affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
+  psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
+  sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
+  remarkBank: { teacher:[], principal:[] }
+};
+
+let resultSettings = JSON.parse(JSON.stringify(DEFAULT_RESULT_SETTINGS));
+
+async function loadResultSettings(){
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'resultSettings'));
+    if(snap.exists()){
+      const data = snap.data();
+      resultSettings = {
+        assessment: { ...DEFAULT_RESULT_SETTINGS.assessment, ...(data.assessment||{}) },
+        gradingBands: Array.isArray(data.gradingBands) && data.gradingBands.length ? data.gradingBands : DEFAULT_RESULT_SETTINGS.gradingBands,
+        ratingScale: DEFAULT_RESULT_SETTINGS.ratingScale,
+        affectiveTraits: Array.isArray(data.affectiveTraits) && data.affectiveTraits.length ? data.affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
+        psychomotorTraits: Array.isArray(data.psychomotorTraits) && data.psychomotorTraits.length ? data.psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
+        sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) },
+        remarkBank: { teacher: data.remarkBank?.teacher||[], principal: data.remarkBank?.principal||[] }
+      };
+    }
+  } catch(e){
+    console.warn('Could not load result settings, using defaults:', e.message);
+  }
+}
+
+function subjectMaxTotal(){
+  const a = resultSettings.assessment;
+  return (Number(a.test1Max)||0) + (Number(a.test2Max)||0) + (Number(a.test3Max)||0) + (Number(a.examMax)||0);
+}
+function gradeFromPercentage(pct){
+  const bands = resultSettings.gradingBands;
+  for(const b of bands){ if(pct >= Number(b.min) && pct <= Number(b.max)) return b; }
+  return bands[bands.length-1] || { grade:'—', remark:'' };
+}
+function gradePillClassAdmin(grade){
+  if(grade==='A1') return 'gp-a';
+  if(grade==='B2'||grade==='B3') return 'gp-b';
+  if(grade==='F9') return 'gp-f';
+  return 'gp-c';
+}
+
+window.loadResultSettingsForm = async function(){
+  await loadResultSettings();
+  document.getElementById('rsTest1Max').value = resultSettings.assessment.test1Max;
+  document.getElementById('rsTest2Max').value = resultSettings.assessment.test2Max;
+  document.getElementById('rsTest3Max').value = resultSettings.assessment.test3Max;
+  document.getElementById('rsExamMax').value = resultSettings.assessment.examMax;
+
+  document.getElementById('rsGradeRows').innerHTML = '';
+  resultSettings.gradingBands.forEach(b => addGradeRow(b.grade, b.min, b.max, b.remark));
+
+  document.getElementById('rsAffectiveRows').innerHTML = '';
+  resultSettings.affectiveTraits.forEach(t => addTraitRow('rsAffectiveRows', t));
+
+  document.getElementById('rsPsychomotorRows').innerHTML = '';
+  resultSettings.psychomotorTraits.forEach(t => addTraitRow('rsPsychomotorRows', t));
+
+  const s = resultSettings.sections;
+  document.getElementById('rsShowAffective').checked = !!s.showAffective;
+  document.getElementById('rsShowPsychomotor').checked = !!s.showPsychomotor;
+  document.getElementById('rsShowSubjectPosition').checked = !!s.showSubjectPosition;
+  document.getElementById('rsShowGradingKey').checked = !!s.showGradingKey;
+  document.getElementById('rsShowTeacherRemark').checked = !!s.showTeacherRemark;
+  document.getElementById('rsShowPrincipalRemark').checked = !!s.showPrincipalRemark;
+  document.getElementById('rsShowSignatures').checked = !!s.showSignatures;
+
+  document.getElementById('rsTeacherRemarks').value = (resultSettings.remarkBank.teacher||[]).join('\n');
+  document.getElementById('rsPrincipalRemarks').value = (resultSettings.remarkBank.principal||[]).join('\n');
+};
+
+window.addGradeRow = function(grade='', min='', max='', remark=''){
+  const wrap = document.getElementById('rsGradeRows');
+  const row = document.createElement('div');
+  row.className = 'grade-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Grade (e.g. A1)" class="gr-grade" value="${escapeAttr(grade)}"/>
+    <input type="number" placeholder="Min %" class="gr-min" value="${min===''?'':min}"/>
+    <input type="number" placeholder="Max %" class="gr-max" value="${max===''?'':max}"/>
+    <input type="text" placeholder="Remark (e.g. Excellent)" class="gr-remark" value="${escapeAttr(remark)}"/>
+    <div class="btn-icon" onclick="this.parentElement.remove()" title="Remove">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>`;
+  wrap.appendChild(row);
+};
+
+window.addTraitRow = function(containerId, name=''){
+  const wrap = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.className = 'trait-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Trait name" class="tr-name" value="${escapeAttr(name)}"/>
+    <div class="btn-icon" onclick="this.parentElement.remove()" title="Remove">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>`;
+  wrap.appendChild(row);
+};
+
+window.saveResultSettings = async function(){
+  const btn = document.getElementById('rsSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    const gradingBands = Array.from(document.querySelectorAll('#rsGradeRows .grade-row')).map(row => ({
+      grade: row.querySelector('.gr-grade').value.trim(),
+      min: Number(row.querySelector('.gr-min').value)||0,
+      max: Number(row.querySelector('.gr-max').value)||0,
+      remark: row.querySelector('.gr-remark').value.trim()
+    })).filter(b => b.grade).sort((a,b)=>b.min-a.min);
+
+    const affectiveTraits = Array.from(document.querySelectorAll('#rsAffectiveRows .tr-name')).map(i=>i.value.trim()).filter(Boolean);
+    const psychomotorTraits = Array.from(document.querySelectorAll('#rsPsychomotorRows .tr-name')).map(i=>i.value.trim()).filter(Boolean);
+
+    const payload = {
+      assessment: {
+        test1Max: Number(document.getElementById('rsTest1Max').value)||0,
+        test2Max: Number(document.getElementById('rsTest2Max').value)||0,
+        test3Max: Number(document.getElementById('rsTest3Max').value)||0,
+        examMax: Number(document.getElementById('rsExamMax').value)||0
+      },
+      gradingBands: gradingBands.length ? gradingBands : DEFAULT_RESULT_SETTINGS.gradingBands,
+      affectiveTraits: affectiveTraits.length ? affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
+      psychomotorTraits: psychomotorTraits.length ? psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
+      sections: {
+        showAffective: document.getElementById('rsShowAffective').checked,
+        showPsychomotor: document.getElementById('rsShowPsychomotor').checked,
+        showSubjectPosition: document.getElementById('rsShowSubjectPosition').checked,
+        showGradingKey: document.getElementById('rsShowGradingKey').checked,
+        showTeacherRemark: document.getElementById('rsShowTeacherRemark').checked,
+        showPrincipalRemark: document.getElementById('rsShowPrincipalRemark').checked,
+        showSignatures: document.getElementById('rsShowSignatures').checked
+      },
+      remarkBank: {
+        teacher: document.getElementById('rsTeacherRemarks').value.split('\n').map(s=>s.trim()).filter(Boolean),
+        principal: document.getElementById('rsPrincipalRemarks').value.split('\n').map(s=>s.trim()).filter(Boolean)
+      },
+      updatedAt: serverTimestamp()
+    };
+
+    await setDoc(doc(db, 'settings', 'resultSettings'), payload, { merge:true });
+    showToast('Result settings saved successfully', 'success');
+    await loadResultSettingsForm();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Result Settings';
+  }
+};
+
 /* ============ RESULTS ============ */
 const CORE_SUBJECTS = ['English Language','Mathematics','Basic Science','Social Studies','CRS/IRS','Civic Education','Physical & Health Education','Cultural & Creative Arts','Computer Studies'];
 const ELECTIVE_SUBJECTS = ['Further Maths','French','Agricultural Science','Economics','Literature','Government','Yoruba','Igbo','Fine Art','Music','Physical Education'];
 
 let resStudents = [];
 let resExistingMap = {}; // studentId -> result doc {id, data}
+let reCurrentStudent = null; // student object currently open in the entry modal
+let reCurrentSubjects = [];
+
+function subjectsForStudent(stu){
+  const stuElectives = Array.isArray(stu.subjects) ? stu.subjects : [];
+  return [...CORE_SUBJECTS, ...ELECTIVE_SUBJECTS.filter(s=>stuElectives.includes(s))];
+}
+
+function computeSubjectResult(scoreObj){
+  const t1 = Number(scoreObj?.test1)||0, t2 = Number(scoreObj?.test2)||0, t3 = Number(scoreObj?.test3)||0, ex = Number(scoreObj?.exam)||0;
+  const total = t1+t2+t3+ex;
+  const max = subjectMaxTotal() || 100;
+  const pct = max > 0 ? (total/max*100) : 0;
+  const band = gradeFromPercentage(pct);
+  return { test1:t1, test2:t2, test3:t3, exam:ex, total, grade: band.grade, remark: band.remark };
+}
+
+function computeOverall(scores){
+  const subjects = Object.keys(scores||{});
+  let overallTotal = 0;
+  subjects.forEach(sub => { overallTotal += Number(scores[sub]?.total)||0; });
+  const numSubjects = subjects.length || 1;
+  const subjectMax = subjectMaxTotal() || 100;
+  const overallMax = subjectMax * numSubjects;
+  const average = overallTotal / numSubjects;
+  const percentage = overallMax > 0 ? (overallTotal/overallMax*100) : 0;
+  const band = gradeFromPercentage(percentage);
+  return { overallTotal, average: Math.round(average*100)/100, percentage: Math.round(percentage*100)/100, overallGrade: band.grade };
+}
 
 window.loadResultsStudents = async function(){
   const btn = document.getElementById('resLoadBtn');
@@ -1398,7 +1778,8 @@ window.loadResultsStudents = async function(){
   document.getElementById('resEmptyBox').style.display = 'none';
 
   try {
-    // Load active students for selected class
+    await loadResultSettings();
+
     const snap = await getDocs(collection(db, 'students'));
     resStudents = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
@@ -1411,7 +1792,6 @@ window.loadResultsStudents = async function(){
       return;
     }
 
-    // Load existing results for this class+session+term
     const resSnap = await getDocs(collection(db, 'results'));
     resExistingMap = {};
     resSnap.docs.forEach(d => {
@@ -1421,11 +1801,14 @@ window.loadResultsStudents = async function(){
       }
     });
 
-    // Check publish state (use first doc if exists)
     const anyPublished = Object.values(resExistingMap).some(r => r.data.published);
     document.getElementById('resPublishToggle').checked = anyPublished;
 
-    buildResultsTable(cls, session, term);
+    const existingMeta = Object.values(resExistingMap)[0]?.data;
+    document.getElementById('resClosingDate').value = existingMeta?.closingDate || '';
+    document.getElementById('resNextTermDate').value = existingMeta?.nextTermBegins || '';
+
+    buildResultsTable();
     document.getElementById('resTableArea').style.display = 'block';
   } catch(e) {
     showToast('Load failed: ' + e.message, 'error');
@@ -1435,118 +1818,258 @@ window.loadResultsStudents = async function(){
   }
 };
 
-function buildResultsTable(cls, session, term) {
-  // Determine which elective columns are needed (union of all students' subjects)
-  const activeElectives = ELECTIVE_SUBJECTS.filter(sub =>
-    resStudents.some(s => Array.isArray(s.subjects) && s.subjects.includes(sub))
-  );
-  const allSubjects = [...CORE_SUBJECTS, ...activeElectives];
-
-  // Build header
-  const thead = document.getElementById('resThead');
-  thead.innerHTML = '<tr>'
-    + '<th>Reg No.</th><th>Student Name</th>'
-    + allSubjects.map(s => `<th style="min-width:80px;white-space:normal;word-break:break-word">${escapeHtml(s)}</th>`).join('')
-    + '<th>Position</th><th>Remark</th>'
-    + '</tr>';
-
-  // Build body
+function buildResultsTable() {
   const tbody = document.getElementById('resTbody');
   tbody.innerHTML = resStudents.map(stu => {
     const existing = resExistingMap[stu.id];
-    const scores = existing ? (existing.data.scores || {}) : {};
-    const position = existing ? (existing.data.position || '') : '';
-    const remark = existing ? (existing.data.classTeacherRemark || '') : '';
-    const stuElectives = Array.isArray(stu.subjects) ? stu.subjects : [];
-
-    const scoreCells = allSubjects.map(sub => {
-      const isCore = CORE_SUBJECTS.includes(sub);
-      const hasElective = stuElectives.includes(sub);
-      if (isCore || hasElective) {
-        const val = scores[sub] !== undefined ? scores[sub] : '';
-        return `<td><input class="res-score-inp" type="number" min="0" max="100" data-stu="${escapeAttr(stu.id)}" data-sub="${escapeAttr(sub)}" value="${escapeAttr(String(val))}" placeholder="—"/></td>`;
-      } else {
-        return `<td class="res-na">—</td>`;
-      }
-    }).join('');
-
+    const data = existing ? existing.data : null;
+    const scores = data?.scores || {};
+    const numScored = Object.keys(scores).length;
+    const average = data?.average!==undefined ? data.average : '—';
+    const overallGrade = data?.overallGrade || '—';
+    const position = data?.overallPosition || '—';
+    const status = data ? (data.published ? 'Published' : 'Draft') : 'Not started';
+    const statusClass = data ? (data.published ? 'b-green' : 'b-gold') : 'b-blue';
     return `<tr>
-      <td style="font-size:.78rem;white-space:nowrap">${escapeHtml(stu.regNumber||'')}</td>
+      <td style="white-space:nowrap;font-size:.78rem">${escapeHtml(stu.regNumber||'')}</td>
       <td style="white-space:nowrap;font-weight:500">${escapeHtml((stu.firstName||'') + ' ' + (stu.lastName||''))}</td>
-      ${scoreCells}
-      <td><input class="res-pos-inp" type="number" min="1" data-stu="${escapeAttr(stu.id)}" data-field="position" value="${escapeAttr(String(position))}" placeholder="—"/></td>
-      <td><input class="res-remark-inp" type="text" data-stu="${escapeAttr(stu.id)}" data-field="remark" value="${escapeAttr(String(remark))}" placeholder="Remark"/></td>
+      <td>${numScored} subject${numScored===1?'':'s'}</td>
+      <td>${average}</td>
+      <td>${overallGrade!=='—'?`<span class="grade-pill ${gradePillClassAdmin(overallGrade)}">${overallGrade}</span>`:'—'}</td>
+      <td>${escapeHtml(String(position))}</td>
+      <td><span class="badge ${statusClass}">${status}</span></td>
+      <td><button class="btn btn-edit btn-sm" onclick="openResultEntry('${escapeAttr(stu.id)}')">Enter Scores</button></td>
     </tr>`;
   }).join('');
 }
 
-window.saveResults = async function(){
-  const btn = document.getElementById('resSaveBtn');
+window.openResultEntry = function(stuId){
+  const stu = resStudents.find(s=>s.id===stuId);
+  if(!stu) return;
+  reCurrentStudent = stu;
+  reCurrentSubjects = subjectsForStudent(stu);
+  const existing = resExistingMap[stu.id];
+  const scores = existing?.data?.scores || {};
+  const affective = existing?.data?.affective || {};
+  const psychomotor = existing?.data?.psychomotor || {};
+
+  document.getElementById('reTitle').textContent = `Enter Scores — ${(stu.firstName||'')} ${(stu.lastName||'')}`.trim();
+  document.getElementById('reSub').textContent = `${stu.regNumber||''} · ${stu.class||''} · Test1(${resultSettings.assessment.test1Max}) Test2(${resultSettings.assessment.test2Max}) Test3(${resultSettings.assessment.test3Max}) Exam(${resultSettings.assessment.examMax})`;
+
+  document.getElementById('reSubjTbody').innerHTML = reCurrentSubjects.map(sub=>{
+    const sc = scores[sub] || {};
+    return `<tr data-subject="${escapeAttr(sub)}">
+      <td>${escapeHtml(sub)}</td>
+      <td><input type="number" min="0" max="${resultSettings.assessment.test1Max}" class="re-inp re-test1" value="${sc.test1!==undefined?sc.test1:''}"/></td>
+      <td><input type="number" min="0" max="${resultSettings.assessment.test2Max}" class="re-inp re-test2" value="${sc.test2!==undefined?sc.test2:''}"/></td>
+      <td><input type="number" min="0" max="${resultSettings.assessment.test3Max}" class="re-inp re-test3" value="${sc.test3!==undefined?sc.test3:''}"/></td>
+      <td><input type="number" min="0" max="${resultSettings.assessment.examMax}" class="re-inp re-exam" value="${sc.exam!==undefined?sc.exam:''}"/></td>
+      <td class="re-total">0</td>
+      <td class="re-grade">—</td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('#reSubjTbody .re-inp').forEach(inp=>{
+    inp.addEventListener('input', recomputeResultEntryRow);
+  });
+  document.querySelectorAll('#reSubjTbody tr').forEach(row=> recomputeResultEntryRow({target: row.querySelector('.re-inp')}));
+
+  document.getElementById('reAffectiveRows').innerHTML = resultSettings.affectiveTraits.map(t=>buildTraitRatingRow(t, affective[t])).join('');
+  document.getElementById('rePsychomotorRows').innerHTML = resultSettings.psychomotorTraits.map(t=>buildTraitRatingRow(t, psychomotor[t])).join('');
+
+  const teacherPick = document.getElementById('reTeacherRemarkPick');
+  teacherPick.innerHTML = '<option value="">— Pick a quick remark (optional) —</option>' + resultSettings.remarkBank.teacher.map(r=>`<option value="${escapeAttr(r)}">${escapeHtml(r)}</option>`).join('');
+  teacherPick.onchange = ()=>{ if(teacherPick.value) document.getElementById('reTeacherRemark').value = teacherPick.value; };
+  const principalPick = document.getElementById('rePrincipalRemarkPick');
+  principalPick.innerHTML = '<option value="">— Pick a quick remark (optional) —</option>' + resultSettings.remarkBank.principal.map(r=>`<option value="${escapeAttr(r)}">${escapeHtml(r)}</option>`).join('');
+  principalPick.onchange = ()=>{ if(principalPick.value) document.getElementById('rePrincipalRemark').value = principalPick.value; };
+
+  document.getElementById('reTeacherRemark').value = existing?.data?.classTeacherRemark || '';
+  document.getElementById('rePrincipalRemark').value = existing?.data?.principalRemark || '';
+
+  recomputeResultEntrySummary();
+  openMo('moResultEntry');
+};
+
+function buildTraitRatingRow(trait, currentVal){
+  const scale = resultSettings.ratingScale;
+  return `<div class="trait-rate-row" data-trait="${escapeAttr(trait)}">
+    <span class="trait-rate-name">${escapeHtml(trait)}</span>
+    <div class="trait-rate-opts">
+      ${scale.map(s=>`<label><input type="radio" name="rate-${escapeAttr(trait).replace(/\s+/g,'-')}" value="${s.v}" ${Number(currentVal)===s.v?'checked':''}/><span>${s.v}</span></label>`).join('')}
+    </div>
+  </div>`;
+}
+
+function recomputeResultEntryRow(e){
+  const row = e.target.closest('tr');
+  const t1 = Number(row.querySelector('.re-test1').value)||0;
+  const t2 = Number(row.querySelector('.re-test2').value)||0;
+  const t3 = Number(row.querySelector('.re-test3').value)||0;
+  const ex = Number(row.querySelector('.re-exam').value)||0;
+  const total = t1+t2+t3+ex;
+  const max = subjectMaxTotal() || 100;
+  const pct = max>0 ? (total/max*100) : 0;
+  const band = gradeFromPercentage(pct);
+  row.querySelector('.re-total').textContent = total;
+  row.querySelector('.re-grade').innerHTML = `<span class="grade-pill ${gradePillClassAdmin(band.grade)}">${band.grade}</span>`;
+  recomputeResultEntrySummary();
+}
+
+function recomputeResultEntrySummary(){
+  let overallTotal = 0, count = 0;
+  document.querySelectorAll('#reSubjTbody tr').forEach(row=>{
+    overallTotal += Number(row.querySelector('.re-total').textContent)||0;
+    count++;
+  });
+  const subjectMax = subjectMaxTotal() || 100;
+  const overallMax = subjectMax * (count||1);
+  const average = count ? overallTotal/count : 0;
+  const percentage = overallMax>0 ? (overallTotal/overallMax*100) : 0;
+  const band = gradeFromPercentage(percentage);
+  document.getElementById('reSummaryBar').innerHTML = `
+    <div><span>Overall Total</span><strong>${overallTotal} / ${overallMax}</strong></div>
+    <div><span>Average</span><strong>${average.toFixed(2)}</strong></div>
+    <div><span>Percentage</span><strong>${percentage.toFixed(1)}%</strong></div>
+    <div><span>Overall Grade</span><strong><span class="grade-pill ${gradePillClassAdmin(band.grade)}">${band.grade}</span></strong></div>
+  `;
+}
+
+window.saveStudentResult = async function(){
+  const btn = document.getElementById('reSaveBtn');
+  const stu = reCurrentStudent;
+  if(!stu) return;
   const cls = document.getElementById('resClass').value;
   const session = document.getElementById('resSession').value;
   const term = document.getElementById('resTerm').value;
+  const closingDate = document.getElementById('resClosingDate').value || '';
+  const nextTermBegins = document.getElementById('resNextTermDate').value || '';
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    const scores = {};
+    document.querySelectorAll('#reSubjTbody tr').forEach(row=>{
+      const sub = row.dataset.subject;
+      const scoreObj = {
+        test1: Number(row.querySelector('.re-test1').value)||0,
+        test2: Number(row.querySelector('.re-test2').value)||0,
+        test3: Number(row.querySelector('.re-test3').value)||0,
+        exam: Number(row.querySelector('.re-exam').value)||0
+      };
+      scores[sub] = computeSubjectResult(scoreObj);
+    });
+
+    const affective = {};
+    document.querySelectorAll('#reAffectiveRows .trait-rate-row').forEach(row=>{
+      const checked = row.querySelector('input[type=radio]:checked');
+      if(checked) affective[row.dataset.trait] = Number(checked.value);
+    });
+    const psychomotor = {};
+    document.querySelectorAll('#rePsychomotorRows .trait-rate-row').forEach(row=>{
+      const checked = row.querySelector('input[type=radio]:checked');
+      if(checked) psychomotor[row.dataset.trait] = Number(checked.value);
+    });
+
+    const overall = computeOverall(scores);
+    const existing = resExistingMap[stu.id];
+    const numInClass = resStudents.length;
+
+    const docData = {
+      studentId: stu.id,
+      regNumber: stu.regNumber || '',
+      studentName: ((stu.firstName||'') + ' ' + (stu.lastName||'')).trim(),
+      session, term, class: cls,
+      numInClass,
+      closingDate, nextTermBegins,
+      scores,
+      affective, psychomotor,
+      overallTotal: overall.overallTotal,
+      average: overall.average,
+      percentage: overall.percentage,
+      overallGrade: overall.overallGrade,
+      classTeacherRemark: document.getElementById('reTeacherRemark').value.trim(),
+      principalRemark: document.getElementById('rePrincipalRemark').value.trim(),
+      published: existing?.data?.published || false,
+      updatedAt: serverTimestamp()
+    };
+
+    if(existing){
+      await updateDoc(doc(db,'results', existing.id), docData);
+      resExistingMap[stu.id] = { id: existing.id, data: { ...existing.data, ...docData } };
+    } else {
+      const newRef = await addDoc(collection(db,'results'), docData);
+      resExistingMap[stu.id] = { id: newRef.id, data: docData };
+    }
+
+    showToast('Result saved for ' + docData.studentName, 'success');
+    closeMo('moResultEntry');
+    buildResultsTable();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Result';
+  }
+};
+
+window.recalcClassPositions = async function(){
+  const btn = document.getElementById('resRecalcBtn');
   const publish = document.getElementById('resPublishToggle').checked;
+  const closingDate = document.getElementById('resClosingDate').value || '';
+  const nextTermBegins = document.getElementById('resNextTermDate').value || '';
+  const entries = resStudents.map(stu => resExistingMap[stu.id]).filter(Boolean);
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Saving...';
+  if(entries.length === 0){ showToast('No results have been entered for this class yet.', 'error'); return; }
 
-  try {
-    // Gather all inputs per student
-    const scoreInputs = document.querySelectorAll('.res-score-inp');
-    const posInputs = document.querySelectorAll('.res-pos-inp');
-    const remarkInputs = document.querySelectorAll('.res-remark-inp');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Working...';
+  try{
+    // Overall position: rank by overallTotal, descending
+    const ranked = [...entries].sort((a,b)=> (b.data.overallTotal||0) - (a.data.overallTotal||0));
+    const overallPosMap = {};
+    ranked.forEach((r,i)=>{ overallPosMap[r.data.studentId] = i+1; });
 
-    // Build per-student score map
-    const stuScores = {}; // stuId -> { scores:{}, position, remark }
-    scoreInputs.forEach(inp => {
-      const stuId = inp.dataset.stu;
-      const sub = inp.dataset.sub;
-      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
-      const val = inp.value !== '' ? Number(inp.value) : null;
-      if (val !== null) stuScores[stuId].scores[sub] = val;
+    // Subject position: rank each subject's total across students who offer it
+    const subjectRanks = {}; // subject -> [{studentId, total}]
+    entries.forEach(r=>{
+      Object.entries(r.data.scores||{}).forEach(([sub, sc])=>{
+        if(!subjectRanks[sub]) subjectRanks[sub] = [];
+        subjectRanks[sub].push({ studentId: r.data.studentId, total: sc.total||0 });
+      });
     });
-    posInputs.forEach(inp => {
-      const stuId = inp.dataset.stu;
-      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
-      stuScores[stuId].position = inp.value !== '' ? Number(inp.value) : null;
-    });
-    remarkInputs.forEach(inp => {
-      const stuId = inp.dataset.stu;
-      if (!stuScores[stuId]) stuScores[stuId] = { scores: {} };
-      stuScores[stuId].remark = inp.value.trim();
+    const subjectPosMap = {}; // studentId -> {subject: position}
+    Object.entries(subjectRanks).forEach(([sub, list])=>{
+      const sorted = [...list].sort((a,b)=>b.total-a.total);
+      sorted.forEach((item,i)=>{
+        if(!subjectPosMap[item.studentId]) subjectPosMap[item.studentId] = {};
+        subjectPosMap[item.studentId][sub] = i+1;
+      });
     });
 
-    // Save/update each student's result
-    const saves = resStudents.map(async stu => {
-      const payload = stuScores[stu.id] || { scores: {} };
-      const docData = {
-        studentId: stu.id,
-        regNumber: stu.regNumber || '',
-        studentName: ((stu.firstName||'') + ' ' + (stu.lastName||'')).trim(),
-        session, term,
-        class: cls,
-        scores: payload.scores || {},
-        position: payload.position || null,
-        classTeacherRemark: payload.remark || '',
+    const numInClass = resStudents.length;
+    const updates = entries.map(async r=>{
+      const scoresWithPos = { ...r.data.scores };
+      Object.keys(scoresWithPos).forEach(sub=>{
+        scoresWithPos[sub] = { ...scoresWithPos[sub], position: subjectPosMap[r.data.studentId]?.[sub] || null };
+      });
+      const payload = {
+        scores: scoresWithPos,
+        overallPosition: overallPosMap[r.data.studentId] || null,
+        numInClass, closingDate, nextTermBegins,
         published: publish,
         updatedAt: serverTimestamp()
       };
-
-      if (resExistingMap[stu.id]) {
-        await updateDoc(doc(db, 'results', resExistingMap[stu.id].id), docData);
-      } else {
-        const newRef = await addDoc(collection(db, 'results'), docData);
-        resExistingMap[stu.id] = { id: newRef.id, data: docData };
-      }
+      await updateDoc(doc(db,'results', r.id), payload);
+      resExistingMap[r.data.studentId] = { id: r.id, data: { ...r.data, ...payload } };
     });
 
-    await Promise.all(saves);
-    showToast('Results saved successfully', 'success');
-  } catch(e) {
-    showToast('Save failed: ' + e.message, 'error');
-  } finally {
+    await Promise.all(updates);
+    showToast(publish ? 'Positions recalculated and results published' : 'Positions recalculated (not yet published)', 'success');
+    buildResultsTable();
+  } catch(e){
+    showToast('Failed: '+e.message, 'error');
+  } finally{
     btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Results';
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Recalculate Positions &amp; Publish State';
   }
 };
 
