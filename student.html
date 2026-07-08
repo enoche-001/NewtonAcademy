@@ -345,26 +345,35 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
 // Same Firebase project used by admin.html (school-8b30a)
 const cfg = {
-  apiKey:"AIzaSyDLQQW9nApENo5h3rXmycrejx37cIXd1TM",
-  authDomain:"school-8b30a.firebaseapp.com",
-  projectId:"school-8b30a",
-  storageBucket:"school-8b30a.firebasestorage.app",
-  messagingSenderId:"976076120343",
-  appId:"1:976076120343:web:0cbe82390644492e975752"
+  apiKey:"AIzaSyCtUPXwPHj0QTU5CCGYkGt4tIFDPBnt3no",
+  authDomain:"schoolportal-9a98d.firebaseapp.com",
+  projectId:"schoolportal-9a98d",
+  storageBucket:"schoolportal-9a98d.firebasestorage.app",
+  messagingSenderId:"162536930811",
+  appId:"1:162536930811:web:815da7689658b6e5161f5e"
 };
 const app = initializeApp(cfg);
 const db = getFirestore(app);
 
+// Matches the SHA-256 hashing done in admin.html when a student's
+// password is set, so login can compare hash-to-hash instead of storing
+// or checking plaintext passwords.
+async function hashPassword(plain){
+  const bytes = new TextEncoder().encode(plain);
+  const hashBuf = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 // ⚠️ NOT FOUND IN paystack-verify.zip — that zip contains no Paystack key or
 // verify endpoint (it's an unrelated e-commerce project). Replace these two
 // values with your real Paystack TEST public key and your Vercel verify URL.
-const PAYSTACK_PUBLIC_KEY = "pk_test_18ca2741786aa5eb29938cac8334563f20dd0e4b";
-const VERIFY_ENDPOINT = "https://paystacktest.vercel.app/api/verify";
+const PAYSTACK_PUBLIC_KEY = "pk_test_0f95979409d37c80f73fa3f8502da39ea04fea58";
+const VERIFY_ENDPOINT = "https://school-payment-server.vercel.app/api/verify";
 
 const CURRENT_SESSION = "2025/2026";
 const TERMS = ["First","Second","Third"];
@@ -436,7 +445,8 @@ window.doLogin = async function(){
     const docSnap = snap.docs[0];
     const data = docSnap.data();
 
-    if(data.password !== pw){
+    const pwHash = await hashPassword(pw);
+    if(data.password !== pwHash){
       showLAlert('Incorrect password.');
       return;
     }
@@ -1002,8 +1012,13 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
       console.warn('Verify endpoint failed:', verifyErr.message);
     }
 
-    // Always record the payment so the student is not left without a record
-    const newDocRef = await addDoc(collection(db,'payments'), {
+    // Always record the payment so the student is not left without a record.
+    // Use the Paystack reference as the doc ID (instead of addDoc's random ID)
+    // so that if this function ever runs twice for the same reference
+    // (double-click, retry, duplicate callback), the second call overwrites
+    // the same document instead of creating a second payment record.
+    const newDocRef = doc(db, 'payments', reference);
+    await setDoc(newDocRef, {
       studentId: student.id,
       regNumber: student.regNumber,
       studentName: student.name,
@@ -1015,7 +1030,7 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
       reference,
       status: verifyStatus,
       date: serverTimestamp()
-    });
+    }, { merge: true });
 
     if(verifyStatus === 'success'){
       showToast('Payment successful!', 'success');

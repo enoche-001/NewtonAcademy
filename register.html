@@ -133,6 +133,29 @@
         </div>
       </div>
 
+      <div id="seniorClassSection" style="display:none">
+        <div class="section-divider">Senior Class Details</div>
+        <div class="form-grid g2">
+          <div class="fg">
+            <label>Department <span class="req">*</span></label>
+            <select id="department">
+              <option value="">Select department</option>
+              <option>Science</option>
+              <option>Arts</option>
+              <option>Commercial</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Career Path <span style="color:var(--muted);font-weight:400;font-size:.78rem">(optional)</span></label>
+            <input type="text" id="careerPath" placeholder="e.g. Medicine, Law, Accounting"/>
+          </div>
+          <div class="fg span-2">
+            <label>Why did you choose this career path? <span style="color:var(--muted);font-weight:400;font-size:.78rem">(optional)</span></label>
+            <textarea id="careerReason" rows="3" placeholder="Tell us a little about why this career interests you…"></textarea>
+          </div>
+        </div>
+      </div>
+
       <div class="section-divider">Previous School</div>
 
       <div class="form-grid g2">
@@ -436,17 +459,17 @@ import { getFirestore, collection, addDoc, getDocs, serverTimestamp }
 /* ═══════════════════════════════════════════
    CONFIG — Replace placeholders before going live
    ═══════════════════════════════════════════ */
-const PAYSTACK_PUBLIC_KEY = "pk_test_18ca2741786aa5eb29938cac8334563f20dd0e4b";
-const VERIFY_ENDPOINT     = "https://paystacktest.vercel.app/api/verify";
+const PAYSTACK_PUBLIC_KEY = "pk_test_0f95979409d37c80f73fa3f8502da39ea04fea58";
+const VERIFY_ENDPOINT     = "https://school-payment-server.vercel.app/api/verify";
 
 /* ── Firebase (same project as admin.html + student.html) ── */
 const cfg = {
-  apiKey:            "AIzaSyDLQQW9nApENo5h3rXmycrejx37cIXd1TM",
-  authDomain:        "school-8b30a.firebaseapp.com",
-  projectId:         "school-8b30a",
-  storageBucket:     "school-8b30a.firebasestorage.app",
-  messagingSenderId: "976076120343",
-  appId:             "1:976076120343:web:0cbe82390644492e975752"
+  apiKey:            "AIzaSyCtUPXwPHj0QTU5CCGYkGt4tIFDPBnt3no",
+  authDomain:        "schoolportal-9a98d.firebaseapp.com",
+  projectId:         "schoolportal-9a98d",
+  storageBucket:     "schoolportal-9a98d.firebasestorage.app",
+  messagingSenderId: "162536930811",
+  appId:             "1:162536930811:web:815da7689658b6e5161f5e"
 };
 const app = initializeApp(cfg);
 const db  = getFirestore(app);
@@ -595,6 +618,19 @@ async function loadClassesForRegistration(){
   } catch(e){
     console.warn('Could not load classes for registration:', e.message);
   }
+  sel.addEventListener('change', toggleSeniorClassSection);
+  toggleSeniorClassSection();
+}
+
+// "Senior" classes are anything starting with SS (e.g. SS1A, SS2B) —
+// JSS classes are excluded since "JSS..." doesn't start with "SS".
+function isSeniorClass(className){
+  return /^SS/i.test((className||'').trim());
+}
+function toggleSeniorClassSection(){
+  const cls = document.getElementById('classApplied').value;
+  const section = document.getElementById('seniorClassSection');
+  section.style.display = isSeniorClass(cls) ? '' : 'none';
 }
 
 function buildCheckGrid(containerId, list, name){
@@ -688,6 +724,9 @@ function getFormData(){
     bloodGroup:      v('bloodGroup'),
     genotype:        v('genotype'),
     classApplied:    v('classApplied'),
+    department:      v('department'),
+    careerPath:      v('careerPath'),
+    careerReason:    v('careerReason'),
     prevSchool:      v('prevSchool'),
     lastClass:       v('lastClass'),
     fatherName:      v('fatherName'),
@@ -717,6 +756,9 @@ function validatePanel1(){
   if(!v('gender'))        return 'Please select a gender.';
   if(!v('stateOfOrigin')) return 'State of origin is required.';
   if(!v('classApplied'))  return 'Please select the class applying for.';
+  if(isSeniorClass(v('classApplied'))){
+    if(!v('department'))   return 'Please select a department (Science, Arts, or Commercial).';
+  }
   return null;
 }
 function validatePanel2(){
@@ -734,6 +776,9 @@ function validateForm(){
   if(!d.gender)            return 'Please select a gender.';
   if(!d.stateOfOrigin)     return 'State of origin is required.';
   if(!d.classApplied)      return 'Please select the class applying for.';
+  if(isSeniorClass(d.classApplied)){
+    if(!d.department)   return 'Please select a department (Science, Arts, or Commercial).';
+  }
   if(!d.primaryPhone)      return 'Primary phone number is required.';
   if(!passportBase64)      return 'Passport photograph is required.';
   return null;
@@ -922,6 +967,9 @@ async function verifyAndSubmit(reference){
       bloodGroup:      d.bloodGroup,
       genotype:        d.genotype,
       classApplied:    d.classApplied,
+      department:      d.department || '',
+      careerPath:      d.careerPath || '',
+      careerReason:    d.careerReason || '',
       prevSchool:      d.prevSchool,
       lastClass:       d.lastClass,
       fatherName:      d.fatherName,
