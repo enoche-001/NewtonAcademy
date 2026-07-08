@@ -586,6 +586,24 @@ tbody tr:hover{background:#f7f9fd}
 .subj-cb input{accent-color:var(--indigo);width:14px;height:14px;flex-shrink:0}
 .subj-cb:has(input:checked){border-color:var(--indigo);background:var(--indigo-s);color:var(--indigo)}
 
+.tag-input-row{display:flex;gap:8px}
+.tag-input-row input{flex:1}
+.subj-tag{
+  display:flex;align-items:center;gap:6px;padding:6px 8px 6px 12px;
+  border:1.5px solid var(--border);border-radius:999px;
+  font-size:.8rem;color:var(--text);background:var(--bg);
+}
+.subj-tag button{
+  border:none;background:none;cursor:pointer;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;
+}
+.subj-tag button:hover{background:var(--err);color:#fff}
+.subj-tag button svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.subj-tag.compulsory{border-color:var(--indigo);background:var(--indigo-s);color:var(--indigo)}
+.class-subj-note{font-size:.78rem;color:var(--soft);margin:6px 0 2px}
+.empty-inline{font-size:.79rem;color:var(--soft);font-style:italic}
+
 .pw-wrap{position:relative}
 .pw-wrap input{padding-right:38px!important}
 .pw-toggle{

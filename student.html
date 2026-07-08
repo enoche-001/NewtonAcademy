@@ -32,13 +32,13 @@
     </div>
     <nav class="sb-nav">
       <div class="nav-label">Academics</div>
-      <div class="nav-item active" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
+      <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
       <div class="nav-label">Updates</div>
       <div class="nav-item" data-sec="announcements"><svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a2 2 0 1 1-3.2 2.4"/></svg>Announcements</div>
       <div class="nav-label">Finance</div>
       <div class="nav-item" data-sec="payments"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</div>
       <div class="nav-label">Account</div>
-      <div class="nav-item" data-sec="profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+      <div class="nav-item active" data-sec="profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
     </nav>
     <div class="sb-footer">
       <div class="ucard">
@@ -66,7 +66,7 @@
     <div class="content">
 
       <!-- RESULTS -->
-      <div class="section active" id="sec-results">
+      <div class="section" id="sec-results">
         <div class="card no-print">
           <div class="res-sel-bar">
             <div class="form-group">
@@ -200,7 +200,7 @@
       </div>
 
       <!-- PROFILE -->
-      <div class="section" id="sec-profile">
+      <div class="section active" id="sec-profile">
         <div class="card">
           <div class="profile-hdr">
             <div class="avatar-lg" id="profAvatar">—</div>
@@ -396,7 +396,7 @@ function showPortal(){
   document.getElementById('sbReg').textContent = student.regNumber||'';
   document.getElementById('tbName').textContent = student.name||'Student';
   document.getElementById('tbReg').textContent = student.regNumber||'';
-  switchTab('results');
+  switchTab('profile');
 }
 
 (function init(){
@@ -701,6 +701,7 @@ document.getElementById('printResultBtn').addEventListener('click', printResult)
 
 /* ============ PAYMENTS ============ */
 let studentPayments = [];
+let currentOpenSession = null; // set from admin's Term Payment Access setting each time payments load
 
 window.loadAnnouncements = async function(){
   const box = document.getElementById('annContainer');
@@ -747,19 +748,33 @@ window.loadPayments = async function(){
       studentPayments = [];
     }
 
-    // Load fee settings for each term of the current session, scoped to this student's class
-    const feeBlocks = [];
-    for(const term of TERMS){
-      const feeId = `${CURRENT_SESSION.replace('/', '-')}_${term}_${student.class}`;
-      let feeData = null;
-      try{
-        const feeSnap = await getDoc(doc(db,'feeSettings',feeId));
-        if(feeSnap.exists()) feeData = feeSnap.data();
-      } catch(e){ /* leave null */ }
-      feeBlocks.push({ term, feeData });
+    // Load global payment access settings — controls which single term (if any)
+    // is currently open for students to view/pay. Set by the admin under
+    // Fee Settings > Term Payment Access.
+    let access = null;
+    try{
+      const accSnap = await getDoc(doc(db,'settings','paymentAccess'));
+      if(accSnap.exists()) access = accSnap.data();
+    } catch(e){ /* leave null */ }
+
+    if(!access || !access.enabled || !access.term){
+      container.innerHTML = `<div class="empty"><p>Payments are not currently open. Please check back later or contact the school office.</p></div>${renderPaymentHistory(studentPayments)}`;
+      return;
     }
 
-    renderPayments(feeBlocks);
+    const openSession = access.session || CURRENT_SESSION;
+    const openTerm = access.term;
+    currentOpenSession = openSession;
+
+    // Load fee settings for just the currently-open term, scoped to this student's class
+    const feeId = `${openSession.replace('/', '-')}_${openTerm}_${student.class}`;
+    let feeData = null;
+    try{
+      const feeSnap = await getDoc(doc(db,'feeSettings',feeId));
+      if(feeSnap.exists()) feeData = feeSnap.data();
+    } catch(e){ /* leave null */ }
+
+    renderPayments([{ term: openTerm, session: openSession, feeData }]);
   } catch(e){
     container.innerHTML = `<div class="empty"><p>Failed to load payment info: ${escapeHtml(e.message)}</p></div>`;
   }
@@ -780,10 +795,16 @@ function findPayment(term){
 function renderPayments(feeBlocks){
   const container = document.getElementById('payContainer');
 
-  container.innerHTML = feeBlocks.map(({term, feeData})=>{
+  // Track which term/session combos are already shown above (the currently
+  // open one), so the history table below doesn't repeat the same row.
+  const openKeys = new Set(feeBlocks.map(b => `${b.term}|${b.session || CURRENT_SESSION}`));
+  const pastPayments = studentPayments.filter(p => !openKeys.has(`${p.term}|${p.session || CURRENT_SESSION}`));
+
+  const feeHtml = feeBlocks.map(({term, feeData, session})=>{
+    const displaySession = session || CURRENT_SESSION;
     if(!feeData){
       return `<div class="term-block">
-        <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
+        <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3></div>
         <div class="twrap"><div class="empty"><p>Fee settings have not been published for this term yet.</p></div></div>
       </div>`;
     }
@@ -798,7 +819,7 @@ function renderPayments(feeBlocks){
 
     if(!breakdown.length){
       return `<div class="term-block">
-        <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
+        <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3></div>
         <div class="twrap"><div class="empty"><p>No fees have been set for this term yet.</p></div></div>
       </div>`;
     }
@@ -827,7 +848,7 @@ function renderPayments(feeBlocks){
     }
 
     return `<div class="term-block">
-      <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3>${badgeHtml}</div>
+      <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3>${badgeHtml}</div>
       <div class="twrap">
         <table class="rc-subj-table fee-table">
           <thead><tr><th class="fee-num-col">#</th><th>Fee Item</th><th class="fee-amt-col">Amount</th></tr></thead>
@@ -838,6 +859,53 @@ function renderPayments(feeBlocks){
       <div class="term-pay-row">${actionHtml}</div>
     </div>`;
   }).join('');
+
+  container.innerHTML = feeHtml + renderPaymentHistory(pastPayments);
+}
+
+function renderPaymentHistory(payments){
+  if(!payments || !payments.length) return '';
+
+  // Most recent first
+  const sorted = [...payments].sort((a,b)=>{
+    const ta = a.date?.toDate ? a.date.toDate().getTime() : 0;
+    const tb = b.date?.toDate ? b.date.toDate().getTime() : 0;
+    return tb - ta;
+  });
+
+  const rows = sorted.map((p,i)=>{
+    const status = (p.status||'').toLowerCase();
+    let badge;
+    if(status === 'success') badge = `<span class="badge b-green">PAID</span>`;
+    else if(status === 'failed') badge = `<span class="badge b-red">FAILED</span>`;
+    else badge = `<span class="badge b-gold">PROCESSING</span>`;
+
+    const ts = p.date?.toDate ? p.date.toDate() : null;
+    const dateStr = ts ? ts.toLocaleDateString() : '—';
+
+    return `<tr>
+      <td class="fee-num-col">${i+1}</td>
+      <td>${escapeHtml(p.term||'—')} Term</td>
+      <td>${escapeHtml(p.session || CURRENT_SESSION)}</td>
+      <td class="fee-amt-col">₦${(Number(p.amount)||0).toLocaleString()}</td>
+      <td>${badge}</td>
+      <td>${dateStr}</td>
+      <td><button class="btn btn-edit pay-receipt-btn" data-id="${p.id}">View Receipt</button></td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="term-block">
+    <div class="term-block-hdr"><h3>Payment History</h3></div>
+    <div class="twrap">
+      <table class="rc-subj-table fee-table">
+        <thead><tr>
+          <th class="fee-num-col">#</th><th>Term</th><th>Session</th>
+          <th class="fee-amt-col">Amount</th><th>Status</th><th>Date</th><th>Receipt</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
 }
 
 let _paymentInProgress = false; // guard against double-tap
@@ -880,7 +948,7 @@ window.payNow = function(term, breakdown, amount){
       studentId: student.id,
       regNumber: student.regNumber,
       term,
-      session: CURRENT_SESSION,
+      session: currentOpenSession || CURRENT_SESSION,
       itemCount: breakdown.length
     },
     callback: function(response){
@@ -941,7 +1009,7 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
       studentName: student.name,
       class: student.class,
       term,
-      session: CURRENT_SESSION,
+      session: currentOpenSession || CURRENT_SESSION,
       breakdown,
       amount: confirmedAmount,
       reference,
@@ -964,7 +1032,7 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
     studentPayments.push({
       id: newDocRef.id,
       studentId: student.id, regNumber: student.regNumber, studentName: student.name,
-      class: student.class, term, session: CURRENT_SESSION, breakdown,
+      class: student.class, term, session: currentOpenSession || CURRENT_SESSION, breakdown,
       amount: confirmedAmount, reference, status: verifyStatus, date: new Date()
     });
 

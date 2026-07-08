@@ -129,8 +129,6 @@
           <label>Class Applying For <span class="req">*</span></label>
           <select id="classApplied">
             <option value="">Select class</option>
-            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-            <option>SS1</option><option>SS2</option><option>SS3</option>
           </select>
         </div>
       </div>
@@ -431,7 +429,7 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp }
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
@@ -580,8 +578,24 @@ function onStateChange(){
 
 initDobDropdowns();
 initStateDropdown();
+loadClassesForRegistration();
 buildCheckGrid('hobbiesCheckboxes', HOBBIES_LIST, 'hobby');
 buildCheckGrid('sportsCheckboxes', SPORTS_LIST, 'sport');
+
+async function loadClassesForRegistration(){
+  const sel = document.getElementById('classApplied');
+  try{
+    const snap = await getDocs(collection(db,'classes'));
+    const names = snap.docs.map(d=>d.id).sort();
+    if(names.length){
+      sel.innerHTML = '<option value="">Select class</option>' + names.map(c=>`<option>${c}</option>`).join('');
+    } else {
+      sel.innerHTML = '<option value="">No classes available — contact the school office</option>';
+    }
+  } catch(e){
+    console.warn('Could not load classes for registration:', e.message);
+  }
+}
 
 function buildCheckGrid(containerId, list, name){
   const el = document.getElementById(containerId);

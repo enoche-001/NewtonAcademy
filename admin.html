@@ -37,6 +37,7 @@
       <div class="nav-item" data-sec="applications"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Applications</div>
       <div class="nav-label">Academics</div>
       <div class="nav-item" data-sec="students"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</div>
+      <div class="nav-item" data-sec="classes"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>Classes</div>
       <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
       <div class="nav-item" data-sec="resultSettings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Result Settings</div>
       <div class="nav-label">Finance</div>
@@ -150,11 +151,7 @@
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
           </select>
-          <select id="appFilterClass" onchange="renderApplications()">
-            <option value="">All Classes</option>
-            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-            <option>SS1</option><option>SS2</option><option>SS3</option>
-          </select>
+          <select id="appFilterClass" onchange="renderApplications()"><option value="">All Classes</option></select>
         </div>
         <div class="twrap">
           <table>
@@ -175,16 +172,30 @@
         </div>
         <div class="s-bar">
           <input type="text" id="stuSearch" placeholder="Search by name or reg number…" oninput="renderStudents()"/>
-          <select id="stuFilterClass" onchange="renderStudents()">
-            <option value="">All Classes</option>
-            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-            <option>SS1</option><option>SS2</option><option>SS3</option>
-          </select>
+          <select id="stuFilterClass" onchange="renderStudents()"><option value="">All Classes</option></select>
         </div>
         <div class="twrap">
           <table>
             <thead><tr><th>Reg Number</th><th>Name</th><th>Class</th><th>Subjects</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="stuTbody"><tr><td colspan="6" class="empty"><p>Loading...</p></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLASSES -->
+      <div class="section" id="sec-classes">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Classes</h2><p>Create classes and set their compulsory and elective subjects</p></div>
+          <button class="btn btn-primary btn-sm" onclick="openCreateClassModal()">
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Class
+          </button>
+        </div>
+        <p class="fs-summary show">Classes created here (e.g. SS1A, SS1B, JSS1A) appear on the registration form and everywhere a class is selected. Compulsory subjects are automatically added to every student in that class — no need to pick them individually. Elective subjects are the ones admin chooses per-student when creating or approving them.</p>
+        <div class="twrap">
+          <table>
+            <thead><tr><th>Class</th><th>Compulsory Subjects</th><th>Elective Subjects</th><th>Actions</th></tr></thead>
+            <tbody id="classTbody"><tr><td colspan="4" class="empty"><p>Loading...</p></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -214,10 +225,7 @@
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label>Class</label>
-              <select id="resClass">
-                <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-                <option>SS1</option><option>SS2</option><option>SS3</option>
-              </select>
+              <select id="resClass"><!-- populated by JS --></select>
             </div>
             <div style="margin-bottom:0">
               <button class="btn btn-p" id="resLoadBtn" onclick="loadResultsStudents()" style="width:100%;justify-content:center;padding:10px 14px">
@@ -369,6 +377,39 @@
           <div class="sec-hdr-l"><h2>Fee Settings</h2><p>Set termly fee items and due dates, class by class</p></div>
         </div>
 
+        <div class="card" id="paymentAccessCard">
+          <h3>Term Payment Access</h3>
+          <p style="margin:-6px 0 16px;font-size:.83rem;color:var(--muted)">Control which single term students can currently see and pay for on their Payments page.</p>
+          <div class="toggle-wrap" style="margin-bottom:18px">
+            <label class="toggle"><input type="checkbox" id="paEnabledToggle"/><span class="slider"></span></label>
+            <span id="paStatusLabel">Payments closed — students cannot see or pay any term</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Session</label>
+              <select id="paSession">
+                <option value="2024/2025">2024/2025</option>
+                <option value="2025/2026" selected>2025/2026</option>
+                <option value="2026/2027">2026/2027</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Term Open for Payment</label>
+              <select id="paTerm">
+                <option value="First">First Term</option>
+                <option value="Second">Second Term</option>
+                <option value="Third">Third Term</option>
+              </select>
+            </div>
+          </div>
+          <div class="fs-actions">
+            <button class="btn btn-p" id="paSaveBtn" onclick="savePaymentAccess()" style="flex:1;justify-content:center;padding:11px">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Payment Access
+            </button>
+          </div>
+        </div>
+
         <div class="card">
           <h3>Session, Term &amp; Class</h3>
           <div class="form-row">
@@ -450,8 +491,6 @@
           </select>
           <select id="payFilterClass" onchange="renderPayments()">
             <option value="">All Classes</option>
-            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-            <option>SS1</option><option>SS2</option><option>SS3</option>
           </select>
         </div>
 
@@ -540,10 +579,7 @@
     <div class="approve-row">
       <div class="form-group">
         <label>Confirm Class</label>
-        <select id="apvClass">
-          <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-          <option>SS1</option><option>SS2</option><option>SS3</option>
-        </select>
+        <select id="apvClass"></select>
       </div>
       <div class="form-group">
         <label>Login Password</label>
@@ -557,6 +593,7 @@
     </div>
 
     <div class="section-sub">Elective Subjects</div>
+    <p class="class-subj-note" id="apvCompNote"></p>
     <div class="subj-grid" id="apvSubjects"></div>
 
     <div class="mactions">
@@ -583,7 +620,7 @@
         <select id="csGender"><option value="">Select</option><option>Male</option><option>Female</option></select>
       </div>
       <div class="form-group"><label>Class <span style="color:var(--err)">*</span></label>
-        <select id="csClass"><option value="">Select class</option><option>JSS1</option><option>JSS2</option><option>JSS3</option><option>SS1</option><option>SS2</option><option>SS3</option></select>
+        <select id="csClass"><option value="">Select class</option></select>
       </div>
       <div class="form-group"><label>Session</label>
         <select id="csSession"><option>2024/2025</option><option selected>2025/2026</option><option>2026/2027</option></select>
@@ -604,6 +641,7 @@
 
     <div class="form-group" style="margin-top:12px">
       <label>Elective Subjects</label>
+      <p class="class-subj-note" id="csCompNote"></p>
       <div id="csSubjects" class="subj-grid"></div>
     </div>
 
@@ -695,10 +733,7 @@
       </div>
       <div class="form-group">
         <label>Class</label>
-        <select id="stuClass">
-          <option>JSS1</option><option>JSS2</option><option>JSS3</option>
-          <option>SS1</option><option>SS2</option><option>SS3</option>
-        </select>
+        <select id="stuClass"></select>
       </div>
       <div class="form-group"><label>Blood Group</label><input type="text" id="stuBloodGroup" placeholder="e.g. O+"/></div>
       <div class="form-group"><label>Genotype</label><input type="text" id="stuGenotype" placeholder="e.g. AA"/></div>
@@ -714,6 +749,7 @@
     </div>
 
     <div class="section-sub">Elective Subjects</div>
+    <p class="class-subj-note" id="stuCompNote"></p>
     <div class="subj-grid" id="stuSubjects"></div>
 
     <div class="section-sub">Hobbies</div>
@@ -735,6 +771,48 @@
       <button class="btn btn-p" id="moStuSaveBtn" onclick="saveStudentEdits()" style="flex:1;justify-content:center;padding:11px">
         <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CLASS MODAL -->
+<div class="mo" id="moClass">
+  <div class="mbox mbox-lg">
+    <h3 id="moClassTitle">Add Class</h3>
+    <p class="mdesc">Set the class name and its subjects</p>
+
+    <div class="form-group">
+      <label>Class Name <span style="color:var(--err)">*</span></label>
+      <input type="text" id="clsName" placeholder="e.g. SS1A, JSS2A"/>
+    </div>
+    <input type="hidden" id="clsOriginalName" value=""/>
+
+    <div class="form-group" style="margin-top:14px">
+      <label>Compulsory Subjects <span style="color:var(--soft);font-weight:400">(auto-added for every student in this class)</span></label>
+      <div class="tag-input-row">
+        <input type="text" id="clsCompInput" placeholder="Type a subject and press Enter" list="subjSuggestions"/>
+        <button type="button" class="btn-cancel" style="flex:none;padding:9px 14px" onclick="addClassTag('compulsory')">Add</button>
+      </div>
+      <div class="subj-grid" id="clsCompTags"></div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px">
+      <label>Elective Subjects <span style="color:var(--soft);font-weight:400">(admin picks per student)</span></label>
+      <div class="tag-input-row">
+        <input type="text" id="clsElecInput" placeholder="Type a subject and press Enter" list="subjSuggestions"/>
+        <button type="button" class="btn-cancel" style="flex:none;padding:9px 14px" onclick="addClassTag('elective')">Add</button>
+      </div>
+      <div class="subj-grid" id="clsElecTags"></div>
+    </div>
+
+    <datalist id="subjSuggestions"></datalist>
+
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moClass')">Cancel</button>
+      <button class="btn btn-p" id="clsSaveBtn" onclick="saveClass()" style="flex:1;justify-content:center;padding:11px">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Class
       </button>
     </div>
   </div>
@@ -776,7 +854,10 @@ const db = getFirestore(app);
 // the browser is fully closed and reopened.
 setPersistence(auth, browserSessionPersistence).catch(()=>{});
 
-const CLASSES = ['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
+// Classes (and their compulsory/elective subjects) are managed by the admin
+// under the "Classes" section and loaded live from Firestore — see loadClasses().
+let CLASS_DATA = {};      // { "SS1A": { compulsory:[...], elective:[...] }, ... }
+let CLASS_NAMES = [];     // sorted list of class names
 const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
 const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
 let allAnnouncements = [];
@@ -826,8 +907,8 @@ window.switchTab = (sec)=>{
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
-  const titles={overview:'Overview',applications:'Applications',students:'Students',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
-  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
+  const titles={overview:'Overview',applications:'Applications',students:'Students',classes:'Classes',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
+  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',classes:'Create classes and set their compulsory and elective subjects',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
   if(sec==='resultSettings') loadResultSettingsForm();
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
@@ -837,10 +918,179 @@ window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove(
 
 /* ============ LOAD ALL ============ */
 async function loadAll(){
-  buildFsClassDropdown();
+  await loadClasses(); // must resolve first — everything else depends on CLASS_NAMES/CLASS_DATA
   setDefaultAnnDate();
-  await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
+  await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadPaymentAccessSettings(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
 }
+
+/* ============ CLASSES ============ */
+async function loadClasses(){
+  try{
+    const snap = await getDocs(collection(db,'classes'));
+    CLASS_DATA = {};
+    snap.docs.forEach(d=>{
+      const data = d.data();
+      CLASS_DATA[d.id] = { compulsory: data.compulsory||[], elective: data.elective||[] };
+    });
+    CLASS_NAMES = Object.keys(CLASS_DATA).sort();
+  } catch(e){
+    console.warn('Could not load classes:', e.message);
+    CLASS_DATA = {}; CLASS_NAMES = [];
+  }
+  populateClassDropdowns();
+  renderClassesTable();
+}
+
+function populateClassDropdowns(){
+  const opts = CLASS_NAMES.map(c=>`<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+  const withAll = `<option value="">All Classes</option>` + opts;
+  const withSelect = `<option value="">Select class</option>` + opts;
+
+  ['appFilterClass','stuFilterClass','payFilterClass'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const prev = el.value;
+    el.innerHTML = withAll;
+    if(CLASS_NAMES.includes(prev)) el.value = prev;
+  });
+  ['csClass','stuClass','apvClass','resClass','fsClass'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const prev = el.value;
+    el.innerHTML = id==='csClass' ? withSelect : opts;
+    if(CLASS_NAMES.includes(prev)) el.value = prev;
+  });
+
+  // Suggestions for the free-text subject inputs in the Class modal
+  const allSubjects = new Set();
+  Object.values(CLASS_DATA).forEach(c=>{ (c.compulsory||[]).forEach(s=>allSubjects.add(s)); (c.elective||[]).forEach(s=>allSubjects.add(s)); });
+  const dl = document.getElementById('subjSuggestions');
+  if(dl) dl.innerHTML = [...allSubjects].sort().map(s=>`<option value="${escapeAttr(s)}"></option>`).join('');
+}
+
+function renderClassesTable(){
+  const tbody = document.getElementById('classTbody');
+  if(!tbody) return;
+  if(!CLASS_NAMES.length){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>No classes yet. Click "Add Class" to create one (e.g. SS1A, JSS2A).</p></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = CLASS_NAMES.map(name=>{
+    const c = CLASS_DATA[name];
+    return `<tr>
+      <td><strong>${escapeHtml(name)}</strong></td>
+      <td>${c.compulsory.length ? c.compulsory.map(s=>escapeHtml(s)).join(', ') : '<span class="empty-inline">None set</span>'}</td>
+      <td>${c.elective.length ? c.elective.map(s=>escapeHtml(s)).join(', ') : '<span class="empty-inline">None set</span>'}</td>
+      <td>
+        <div class="act-btns">
+          <button class="btn btn-edit btn-sm" onclick="openEditClassModal('${escapeAttr(name)}')">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="triggerDeleteClass('${escapeAttr(name)}')">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+let classFormCompulsory = [];
+let classFormElective = [];
+
+function renderClassFormTags(){
+  const compWrap = document.getElementById('clsCompTags');
+  const elecWrap = document.getElementById('clsElecTags');
+  const chip = (s, type) => `<span class="subj-tag ${type==='compulsory'?'compulsory':''}">${escapeHtml(s)}<button type="button" onclick="removeClassTag('${type}','${escapeAttr(s)}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></span>`;
+  compWrap.innerHTML = classFormCompulsory.length ? classFormCompulsory.map(s=>chip(s,'compulsory')).join('') : '<span class="empty-inline">No compulsory subjects added yet</span>';
+  elecWrap.innerHTML = classFormElective.length ? classFormElective.map(s=>chip(s,'elective')).join('') : '<span class="empty-inline">No elective subjects added yet</span>';
+}
+
+window.addClassTag = function(type){
+  const inputId = type==='compulsory' ? 'clsCompInput' : 'clsElecInput';
+  const input = document.getElementById(inputId);
+  const val = input.value.trim();
+  if(!val) return;
+  const arr = type==='compulsory' ? classFormCompulsory : classFormElective;
+  if(!arr.includes(val)) arr.push(val);
+  input.value = '';
+  renderClassFormTags();
+  input.focus();
+};
+window.removeClassTag = function(type, subject){
+  if(type==='compulsory') classFormCompulsory = classFormCompulsory.filter(s=>s!==subject);
+  else classFormElective = classFormElective.filter(s=>s!==subject);
+  renderClassFormTags();
+};
+['clsCompInput','clsElecInput'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); addClassTag(id==='clsCompInput'?'compulsory':'elective'); }
+  });
+});
+
+window.openCreateClassModal = function(){
+  document.getElementById('moClassTitle').textContent = 'Add Class';
+  document.getElementById('clsName').value = '';
+  document.getElementById('clsName').disabled = false;
+  document.getElementById('clsOriginalName').value = '';
+  classFormCompulsory = [];
+  classFormElective = [];
+  renderClassFormTags();
+  openMo('moClass');
+};
+
+window.openEditClassModal = function(name){
+  const c = CLASS_DATA[name];
+  if(!c) return;
+  document.getElementById('moClassTitle').textContent = `Edit ${name}`;
+  document.getElementById('clsName').value = name;
+  document.getElementById('clsOriginalName').value = name;
+  classFormCompulsory = [...c.compulsory];
+  classFormElective = [...c.elective];
+  renderClassFormTags();
+  openMo('moClass');
+};
+
+window.saveClass = async function(){
+  const name = document.getElementById('clsName').value.trim().toUpperCase();
+  const originalName = document.getElementById('clsOriginalName').value;
+  if(!name) return showToast('Please enter a class name', 'error');
+  if(!originalName && CLASS_NAMES.includes(name)) return showToast('A class with this name already exists', 'error');
+
+  const btn = document.getElementById('clsSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving…';
+  try{
+    if(originalName && originalName !== name){
+      await deleteDoc(doc(db,'classes',originalName));
+    }
+    await setDoc(doc(db,'classes',name), {
+      compulsory: classFormCompulsory,
+      elective: classFormElective,
+      updatedAt: serverTimestamp()
+    });
+    showToast(`Class ${name} saved`, 'success');
+    closeMo('moClass');
+    await loadClasses();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Class';
+  }
+};
+
+window.triggerDeleteClass = function(name){
+  showDlg(`Delete ${name}?`, 'Students already in this class will keep their record, but the class will no longer appear in dropdowns or on the registration form.', async ()=>{
+    try{
+      await deleteDoc(doc(db,'classes',name));
+      showToast('Class deleted', 'success');
+      await loadClasses();
+    } catch(e){ showToast('Failed: '+e.message, 'error'); }
+    closeDlg();
+  });
+};
 
 /* ============ OVERVIEW ============ */
 async function loadOverviewStats(){
@@ -861,18 +1111,17 @@ async function loadOverviewStats(){
     document.getElementById('s-payments').textContent = '₦0';
     // Class breakdown bar chart
     const classCounts={};
-    const CLASSES=['JSS1','JSS2','JSS3','SS1','SS2','SS3'];
-    CLASSES.forEach(c=>classCounts[c]=0);
+    CLASS_NAMES.forEach(c=>classCounts[c]=0);
     stuSnap.docs.forEach(d=>{const c=d.data().className||d.data().class;if(c&&classCounts[c]!==undefined)classCounts[c]++;});
     const maxCount=Math.max(...Object.values(classCounts),1);
-    const fills=['fill-blue','fill-blue','fill-blue','fill-green','fill-green','fill-green'];
+    const fills=['fill-blue','fill-green'];
     const barList=document.getElementById('classBarList');
     if(barList){
-      barList.innerHTML=CLASSES.map((c,i)=>`
+      barList.innerHTML = CLASS_NAMES.length ? CLASS_NAMES.map((c,i)=>`
         <div class="ov-bar-item">
           <div class="ov-bar-label"><span>${c}</span><span>${classCounts[c]}</span></div>
-          <div class="ov-bar-track"><div class="ov-bar-fill ${fills[i]}" style="width:${Math.round(classCounts[c]/maxCount*100)}%"></div></div>
-        </div>`).join('');
+          <div class="ov-bar-track"><div class="ov-bar-fill ${fills[i%fills.length]}" style="width:${Math.round(classCounts[c]/maxCount*100)}%"></div></div>
+        </div>`).join('') : '<p class="empty">No classes created yet</p>';
     }
     // Results count
     try{
@@ -883,7 +1132,6 @@ async function loadOverviewStats(){
 }
 
 /* ============ APPLICATIONS ============ */
-const ELECTIVES = ['Further Maths','French','Agricultural Science','Economics','Literature','Government','Yoruba','Igbo','Fine Art','Music','Physical Education'];
 let allApplications = [];
 let currentAppId = null; // tracks which app is open in view/approve modal
 
@@ -1024,13 +1272,19 @@ window.openApproveModal = function(){
   if(!a) return;
   // Pre-fill class
   const cls = document.getElementById('apvClass');
-  cls.value = a.classApplied||'JSS1';
+  cls.value = CLASS_NAMES.includes(a.classApplied) ? a.classApplied : (CLASS_NAMES[0]||'');
   document.getElementById('apvPassword').value='';
-  // Build subject checkboxes
-  buildSubjectCheckboxes('apvSubjects', []);
+  // Build subject checkboxes for the selected class
+  buildSubjectCheckboxes('apvSubjects', [], cls.value);
+  renderCompulsoryNote('apvCompNote', cls.value);
   closeMo('moAppView');
   openMo('moApprove');
 };
+
+document.getElementById('apvClass')?.addEventListener('change', function(){
+  buildSubjectCheckboxes('apvSubjects', [], this.value);
+  renderCompulsoryNote('apvCompNote', this.value);
+});
 
 window.confirmApprove = async function(){
   const btn = document.getElementById('apvConfirmBtn');
@@ -1168,11 +1422,12 @@ window.openStudentModal = function(docId){
   document.getElementById('stuLastName').value   = s.lastName||'';
   document.getElementById('stuDob').value        = s.dob||'';
   document.getElementById('stuGender').value     = s.gender||'';
-  document.getElementById('stuClass').value      = s.class||'JSS1';
+  document.getElementById('stuClass').value      = CLASS_NAMES.includes(s.class) ? s.class : (CLASS_NAMES[0]||'');
   document.getElementById('stuBloodGroup').value = s.bloodGroup||'';
   document.getElementById('stuGenotype').value   = s.genotype||'';
   document.getElementById('stuPassword').value   = '';
-  buildSubjectCheckboxes('stuSubjects', s.subjects||[]);
+  buildSubjectCheckboxes('stuSubjects', s.subjects||[], document.getElementById('stuClass').value);
+  renderCompulsoryNote('stuCompNote', document.getElementById('stuClass').value);
   buildChecklist('stuHobbies', HOBBIES_LIST, s.hobbies||[]);
   buildChecklist('stuSports', SPORTS_LIST, s.favoriteSports||[]);
   document.getElementById('stuAllergies').value = s.allergies||'';
@@ -1184,6 +1439,11 @@ window.openStudentModal = function(docId){
   document.getElementById('moStuDeactivateBtn').className = isActive?'btn btn-danger btn-sm':'btn btn-ok btn-sm';
   openMo('moStudent');
 };
+
+document.getElementById('stuClass')?.addEventListener('change', function(){
+  buildSubjectCheckboxes('stuSubjects', [], this.value);
+  renderCompulsoryNote('stuCompNote', this.value);
+});
 
 window.saveStudentEdits = async function(){
   const btn = document.getElementById('moStuSaveBtn');
@@ -1254,9 +1514,15 @@ window.openCreateStudentModal = function(){
   document.getElementById('csBloodGroup').value = '';
   document.getElementById('csGenotype').value = '';
   document.getElementById('csSession').value = '2025/2026';
-  buildSubjectCheckboxes('csSubjects', []);
+  buildSubjectCheckboxes('csSubjects', [], '');
+  renderCompulsoryNote('csCompNote', '');
   openMo('moCreateStudent');
 };
+
+document.getElementById('csClass')?.addEventListener('change', function(){
+  buildSubjectCheckboxes('csSubjects', [], this.value);
+  renderCompulsoryNote('csCompNote', this.value);
+});
 
 window.createStudentManually = async function(){
   const firstName = document.getElementById('csFirstName').value.trim();
@@ -1318,14 +1584,31 @@ window.createStudentManually = async function(){
 };
 
 
-function buildSubjectCheckboxes(containerId, checked){
+function buildSubjectCheckboxes(containerId, checked, className){
   const wrap = document.getElementById(containerId);
-  wrap.innerHTML = ELECTIVES.map(s=>`
+  const electives = (CLASS_DATA[className]?.elective) || [];
+  if(!className){
+    wrap.innerHTML = '<span class="empty-inline">Select a class first</span>';
+    return;
+  }
+  if(!electives.length){
+    wrap.innerHTML = '<span class="empty-inline">This class has no elective subjects set up yet — add some under Classes.</span>';
+    return;
+  }
+  wrap.innerHTML = electives.map(s=>`
     <label class="subj-cb">
       <input type="checkbox" value="${escapeAttr(s)}" ${checked.includes(s)?'checked':''}/>
       ${escapeHtml(s)}
     </label>
   `).join('');
+}
+function renderCompulsoryNote(noteId, className){
+  const el = document.getElementById(noteId);
+  if(!el) return;
+  const compulsory = (CLASS_DATA[className]?.compulsory) || [];
+  el.textContent = compulsory.length
+    ? `Compulsory (auto-added): ${compulsory.join(', ')}`
+    : (className ? 'No compulsory subjects set for this class yet.' : '');
 }
 function buildChecklist(containerId, list, checked){
   const wrap = document.getElementById(containerId);
@@ -1358,11 +1641,6 @@ window.togglePw = function(inputId, btn){
 document.querySelectorAll('.mo').forEach(mo=>{
   mo.addEventListener('click', e=>{ if(e.target===mo) mo.classList.remove('open'); });
 });
-function buildFsClassDropdown(){
-  const sel = document.getElementById('fsClass');
-  sel.innerHTML = CLASSES.map(c=>`<option value="${c}">${c}</option>`).join('');
-}
-
 function feeSettingsDocId(){
   const session = document.getElementById('fsSession').value;
   const term = document.getElementById('fsTerm').value;
@@ -1373,6 +1651,54 @@ function feeSettingsDocId(){
 document.getElementById('fsSession').addEventListener('change', loadFeeSettingsForCurrentSelection);
 document.getElementById('fsTerm').addEventListener('change', loadFeeSettingsForCurrentSelection);
 document.getElementById('fsClass').addEventListener('change', loadFeeSettingsForCurrentSelection);
+
+/* ---- Term Payment Access (global toggle controlling which single term students see) ---- */
+function updatePaStatusLabel(){
+  const enabled = document.getElementById('paEnabledToggle').checked;
+  const term = document.getElementById('paTerm').value;
+  const session = document.getElementById('paSession').value;
+  document.getElementById('paStatusLabel').textContent = enabled
+    ? `Open — students can currently see and pay for ${term} Term, ${session}`
+    : 'Payments closed — students cannot see or pay any term';
+}
+document.getElementById('paEnabledToggle').addEventListener('change', updatePaStatusLabel);
+document.getElementById('paSession').addEventListener('change', updatePaStatusLabel);
+document.getElementById('paTerm').addEventListener('change', updatePaStatusLabel);
+
+async function loadPaymentAccessSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','paymentAccess'));
+    if(snap.exists()){
+      const data = snap.data();
+      document.getElementById('paEnabledToggle').checked = !!data.enabled;
+      if(data.session) document.getElementById('paSession').value = data.session;
+      if(data.term) document.getElementById('paTerm').value = data.term;
+    }
+  } catch(e){
+    showToast('Failed to load payment access settings: '+e.message, 'error');
+  } finally {
+    updatePaStatusLabel();
+  }
+}
+
+window.savePaymentAccess = async function(){
+  const btn = document.getElementById('paSaveBtn');
+  const enabled = document.getElementById('paEnabledToggle').checked;
+  const session = document.getElementById('paSession').value;
+  const term = document.getElementById('paTerm').value;
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    await setDoc(doc(db,'settings','paymentAccess'), { enabled, session, term, updatedAt: serverTimestamp() }, { merge: true });
+    showToast('Payment access settings saved', 'success');
+    updatePaStatusLabel();
+  } catch(e){
+    showToast('Save failed: '+e.message, 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Payment Access';
+  }
+};
 
 async function loadFeeSettingsForCurrentSelection(){
   const id = feeSettingsDocId();
@@ -1823,17 +2149,15 @@ window.saveResultSettings = async function(){
 };
 
 /* ============ RESULTS ============ */
-const CORE_SUBJECTS = ['English Language','Mathematics','Basic Science','Social Studies','CRS/IRS','Civic Education','Physical & Health Education','Cultural & Creative Arts','Computer Studies'];
-const ELECTIVE_SUBJECTS = ['Further Maths','French','Agricultural Science','Economics','Literature','Government','Yoruba','Igbo','Fine Art','Music','Physical Education'];
-
 let resStudents = [];
 let resExistingMap = {}; // studentId -> result doc {id, data}
 let reCurrentStudent = null; // student object currently open in the entry modal
 let reCurrentSubjects = [];
 
 function subjectsForStudent(stu){
+  const cls = CLASS_DATA[stu.class] || { compulsory: [], elective: [] };
   const stuElectives = Array.isArray(stu.subjects) ? stu.subjects : [];
-  return [...CORE_SUBJECTS, ...ELECTIVE_SUBJECTS.filter(s=>stuElectives.includes(s))];
+  return [...cls.compulsory, ...cls.elective.filter(s=>stuElectives.includes(s))];
 }
 
 function computeSubjectResult(scoreObj){
