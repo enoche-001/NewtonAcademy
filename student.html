@@ -155,11 +155,11 @@
           <div class="rc-domains-wrap" id="rcDomainsWrap">
             <div id="rcAffectiveBox">
               <div class="rc-section-title">Affective Domain</div>
-              <table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcAffectiveTbody"></tbody></table>
+              <div class="twrap"><table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcAffectiveTbody"></tbody></table></div>
             </div>
             <div id="rcPsychomotorBox">
               <div class="rc-section-title">Psychomotor Domain</div>
-              <table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcPsychomotorTbody"></tbody></table>
+              <div class="twrap"><table class="rc-domain-table"><thead><tr><th>Trait</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr></thead><tbody id="rcPsychomotorTbody"></tbody></table></div>
             </div>
           </div>
           <p class="rc-scale-note">Key: 5 = Excellent &nbsp;·&nbsp; 4 = Very Good &nbsp;·&nbsp; 3 = Good &nbsp;·&nbsp; 2 = Fair &nbsp;·&nbsp; 1 = Poor</p>
@@ -172,9 +172,8 @@
 
           <!-- SIGNATURES -->
           <div class="rc-sign-row" id="rcSignRow">
-            <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Class Teacher's Signature</span></div>
-            <div class="rc-stamp-box">School Stamp</div>
-            <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Principal's Signature</span></div>
+            <div class="rc-sign-block"><div class="rc-sign-line" id="rcTeacherSigLine"></div><span>Class Teacher's Signature</span></div>
+            <div class="rc-sign-block"><div class="rc-sign-line" id="rcPrincipalSigLine"></div><span>Principal's Signature</span></div>
           </div>
 
           <div class="res-footer no-print">
@@ -492,7 +491,8 @@ const DEFAULT_RESULT_SETTINGS = {
   ],
   affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
   psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
-  sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true }
+  sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
+  signatures: { teacher:'', principal:'' }
 };
 let resultSettings = JSON.parse(JSON.stringify(DEFAULT_RESULT_SETTINGS));
 
@@ -506,7 +506,8 @@ async function loadResultSettings(){
         gradingBands: Array.isArray(data.gradingBands) && data.gradingBands.length ? data.gradingBands : DEFAULT_RESULT_SETTINGS.gradingBands,
         affectiveTraits: Array.isArray(data.affectiveTraits) && data.affectiveTraits.length ? data.affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
         psychomotorTraits: Array.isArray(data.psychomotorTraits) && data.psychomotorTraits.length ? data.psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
-        sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) }
+        sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) },
+        signatures: { ...DEFAULT_RESULT_SETTINGS.signatures, ...(data.signatures||{}) }
       };
     }
   } catch(e){
@@ -648,6 +649,10 @@ function renderResultCard(result, session, term){
 
   // Signatures
   document.getElementById('rcSignRow').style.display = s.showSignatures ? 'flex' : 'none';
+  const teacherSig = resultSettings.signatures.teacher;
+  const principalSig = resultSettings.signatures.principal;
+  document.getElementById('rcTeacherSigLine').innerHTML = teacherSig ? `<img src="${escapeAttr(teacherSig)}" alt="Class Teacher's Signature"/>` : '';
+  document.getElementById('rcPrincipalSigLine').innerHTML = principalSig ? `<img src="${escapeAttr(principalSig)}" alt="Principal's Signature"/>` : '';
 }
 
 function domainRow(trait, val){

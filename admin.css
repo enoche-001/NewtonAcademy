@@ -702,9 +702,33 @@ tbody tr:hover{background:#f7f9fd}
 .rs-toggle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 20px}
 .rs-toggle-grid .toggle-wrap span{font-size:.83rem;color:var(--soft)}
 
+/* ─ Signature uploads ─ */
+.rs-signature-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rs-sig-box label{
+  display:block;font-size:.67rem;font-weight:700;color:var(--ink3);
+  margin-bottom:7px;letter-spacing:.07em;text-transform:uppercase;
+}
+.rs-sig-dropzone{
+  border:2px dashed var(--border);border-radius:var(--r-md);
+  background:var(--inp);cursor:pointer;transition:all .15s;
+  min-height:100px;display:flex;align-items:center;justify-content:center;padding:14px;
+}
+.rs-sig-dropzone:hover{border-color:var(--indigo);background:var(--indigo-s)}
+.rs-sig-dropzone img{max-width:100%;max-height:80px;object-fit:contain}
+.rs-sig-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.rs-sig-placeholder svg{width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linecap:round}
+.rs-sig-placeholder span{font-size:.78rem;color:var(--muted);font-weight:600}
+.rs-sig-remove{
+  margin-top:8px;background:none;border:none;color:var(--err);
+  font-size:.76rem;font-weight:600;cursor:pointer;padding:2px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.rs-sig-remove:hover{text-decoration:underline}
+
 @media(max-width:768px){
   .mbox-xl{width:94vw;padding:22px 16px}
   .re-domains{grid-template-columns:1fr}
   .grade-row{grid-template-columns:1fr 1fr;grid-template-areas:"g m" "x r" "d d"}
   .trait-rate-opts{gap:6px}
+  .rs-signature-grid{grid-template-columns:1fr}
 }

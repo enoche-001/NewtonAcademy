@@ -305,6 +305,37 @@
         </div>
 
         <div class="card">
+          <h3>Signatures</h3>
+          <p class="fs-summary show">Upload each signature once — it will automatically appear on every student's result sheet. Leave blank and teachers/principal can sign printed copies by hand instead.</p>
+          <div class="rs-signature-grid">
+            <div class="rs-sig-box">
+              <label>Class Teacher's Signature</label>
+              <div class="rs-sig-dropzone" id="rsTeacherSigDropzone" onclick="document.getElementById('rsTeacherSigInput').click()">
+                <input type="file" id="rsTeacherSigInput" accept="image/*" style="display:none" onchange="handleSignatureSelect(this,'teacher')"/>
+                <img id="rsTeacherSigPreview" style="display:none" alt="Teacher's signature preview"/>
+                <div class="rs-sig-placeholder" id="rsTeacherSigPlaceholder">
+                  <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  <span>Click to upload signature</span>
+                </div>
+              </div>
+              <button type="button" class="rs-sig-remove" id="rsTeacherSigRemoveBtn" style="display:none" onclick="clearSignature('teacher')">Remove signature</button>
+            </div>
+            <div class="rs-sig-box">
+              <label>Principal's Signature</label>
+              <div class="rs-sig-dropzone" id="rsPrincipalSigDropzone" onclick="document.getElementById('rsPrincipalSigInput').click()">
+                <input type="file" id="rsPrincipalSigInput" accept="image/*" style="display:none" onchange="handleSignatureSelect(this,'principal')"/>
+                <img id="rsPrincipalSigPreview" style="display:none" alt="Principal's signature preview"/>
+                <div class="rs-sig-placeholder" id="rsPrincipalSigPlaceholder">
+                  <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  <span>Click to upload signature</span>
+                </div>
+              </div>
+              <button type="button" class="rs-sig-remove" id="rsPrincipalSigRemoveBtn" style="display:none" onclick="clearSignature('principal')">Remove signature</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
           <h3>Report Sections to Display</h3>
           <div class="rs-toggle-grid">
             <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowAffective" checked/><span class="slider"></span></label><span>Affective Domain</span></label>
@@ -313,7 +344,7 @@
             <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowGradingKey" checked/><span class="slider"></span></label><span>Grading Key</span></label>
             <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowTeacherRemark" checked/><span class="slider"></span></label><span>Teacher's Remark</span></label>
             <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowPrincipalRemark" checked/><span class="slider"></span></label><span>Principal's Remark</span></label>
-            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowSignatures" checked/><span class="slider"></span></label><span>Signatures &amp; Stamp</span></label>
+            <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="rsShowSignatures" checked/><span class="slider"></span></label><span>Signatures</span></label>
           </div>
         </div>
 
@@ -1582,6 +1613,7 @@ const DEFAULT_RESULT_SETTINGS = {
   affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
   psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
   sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
+  signatures: { teacher:'', principal:'' },
   remarkBank: { teacher:[], principal:[] }
 };
 
@@ -1599,6 +1631,7 @@ async function loadResultSettings(){
         affectiveTraits: Array.isArray(data.affectiveTraits) && data.affectiveTraits.length ? data.affectiveTraits : DEFAULT_RESULT_SETTINGS.affectiveTraits,
         psychomotorTraits: Array.isArray(data.psychomotorTraits) && data.psychomotorTraits.length ? data.psychomotorTraits : DEFAULT_RESULT_SETTINGS.psychomotorTraits,
         sections: { ...DEFAULT_RESULT_SETTINGS.sections, ...(data.sections||{}) },
+        signatures: { ...DEFAULT_RESULT_SETTINGS.signatures, ...(data.signatures||{}) },
         remarkBank: { teacher: data.remarkBank?.teacher||[], principal: data.remarkBank?.principal||[] }
       };
     }
@@ -1648,6 +1681,11 @@ window.loadResultSettingsForm = async function(){
   document.getElementById('rsShowPrincipalRemark').checked = !!s.showPrincipalRemark;
   document.getElementById('rsShowSignatures').checked = !!s.showSignatures;
 
+  teacherSignatureData = resultSettings.signatures.teacher || '';
+  principalSignatureData = resultSettings.signatures.principal || '';
+  renderSignaturePreview('teacher');
+  renderSignaturePreview('principal');
+
   document.getElementById('rsTeacherRemarks').value = (resultSettings.remarkBank.teacher||[]).join('\n');
   document.getElementById('rsPrincipalRemarks').value = (resultSettings.remarkBank.principal||[]).join('\n');
 };
@@ -1677,6 +1715,72 @@ window.addTraitRow = function(containerId, name=''){
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </div>`;
   wrap.appendChild(row);
+};
+
+/* ============ SIGNATURES — Base64 via Canvas (same pattern as passport photo) ============ */
+let teacherSignatureData = '';
+let principalSignatureData = '';
+
+function renderSignaturePreview(type){
+  const data = type === 'teacher' ? teacherSignatureData : principalSignatureData;
+  const img = document.getElementById(type === 'teacher' ? 'rsTeacherSigPreview' : 'rsPrincipalSigPreview');
+  const placeholder = document.getElementById(type === 'teacher' ? 'rsTeacherSigPlaceholder' : 'rsPrincipalSigPlaceholder');
+  const removeBtn = document.getElementById(type === 'teacher' ? 'rsTeacherSigRemoveBtn' : 'rsPrincipalSigRemoveBtn');
+  if(data){
+    img.src = data;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    removeBtn.style.display = 'inline-flex';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+    placeholder.style.display = 'flex';
+    removeBtn.style.display = 'none';
+  }
+}
+
+window.handleSignatureSelect = function(input, type){
+  const file = input.files[0];
+  if(!file) return;
+
+  if(!file.type.startsWith('image/')){
+    showToast('Please select an image file (JPG, PNG, WEBP).', 'error');
+    input.value = '';
+    return;
+  }
+  if(file.size > 5 * 1024 * 1024){
+    showToast('File too large. Please select an image under 5MB.', 'error');
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      // Compress via canvas — max width 500px, keep as PNG to preserve transparency
+      const canvas = document.createElement('canvas');
+      const MAX = 500;
+      let w = img.width, h = img.height;
+      if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      if(type === 'teacher') teacherSignatureData = dataUrl;
+      else principalSignatureData = dataUrl;
+      renderSignaturePreview(type);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+};
+
+window.clearSignature = function(type){
+  if(type === 'teacher') teacherSignatureData = '';
+  else principalSignatureData = '';
+  renderSignaturePreview(type);
 };
 
 window.saveResultSettings = async function(){
@@ -1711,6 +1815,10 @@ window.saveResultSettings = async function(){
         showTeacherRemark: document.getElementById('rsShowTeacherRemark').checked,
         showPrincipalRemark: document.getElementById('rsShowPrincipalRemark').checked,
         showSignatures: document.getElementById('rsShowSignatures').checked
+      },
+      signatures: {
+        teacher: teacherSignatureData || '',
+        principal: principalSignatureData || ''
       },
       remarkBank: {
         teacher: document.getElementById('rsTeacherRemarks').value.split('\n').map(s=>s.trim()).filter(Boolean),
