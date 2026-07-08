@@ -172,7 +172,7 @@
 
           <!-- SIGNATURES -->
           <div class="rc-sign-row" id="rcSignRow">
-            <div class="rc-sign-block"><div class="rc-sign-line" id="rcTeacherSigLine"></div><span>Class Teacher's Signature</span></div>
+            <div class="rc-sign-block"><div class="rc-sign-line" id="rcIctSigLine"></div><span>ICT Officer's Signature</span></div>
             <div class="rc-sign-block"><div class="rc-sign-line" id="rcPrincipalSigLine"></div><span>Principal's Signature</span></div>
           </div>
 
@@ -290,21 +290,47 @@
 
 <!-- RECEIPT MODAL -->
 <div class="mo" id="moReceipt">
-  <div class="mbox">
-    <h3>Payment Receipt</h3>
-    <p class="mdesc" id="recSchoolName">School Management System</p>
-    <div class="info-grid">
-      <div class="info-item"><label>Receipt No.</label><span id="recId">—</span></div>
-      <div class="info-item"><label>Date</label><span id="recDate">—</span></div>
-      <div class="info-item"><label>Student Name</label><span id="recName">—</span></div>
-      <div class="info-item"><label>Reg Number</label><span id="recReg">—</span></div>
-      <div class="info-item"><label>Class</label><span id="recClass">—</span></div>
-      <div class="info-item"><label>Term</label><span id="recTerm">—</span></div>
-      <div class="info-item"><label>Item</label><span id="recItem">—</span></div>
-      <div class="info-item"><label>Amount Paid</label><span id="recAmount">—</span></div>
+  <div class="mbox mbox-lg" id="receiptCard">
+    <!-- LETTERHEAD -->
+    <div class="rc-school-hdr">
+      <img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest" class="rc-school-logo"/>
+      <div class="rc-school-info">
+        <h1 id="recSchoolName">School Management System</h1>
+        <p>Lokoja, Kogi State, Nigeria</p>
+        <span class="rc-report-label">Official Fee Payment Receipt</span>
+      </div>
     </div>
-    <p id="recStatusNote" style="display:none;margin:10px 0 0;font-size:.82rem;color:var(--warn);font-weight:600"></p>
-    <div class="mactions">
+
+    <!-- RECEIPT / STUDENT META -->
+    <div class="rc-student-grid">
+      <div><span>Receipt No.</span><strong id="recId">—</strong></div>
+      <div><span>Date</span><strong id="recDate">—</strong></div>
+      <div><span>Student Name</span><strong id="recName">—</strong></div>
+      <div><span>Reg Number</span><strong id="recReg">—</strong></div>
+      <div><span>Class</span><strong id="recClass">—</strong></div>
+      <div><span>Term / Session</span><strong id="recTerm">—</strong></div>
+      <div><span>Reference</span><strong id="recRef">—</strong></div>
+      <div><span>Status</span><strong id="recStatusText">—</strong></div>
+    </div>
+
+    <!-- BREAKDOWN -->
+    <div class="rc-section-title">Payment Breakdown</div>
+    <div class="twrap">
+      <table class="rc-subj-table fee-table">
+        <thead><tr><th class="fee-num-col">#</th><th>Fee Item</th><th class="fee-amt-col">Amount</th></tr></thead>
+        <tbody id="recBreakdownBody"></tbody>
+        <tfoot><tr class="fee-total-row"><td colspan="2">Total Paid</td><td class="fee-amt-col" id="recTotal">—</td></tr></tfoot>
+      </table>
+    </div>
+
+    <p id="recStatusNote" style="display:none;margin:14px 0 0;font-size:.82rem;color:var(--warn);font-weight:600"></p>
+
+    <!-- SIGNATURE -->
+    <div class="rc-sign-row" style="margin-top:30px">
+      <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Date &amp; Stamp (For: Bursar)</span></div>
+    </div>
+
+    <div class="mactions no-print">
       <button class="btn-cancel" id="closeReceiptBtn">Close</button>
       <button class="btn btn-p" id="printReceiptBtn">
         <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -492,7 +518,7 @@ const DEFAULT_RESULT_SETTINGS = {
   affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
   psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
   sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
-  signatures: { teacher:'', principal:'' }
+  signatures: { ict:'', principal:'' }
 };
 let resultSettings = JSON.parse(JSON.stringify(DEFAULT_RESULT_SETTINGS));
 
@@ -649,9 +675,9 @@ function renderResultCard(result, session, term){
 
   // Signatures
   document.getElementById('rcSignRow').style.display = s.showSignatures ? 'flex' : 'none';
-  const teacherSig = resultSettings.signatures.teacher;
+  const ictSig = resultSettings.signatures.ict;
   const principalSig = resultSettings.signatures.principal;
-  document.getElementById('rcTeacherSigLine').innerHTML = teacherSig ? `<img src="${escapeAttr(teacherSig)}" alt="Class Teacher's Signature"/>` : '';
+  document.getElementById('rcIctSigLine').innerHTML = ictSig ? `<img src="${escapeAttr(ictSig)}" alt="ICT Officer's Signature"/>` : '';
   document.getElementById('rcPrincipalSigLine').innerHTML = principalSig ? `<img src="${escapeAttr(principalSig)}" alt="Principal's Signature"/>` : '';
 }
 
@@ -721,10 +747,10 @@ window.loadPayments = async function(){
       studentPayments = [];
     }
 
-    // Load fee settings for each term of the current session
+    // Load fee settings for each term of the current session, scoped to this student's class
     const feeBlocks = [];
     for(const term of TERMS){
-      const feeId = `${CURRENT_SESSION.replace('/', '-')}_${term}`;
+      const feeId = `${CURRENT_SESSION.replace('/', '-')}_${term}_${student.class}`;
       let feeData = null;
       try{
         const feeSnap = await getDoc(doc(db,'feeSettings',feeId));
@@ -739,21 +765,20 @@ window.loadPayments = async function(){
   }
 };
 
-function findPayment(term, itemName){
+function findPayment(term){
+  // One bundled payment per student per term now (replaces old per-item lookup).
   // Match any payment that isn't explicitly failed — this includes 'success',
   // 'pending' (verify endpoint didn't confirm yet) and 'needs_review' (amount
   // mismatch). This prevents a student from being shown "UNPAID" and paying
   // twice while a payment is still awaiting confirmation.
   return studentPayments.find(p =>
     p.term === term &&
-    p.itemName === itemName &&
     ['success','pending','needs_review'].includes((p.status||'').toLowerCase())
   );
 }
 
 function renderPayments(feeBlocks){
   const container = document.getElementById('payContainer');
-  const cls = student.class;
 
   container.innerHTML = feeBlocks.map(({term, feeData})=>{
     if(!feeData){
@@ -763,51 +788,61 @@ function renderPayments(feeBlocks){
       </div>`;
     }
 
-    const items = [];
-    const schoolFeeAmount = Number(feeData[cls] || 0);
-    items.push({ itemName: 'School Fee', amount: schoolFeeAmount, type: 'schoolFee' });
-    (feeData.levies||[]).forEach(lv=>{
-      items.push({ itemName: lv.name, amount: Number(lv.amount||0), type: 'levy' });
+    // Build the itemized breakdown for this term from the class's fee items
+    const breakdown = [];
+    (feeData.items||[]).forEach(it=>{
+      const amt = Number(it.amount||0);
+      if(amt > 0) breakdown.push({ name: it.name, amount: amt });
     });
+    const total = breakdown.reduce((sum,i)=> sum + i.amount, 0);
 
-    const rows = items.map(item=>{
-      const payment = findPayment(term, item.itemName);
-      const isPaid = !!payment;
-      const pStatus = (payment?.status||'').toLowerCase();
-      const amountStr = '₦' + (item.amount||0).toLocaleString();
-      let actionHtml;
-      if(pStatus === 'success'){
-        actionHtml = `<span class="badge b-green">PAID</span>
-           <button class="btn btn-edit btn-sm pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
-      } else if(isPaid){
-        // pending or needs_review — awaiting office confirmation, but a
-        // receipt/proof-of-payment is still available to the student.
-        actionHtml = `<span class="badge b-gold">PROCESSING</span>
-           <button class="btn btn-edit btn-sm pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
-      } else {
-        actionHtml = `<span class="badge b-red">UNPAID</span>
-           <button class="btn btn-p btn-sm pay-now-btn"
-             data-term="${escapeAttr(term)}"
-             data-item="${escapeAttr(item.itemName)}"
-             data-amount="${item.amount}"
-             data-type="${escapeAttr(item.type)}">Pay Now</button>`;
-      }
-      return `<div class="fee-item">
-        <div class="fee-item-l"><strong>${escapeHtml(item.itemName)}</strong><span>${amountStr}</span></div>
-        <div class="fee-item-r">${actionHtml}</div>
+    if(!breakdown.length){
+      return `<div class="term-block">
+        <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
+        <div class="twrap"><div class="empty"><p>No fees have been set for this term yet.</p></div></div>
       </div>`;
-    }).join('');
+    }
+
+    const rows = breakdown.map((item,i)=>`
+      <tr><td class="fee-num-col">${i+1}</td><td>${escapeHtml(item.name)}</td><td class="fee-amt-col">₦${item.amount.toLocaleString()}</td></tr>
+    `).join('');
+
+    const payment = findPayment(term);
+    const pStatus = (payment?.status||'').toLowerCase();
+    let badgeHtml, actionHtml;
+    if(pStatus === 'success'){
+      badgeHtml = `<span class="badge b-green">PAID</span>`;
+      actionHtml = `<button class="btn btn-edit pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+    } else if(payment){
+      // pending or needs_review — awaiting office confirmation, but a
+      // receipt/proof-of-payment is still available to the student.
+      badgeHtml = `<span class="badge b-gold">PROCESSING</span>`;
+      actionHtml = `<button class="btn btn-edit pay-receipt-btn" data-id="${payment.id}">View Receipt</button>`;
+    } else {
+      badgeHtml = `<span class="badge b-red">UNPAID</span>`;
+      actionHtml = `<button class="btn btn-p pay-now-btn"
+           data-term="${escapeAttr(term)}"
+           data-breakdown='${escapeAttr(JSON.stringify(breakdown))}'
+           data-amount="${total}">Pay ₦${total.toLocaleString()}</button>`;
+    }
 
     return `<div class="term-block">
-      <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3></div>
-      <div class="twrap">${rows}</div>
+      <div class="term-block-hdr"><h3>${term} Term — ${CURRENT_SESSION}</h3>${badgeHtml}</div>
+      <div class="twrap">
+        <table class="rc-subj-table fee-table">
+          <thead><tr><th class="fee-num-col">#</th><th>Fee Item</th><th class="fee-amt-col">Amount</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr class="fee-total-row"><td colspan="2">Total</td><td class="fee-amt-col">₦${total.toLocaleString()}</td></tr></tfoot>
+        </table>
+      </div>
+      <div class="term-pay-row">${actionHtml}</div>
     </div>`;
   }).join('');
 }
 
 let _paymentInProgress = false; // guard against double-tap
 
-window.payNow = function(term, itemName, amount, type){
+window.payNow = function(term, breakdown, amount){
   if(PAYSTACK_PUBLIC_KEY.includes('REPLACE')){
     showToast('Payments are not configured yet — set PAYSTACK_PUBLIC_KEY first.', 'error');
     return;
@@ -816,7 +851,7 @@ window.payNow = function(term, itemName, amount, type){
     // Paystack CDN may still be loading — retry once after a short delay
     showToast('Payment service loading, please wait…', 'error');
     setTimeout(function(){
-      if(window.PaystackPop){ payNow(term, itemName, amount, type); }
+      if(window.PaystackPop){ payNow(term, breakdown, amount); }
       else { showToast('Payment service failed to load. Check your internet connection and refresh.', 'error'); }
     }, 2000);
     return;
@@ -826,7 +861,7 @@ window.payNow = function(term, itemName, amount, type){
     return;
   }
   if(!amount || amount <= 0){
-    showToast('This fee has no amount set. Contact the school office.', 'error');
+    showToast('This term has no fees set. Contact the school office.', 'error');
     return;
   }
 
@@ -846,12 +881,11 @@ window.payNow = function(term, itemName, amount, type){
       regNumber: student.regNumber,
       term,
       session: CURRENT_SESSION,
-      itemName,
-      type
+      itemCount: breakdown.length
     },
     callback: function(response){
       _paymentInProgress = false;
-      verifyAndRecordPayment(response.reference, term, itemName, amount, type);
+      verifyAndRecordPayment(response.reference, term, breakdown, amount);
     },
     onClose: function(){
       _paymentInProgress = false;
@@ -862,7 +896,7 @@ window.payNow = function(term, itemName, amount, type){
   handler.openIframe();
 };
 
-async function verifyAndRecordPayment(reference, term, itemName, amount, type){
+async function verifyAndRecordPayment(reference, term, breakdown, amount){
   // Guard: reference already recorded? (network retry safety)
   if(studentPayments.some(p => p.reference === reference)){
     showToast('This payment was already recorded. Refreshing…', 'success');
@@ -908,8 +942,7 @@ async function verifyAndRecordPayment(reference, term, itemName, amount, type){
       class: student.class,
       term,
       session: CURRENT_SESSION,
-      type,
-      itemName,
+      breakdown,
       amount: confirmedAmount,
       reference,
       status: verifyStatus,
@@ -931,7 +964,7 @@ async function verifyAndRecordPayment(reference, term, itemName, amount, type){
     studentPayments.push({
       id: newDocRef.id,
       studentId: student.id, regNumber: student.regNumber, studentName: student.name,
-      class: student.class, term, session: CURRENT_SESSION, type, itemName,
+      class: student.class, term, session: CURRENT_SESSION, breakdown,
       amount: confirmedAmount, reference, status: verifyStatus, date: new Date()
     });
 
@@ -954,11 +987,22 @@ window.openReceipt = function(paymentId){
   document.getElementById('recReg').textContent = payment.regNumber || student.regNumber;
   document.getElementById('recClass').textContent = payment.class || student.class;
   document.getElementById('recTerm').textContent = `${payment.term||''} Term, ${payment.session||CURRENT_SESSION}`;
-  document.getElementById('recItem').textContent = payment.itemName || '—';
-  document.getElementById('recAmount').textContent = '₦' + (Number(payment.amount)||0).toLocaleString();
+  document.getElementById('recRef').textContent = payment.reference || '—';
 
-  const statusNote = document.getElementById('recStatusNote');
+  // Breakdown — falls back to a single legacy row for payments recorded
+  // before this feature (which stored one itemName/amount per document).
+  const breakdown = (payment.breakdown && payment.breakdown.length)
+    ? payment.breakdown
+    : [{ name: payment.itemName || 'Payment', amount: Number(payment.amount)||0 }];
+  document.getElementById('recBreakdownBody').innerHTML = breakdown.map((item,i)=>`
+    <tr><td class="fee-num-col">${i+1}</td><td>${escapeHtml(item.name)}</td><td class="fee-amt-col">₦${Number(item.amount||0).toLocaleString()}</td></tr>
+  `).join('');
+  document.getElementById('recTotal').textContent = '₦' + (Number(payment.amount)||0).toLocaleString();
+
   const pStatus = (payment.status||'').toLowerCase();
+  const statusNote = document.getElementById('recStatusNote');
+  const statusLabel = pStatus === 'success' ? 'Paid' : pStatus === 'needs_review' ? 'Under Review' : 'Pending Confirmation';
+  document.getElementById('recStatusText').textContent = statusLabel;
   if(pStatus === 'success'){
     statusNote.style.display = 'none';
   } else if(pStatus === 'needs_review'){
@@ -976,11 +1020,10 @@ document.getElementById('payContainer').addEventListener('click', function(e){
   const payBtn = e.target.closest('.pay-now-btn');
   const rcptBtn = e.target.closest('.pay-receipt-btn');
   if(payBtn){
-    const term   = payBtn.dataset.term;
-    const item   = payBtn.dataset.item;
+    const term = payBtn.dataset.term;
+    const breakdown = JSON.parse(payBtn.dataset.breakdown);
     const amount = Number(payBtn.dataset.amount);
-    const type   = payBtn.dataset.type;
-    payNow(term, item, amount, type);
+    payNow(term, breakdown, amount);
   } else if(rcptBtn){
     openReceipt(rcptBtn.dataset.id);
   }

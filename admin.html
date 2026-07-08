@@ -309,16 +309,16 @@
           <p class="fs-summary show">Upload each signature once — it will automatically appear on every student's result sheet. Leave blank and teachers/principal can sign printed copies by hand instead.</p>
           <div class="rs-signature-grid">
             <div class="rs-sig-box">
-              <label>Class Teacher's Signature</label>
-              <div class="rs-sig-dropzone" id="rsTeacherSigDropzone" onclick="document.getElementById('rsTeacherSigInput').click()">
-                <input type="file" id="rsTeacherSigInput" accept="image/*" style="display:none" onchange="handleSignatureSelect(this,'teacher')"/>
-                <img id="rsTeacherSigPreview" style="display:none" alt="Teacher's signature preview"/>
-                <div class="rs-sig-placeholder" id="rsTeacherSigPlaceholder">
+              <label>ICT Officer's Signature</label>
+              <div class="rs-sig-dropzone" id="rsIctSigDropzone" onclick="document.getElementById('rsIctSigInput').click()">
+                <input type="file" id="rsIctSigInput" accept="image/*" style="display:none" onchange="handleSignatureSelect(this,'ict')"/>
+                <img id="rsIctSigPreview" style="display:none" alt="ICT Officer's signature preview"/>
+                <div class="rs-sig-placeholder" id="rsIctSigPlaceholder">
                   <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                   <span>Click to upload signature</span>
                 </div>
               </div>
-              <button type="button" class="rs-sig-remove" id="rsTeacherSigRemoveBtn" style="display:none" onclick="clearSignature('teacher')">Remove signature</button>
+              <button type="button" class="rs-sig-remove" id="rsIctSigRemoveBtn" style="display:none" onclick="clearSignature('ict')">Remove signature</button>
             </div>
             <div class="rs-sig-box">
               <label>Principal's Signature</label>
@@ -366,11 +366,11 @@
       <!-- FEE SETTINGS -->
       <div class="section" id="sec-feeSettings">
         <div class="sec-hdr">
-          <div class="sec-hdr-l"><h2>Fee Settings</h2><p>Set termly fees, levies, and due dates per class</p></div>
+          <div class="sec-hdr-l"><h2>Fee Settings</h2><p>Set termly fee items and due dates, class by class</p></div>
         </div>
 
         <div class="card">
-          <h3>Session &amp; Term</h3>
+          <h3>Session, Term &amp; Class</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Academic Session</label>
@@ -389,20 +389,19 @@
               </select>
             </div>
           </div>
+          <div class="form-group" style="margin-top:14px">
+            <label>Class</label>
+            <select id="fsClass"><!-- populated by JS --></select>
+          </div>
           <div class="fs-summary" id="fsExistingNote"></div>
         </div>
 
         <div class="card">
-          <h3>Fee Per Class</h3>
-          <div class="class-fee-grid" id="classFeeGrid">
-            <!-- populated by JS -->
-          </div>
-
-          <h3>Levy Items</h3>
+          <h3>Fee Items</h3>
           <div id="levyRows"></div>
           <button class="btn-add-row" onclick="addLevyRow()" type="button">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Levy
+            Add Fee Item
           </button>
 
           <h3 style="margin-top:18px">Due Date</h3>
@@ -454,11 +453,6 @@
             <option>JSS1</option><option>JSS2</option><option>JSS3</option>
             <option>SS1</option><option>SS2</option><option>SS3</option>
           </select>
-          <select id="payFilterType" onchange="renderPayments()">
-            <option value="">All Types</option>
-            <option value="School Fee">School Fee</option>
-            <option value="Levy">Levy</option>
-          </select>
         </div>
 
         <div class="twrap">
@@ -466,7 +460,7 @@
             <thead>
               <tr>
                 <th>Date</th><th>Student Name</th><th>Reg Number</th><th>Class</th>
-                <th>Payment Type</th><th>Term</th><th>Session</th><th>Amount</th>
+                <th>Fee Items</th><th>Term</th><th>Session</th><th>Amount</th>
                 <th>Status</th><th>Reference</th><th>Action</th>
               </tr>
             </thead>
@@ -833,7 +827,7 @@ window.switchTab = (sec)=>{
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
   const titles={overview:'Overview',applications:'Applications',students:'Students',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
-  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fees, levies, and due dates per class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
+  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
   if(sec==='resultSettings') loadResultSettingsForm();
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
@@ -843,7 +837,7 @@ window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove(
 
 /* ============ LOAD ALL ============ */
 async function loadAll(){
-  buildClassFeeGrid();
+  buildFsClassDropdown();
   setDefaultAnnDate();
   await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
 }
@@ -1364,48 +1358,41 @@ window.togglePw = function(inputId, btn){
 document.querySelectorAll('.mo').forEach(mo=>{
   mo.addEventListener('click', e=>{ if(e.target===mo) mo.classList.remove('open'); });
 });
-function buildClassFeeGrid(){
-  const grid = document.getElementById('classFeeGrid');
-  grid.innerHTML = CLASSES.map(c=>`
-    <div class="cf-item">
-      <label>${c}</label>
-      <div class="cf-wrap">
-        <span>₦</span>
-        <input type="number" min="0" step="100" id="fee-${c}" placeholder="0" data-cf="${c}"/>
-      </div>
-    </div>
-  `).join('');
+function buildFsClassDropdown(){
+  const sel = document.getElementById('fsClass');
+  sel.innerHTML = CLASSES.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
 
 function feeSettingsDocId(){
   const session = document.getElementById('fsSession').value;
   const term = document.getElementById('fsTerm').value;
-  return `${session.replace('/', '-')}_${term}`;
+  const cls = document.getElementById('fsClass').value;
+  return `${session.replace('/', '-')}_${term}_${cls}`;
 }
 
 document.getElementById('fsSession').addEventListener('change', loadFeeSettingsForCurrentSelection);
 document.getElementById('fsTerm').addEventListener('change', loadFeeSettingsForCurrentSelection);
+document.getElementById('fsClass').addEventListener('change', loadFeeSettingsForCurrentSelection);
 
 async function loadFeeSettingsForCurrentSelection(){
   const id = feeSettingsDocId();
+  const cls = document.getElementById('fsClass').value;
   const note = document.getElementById('fsExistingNote');
   note.classList.remove('show'); note.textContent='';
   try{
     const snap = await getDoc(doc(db, 'feeSettings', id));
     // Reset fields first
-    CLASSES.forEach(c=>{ document.getElementById(`fee-${c}`).value=''; });
     document.getElementById('fsDueDate').value='';
     document.getElementById('levyRows').innerHTML='';
 
     if(snap.exists()){
       const data = snap.data();
-      CLASSES.forEach(c=>{ if(data[c]!==undefined) document.getElementById(`fee-${c}`).value = data[c]; });
       if(data.dueDate) document.getElementById('fsDueDate').value = data.dueDate;
-      (data.levies||[]).forEach(lv=> addLevyRow(lv.name, lv.amount));
-      note.textContent = `Existing fee settings found for ${id.replace('_',' — ')} Term. Editing will overwrite on save.`;
+      (data.items||[]).forEach(it=> addLevyRow(it.name, it.amount));
+      note.textContent = `Existing fee settings found for ${cls} — ${id.replace(/_/g,' ').replace(cls,'').trim()} Term. Editing will overwrite on save.`;
       note.classList.add('show');
     } else {
-      note.textContent = `No fee settings yet for ${id.replace('_',' — ')} Term. Fill the form below to create one.`;
+      note.textContent = `No fee settings yet for ${cls} this term. Add fee items below to create one.`;
       note.classList.add('show');
     }
   } catch(e){
@@ -1418,7 +1405,7 @@ window.addLevyRow = function(name='', amount=''){
   const row = document.createElement('div');
   row.className = 'levy-row';
   row.innerHTML = `
-    <input type="text" placeholder="Levy name (e.g. PTA Levy)" class="levy-name" value="${escapeAttr(name)}"/>
+    <input type="text" placeholder="Fee item name (e.g. School Fee, PTA Levy)" class="levy-name" value="${escapeAttr(name)}"/>
     <input type="number" min="0" step="100" placeholder="Amount (₦)" class="levy-amount" value="${amount===''?'':amount}"/>
     <div class="btn-icon" onclick="this.parentElement.remove()" title="Remove">
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1432,28 +1419,25 @@ window.saveFeeSettings = async function(){
   const id = feeSettingsDocId();
   const selSession = document.getElementById('fsSession').value;
   const selTerm    = document.getElementById('fsTerm').value;
+  const selClass   = document.getElementById('fsClass').value;
   const payload = {
     dueDate: document.getElementById('fsDueDate').value || null,
-    levies: [],
+    items: [],
     session: selSession,
-    term:    selTerm
+    term:    selTerm,
+    class:   selClass
   };
 
-  let allZero = true;
-  CLASSES.forEach(c=>{
-    const v = document.getElementById(`fee-${c}`).value;
-    const num = v === '' ? 0 : Number(v);
-    if(num < 0){ showToast('Fee amounts cannot be negative.', 'error'); return; }
-    if(num > 0) allZero = false;
-    payload[c] = num;
-  });
-  if(allZero && !confirm('All class fees are set to ₦0. Save anyway?')) return;
-
+  let hasNegative = false;
   document.querySelectorAll('#levyRows .levy-row').forEach(row=>{
     const name = row.querySelector('.levy-name').value.trim();
-    const amount = row.querySelector('.levy-amount').value;
-    if(name) payload.levies.push({ name, amount: amount===''?0:Number(amount) });
+    const amountRaw = row.querySelector('.levy-amount').value;
+    const amount = amountRaw===''?0:Number(amountRaw);
+    if(amount < 0) hasNegative = true;
+    if(name) payload.items.push({ name, amount });
   });
+  if(hasNegative){ showToast('Fee amounts cannot be negative.', 'error'); return; }
+  if(!payload.items.length && !confirm('No fee items have been added for '+selClass+'. Save anyway?')) return;
 
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
   try{
@@ -1613,7 +1597,7 @@ const DEFAULT_RESULT_SETTINGS = {
   affectiveTraits: ['Punctuality','Neatness','Honesty','Leadership','Cooperation','Attentiveness','Politeness'],
   psychomotorTraits: ['Handwriting','Verbal Fluency','Sport/Games','Handling of Tools','Musical Skill','Drawing & Painting'],
   sections: { showAffective:true, showPsychomotor:true, showSubjectPosition:true, showGradingKey:true, showTeacherRemark:true, showPrincipalRemark:true, showSignatures:true },
-  signatures: { teacher:'', principal:'' },
+  signatures: { ict:'', principal:'' },
   remarkBank: { teacher:[], principal:[] }
 };
 
@@ -1681,9 +1665,9 @@ window.loadResultSettingsForm = async function(){
   document.getElementById('rsShowPrincipalRemark').checked = !!s.showPrincipalRemark;
   document.getElementById('rsShowSignatures').checked = !!s.showSignatures;
 
-  teacherSignatureData = resultSettings.signatures.teacher || '';
+  ictSignatureData = resultSettings.signatures.ict || '';
   principalSignatureData = resultSettings.signatures.principal || '';
-  renderSignaturePreview('teacher');
+  renderSignaturePreview('ict');
   renderSignaturePreview('principal');
 
   document.getElementById('rsTeacherRemarks').value = (resultSettings.remarkBank.teacher||[]).join('\n');
@@ -1718,14 +1702,14 @@ window.addTraitRow = function(containerId, name=''){
 };
 
 /* ============ SIGNATURES — Base64 via Canvas (same pattern as passport photo) ============ */
-let teacherSignatureData = '';
+let ictSignatureData = '';
 let principalSignatureData = '';
 
 function renderSignaturePreview(type){
-  const data = type === 'teacher' ? teacherSignatureData : principalSignatureData;
-  const img = document.getElementById(type === 'teacher' ? 'rsTeacherSigPreview' : 'rsPrincipalSigPreview');
-  const placeholder = document.getElementById(type === 'teacher' ? 'rsTeacherSigPlaceholder' : 'rsPrincipalSigPlaceholder');
-  const removeBtn = document.getElementById(type === 'teacher' ? 'rsTeacherSigRemoveBtn' : 'rsPrincipalSigRemoveBtn');
+  const data = type === 'ict' ? ictSignatureData : principalSignatureData;
+  const img = document.getElementById(type === 'ict' ? 'rsIctSigPreview' : 'rsPrincipalSigPreview');
+  const placeholder = document.getElementById(type === 'ict' ? 'rsIctSigPlaceholder' : 'rsPrincipalSigPlaceholder');
+  const removeBtn = document.getElementById(type === 'ict' ? 'rsIctSigRemoveBtn' : 'rsPrincipalSigRemoveBtn');
   if(data){
     img.src = data;
     img.style.display = 'block';
@@ -1767,7 +1751,7 @@ window.handleSignatureSelect = function(input, type){
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const dataUrl = canvas.toDataURL('image/png');
 
-      if(type === 'teacher') teacherSignatureData = dataUrl;
+      if(type === 'ict') ictSignatureData = dataUrl;
       else principalSignatureData = dataUrl;
       renderSignaturePreview(type);
     };
@@ -1778,7 +1762,7 @@ window.handleSignatureSelect = function(input, type){
 };
 
 window.clearSignature = function(type){
-  if(type === 'teacher') teacherSignatureData = '';
+  if(type === 'ict') ictSignatureData = '';
   else principalSignatureData = '';
   renderSignaturePreview(type);
 };
@@ -1817,7 +1801,7 @@ window.saveResultSettings = async function(){
         showSignatures: document.getElementById('rsShowSignatures').checked
       },
       signatures: {
-        teacher: teacherSignatureData || '',
+        ict: ictSignatureData || '',
         principal: principalSignatureData || ''
       },
       remarkBank: {
@@ -2217,16 +2201,10 @@ window.renderPayments = function(){
   const search = (document.getElementById('paySearch')?.value||'').toLowerCase();
   const fTerm = document.getElementById('payFilterTerm')?.value||'';
   const fClass = document.getElementById('payFilterClass')?.value||'';
-  const fType = document.getElementById('payFilterType')?.value||'';
 
   let filtered = allPayments.filter(p => {
     if (fTerm && p.term !== fTerm) return false;
     if (fClass && p.class !== fClass) return false;
-    if (fType) {
-      const pType = (p.paymentType||p.type||p.itemName||'').toLowerCase();
-      if (fType === 'School Fee' && pType !== 'schoolfee' && pType !== 'school fee') return false;
-      if (fType === 'Levy' && (pType === 'schoolfee' || pType === 'school fee')) return false;
-    }
     if (search) {
       const name = ((p.studentName||p.name||'')).toLowerCase();
       const reg = (p.regNumber||'').toLowerCase();
@@ -2254,8 +2232,13 @@ window.renderPayments = function(){
     const badgeTxt = status === 'success' ? 'Success' : status === 'needs_review' ? 'Needs Review' : 'Pending';
     const date = p.date ? (p.date.toDate ? formatDate(p.date.toDate().toISOString().split('T')[0]) : formatDate(p.date)) : '—';
     const amount = Number(p.amount||0).toLocaleString('en-NG', {style:'currency',currency:'NGN',minimumFractionDigits:0});
-    const rawType = p.paymentType || p.type || p.paymenttype || '';
-    const type = rawType === 'schoolFee' ? 'School Fee' : rawType === 'levy' ? 'Levy' : (rawType || '—');
+
+    // Bundled payments carry a `breakdown` array; older per-item records
+    // (from before payments were consolidated) only have a single itemName.
+    const breakdown = (p.breakdown && p.breakdown.length) ? p.breakdown : (p.itemName ? [{name:p.itemName, amount:p.amount}] : []);
+    const itemsLabel = breakdown.length ? `${breakdown.length} item${breakdown.length===1?'':'s'}` : '—';
+    const itemsTooltip = breakdown.map(i=>`${i.name}: ₦${Number(i.amount||0).toLocaleString()}`).join(', ');
+
     const actionHtml = status === 'success'
       ? '—'
       : `<button class="btn btn-p btn-sm confirm-pay-btn" data-id="${p.id}">Mark Paid</button>`;
@@ -2264,7 +2247,7 @@ window.renderPayments = function(){
       <td>${escapeHtml(p.studentName||p.name||'—')}</td>
       <td style="font-size:.78rem">${escapeHtml(p.regNumber||'—')}</td>
       <td>${escapeHtml(p.class||'—')}</td>
-      <td>${escapeHtml(type)}</td>
+      <td title="${escapeAttr(itemsTooltip)}">${itemsLabel}</td>
       <td>${escapeHtml(p.term||'—')}</td>
       <td>${escapeHtml(p.session||'—')}</td>
       <td style="white-space:nowrap">${amount}</td>
@@ -2300,17 +2283,17 @@ document.getElementById('payTbody').addEventListener('click', async function(e){
 });
 
 window.exportPaymentsCSV = function(){
-  const rows = [['Date','Student Name','Reg Number','Class','Item','Term','Session','Amount','Status','Reference']];
+  const rows = [['Date','Student Name','Reg Number','Class','Fee Items','Term','Session','Amount','Status','Reference']];
   allPayments.forEach(p=>{
     const date = p.date ? (p.date.toDate ? p.date.toDate().toISOString().split('T')[0] : p.date) : '';
-    const rawType = p.paymentType || p.type || '';
-    const type = rawType === 'schoolFee' ? 'School Fee' : rawType === 'levy' ? 'Levy' : (rawType || p.itemName || '');
+    const breakdown = (p.breakdown && p.breakdown.length) ? p.breakdown : (p.itemName ? [{name:p.itemName, amount:p.amount}] : []);
+    const itemsSummary = breakdown.map(i=>`${i.name} (₦${Number(i.amount||0).toLocaleString()})`).join('; ');
     rows.push([
       date,
       p.studentName||p.name||'',
       p.regNumber||'',
       p.class||'',
-      p.itemName||type||'',
+      itemsSummary,
       p.term||'',
       p.session||'',
       Number(p.amount||0).toFixed(2),
