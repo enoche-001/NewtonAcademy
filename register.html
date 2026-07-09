@@ -3,26 +3,79 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Admission Application — School Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<title>Admission Application — Newtown Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="register.css"/>
 </head>
 <body>
 
+<!-- ═══════ NAV ═══════ -->
+<nav id="mainNav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <div class="bmark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
+      <div class="bname">
+        <strong>Newtown Academy</strong>
+        <small>Excellence &amp; Character</small>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#academics">Academics</a></li>
+      <li><a href="index.html#gallery">Gallery</a></li>
+      <li><a href="index.html#admissions">Admissions</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="register.html" class="nbtn nbtn-solid">Apply Now</a>
+      <a href="student.html" class="nbtn nbtn-ghost">Student Login</a>
+    </div>
+    <div class="ham" id="hamBtn" onclick="toggleMobNav()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mob-overlay" id="mobOverlay"></div>
+<div class="mob-nav" id="mobNav">
+  <a href="index.html#about" onclick="closeMobNav()">About</a>
+  <a href="index.html#academics" onclick="closeMobNav()">Academics</a>
+  <a href="index.html#gallery" onclick="closeMobNav()">Gallery</a>
+  <a href="index.html#admissions" onclick="closeMobNav()">Admissions</a>
+  <a href="index.html#faq" onclick="closeMobNav()">FAQ</a>
+  <a href="index.html#contact" onclick="closeMobNav()">Contact</a>
+  <div class="mob-divider"></div>
+  <div class="mob-cta">
+    <a href="register.html" class="solid">Apply Now</a>
+    <a href="student.html" class="ghost">Student Login</a>
+  </div>
+</div>
+
 <!-- PAGE HEADER -->
-<div class="page-header">
-  <div class="header-inner">
-    <div class="header-mark">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+<div class="page-intro">
+  <h1>Admission Application</h1>
+  <p>Complete the form below to apply for admission at Newtown Academy.</p>
+</div>
+
+<!-- DRAFT RESUME MODAL -->
+<div class="draft-modal-overlay" id="draftModalOverlay">
+  <div class="draft-modal">
+    <div class="draft-modal-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18.7 8l-5.3 5.3-3-3L3 17"/></svg>
     </div>
-    <div class="header-text">
-      <h1>Admission Application</h1>
-      <p>School Management System</p>
+    <h3>Continue your application?</h3>
+    <p id="draftModalSub">We found an unfinished application saved on this device.</p>
+    <div class="draft-modal-summary" id="draftModalSummary"></div>
+    <div class="draft-modal-actions">
+      <button class="btn btn-primary" id="draftContinueBtn" style="width:100%">Continue where I left off</button>
+      <button class="btn btn-ghost" id="draftNewBtn" style="width:100%">Start a new application</button>
     </div>
+    <div class="draft-modal-note">Starting new will permanently discard the saved draft.</div>
   </div>
 </div>
 
 <div class="page-body">
+
 
   <!-- STEP INDICATOR -->
   <div class="step-bar" id="stepBar">
@@ -73,6 +126,10 @@
         <div class="fg">
           <label>First Name <span class="req">*</span></label>
           <input type="text" id="firstName" placeholder="e.g. Amara" autocomplete="given-name"/>
+        </div>
+        <div class="fg">
+          <label>Middle Name <span style="color:var(--muted);font-weight:400;font-size:.78rem">(optional)</span></label>
+          <input type="text" id="middleName" placeholder="e.g. Chiamaka" autocomplete="additional-name"/>
         </div>
         <div class="fg">
           <label>Last Name <span class="req">*</span></label>
@@ -341,10 +398,41 @@
         <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
           <li style="font-size:.78rem;color:var(--muted)">Birth certificate or sworn affidavit</li>
           <li style="font-size:.78rem;color:var(--muted)">Previous school report card (last term)</li>
-          <li style="font-size:.78rem;color:var(--muted)">JSCE / BECE result <span style="color:var(--muted);font-style:italic">(SS1 applicants only)</span></li>
         </ul>
       </div>
-    </div>
+    </div><!-- /form-card -->
+
+    <!-- Last School Result — Junior WAEC / BECE -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div><h2>Last School Result</h2><p id="lastResultNote">Junior WAEC / BECE result — required for new SS1 applicants</p></div>
+      </div>
+
+      <div class="fg" style="margin-bottom:6px">
+        <label>Result Upload <span class="req" id="lastResultReqMark" style="display:none">*</span> <span style="color:var(--muted);font-weight:400;font-size:.78rem" id="lastResultOptMark">(optional)</span></label>
+        <div id="lastResultDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:24px;text-align:center;cursor:pointer;background:var(--inp);transition:all .2s" onclick="document.getElementById('lastResultFileInput').click()">
+          <input type="file" id="lastResultFileInput" accept="image/*,application/pdf" style="display:none" onchange="handleLastResultSelect(this)"/>
+          <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;margin-bottom:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div style="font-size:.82rem;font-weight:600;color:var(--text)">Click to select result slip</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:4px">JPG, PNG, WEBP or PDF · This is the document the school will review</div>
+        </div>
+
+        <!-- Preview -->
+        <div id="lastResultPreview" style="display:none;margin-top:12px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
+          <div id="lastResultThumbWrap" style="width:52px;height:52px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg)">
+            <img id="lastResultThumb" style="width:100%;height:100%;object-fit:cover;display:none" src="" alt="preview"/>
+            <svg id="lastResultPdfIcon" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;display:none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div id="lastResultFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div id="lastResultFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <button onclick="clearLastResult()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+        </div>
+        <div id="lastResultError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+      </div>
+    </div><!-- /form-card -->
 
     <div class="btn-row" style="justify-content:space-between">
       <button class="btn btn-ghost" onclick="showPanel(3)">
@@ -411,33 +499,78 @@
     </div>
   </div><!-- /screen2 -->
 
-  <!-- ══════════ SCREEN 3: SUCCESS ══════════ -->
+  <!-- ══════════ SCREEN 3: SUCCESS / PRINTABLE RECEIPT ══════════ -->
   <div class="screen" id="screen3">
-    <div class="success-card">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2>Application Submitted!</h2>
-      <p class="s-sub">Your admission application has been received and is now under review.</p>
+    <div class="receipt-card" id="receiptCard">
 
-      <div class="ref-box">
-        <div class="ref-label">Application Reference Number</div>
-        <div class="ref-number" id="refNumber">—</div>
+      <div class="rc-confirm no-print">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Application Submitted!</h2>
+        <p class="s-sub">Your admission application has been received and is now under review. A copy of this receipt has been generated below — you can print it or keep it for your records.</p>
       </div>
 
-      <div class="success-details">
-        <div class="sd-row"><span>Applicant</span><span id="sucName">—</span></div>
-        <div class="sd-row"><span>Class Applied</span><span id="sucClass">—</span></div>
-        <div class="sd-row"><span>Parent Phone</span><span id="sucPhone">—</span></div>
-        <div class="sd-row"><span>Payment Status</span><span style="color:var(--ok);font-weight:700">✓ Paid</span></div>
+      <!-- LETTERHEAD -->
+      <div class="rc-hdr">
+        <img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest" class="rc-logo"/>
+        <div class="rc-hdr-text">
+          <h1>Newtown Academy</h1>
+          <p>Lokoja, Kogi State, Nigeria</p>
+          <span class="rc-label">Official Admission Application &amp; Payment Receipt</span>
+        </div>
+      </div>
+
+      <!-- APPLICATION META -->
+      <div class="rc-meta-grid">
+        <div><span>Reference No.</span><strong id="rcvRef">—</strong></div>
+        <div><span>Date Submitted</span><strong id="rcvDate">—</strong></div>
+        <div><span>Applicant Name</span><strong id="rcvName">—</strong></div>
+        <div><span>Class Applied For</span><strong id="rcvClass">—</strong></div>
+        <div><span>Date of Birth</span><strong id="rcvDob">—</strong></div>
+        <div><span>Gender</span><strong id="rcvGender">—</strong></div>
+        <div><span>Parent / Guardian</span><strong id="rcvGuardian">—</strong></div>
+        <div><span>Phone Number</span><strong id="rcvPhone">—</strong></div>
+        <div><span>Email Address</span><strong id="rcvEmail">—</strong></div>
+        <div><span>Application Status</span><strong id="rcvStatus">Pending Review</strong></div>
+      </div>
+
+      <!-- PAYMENT BREAKDOWN -->
+      <div class="rc-section-title">Payment Breakdown</div>
+      <div class="rc-twrap">
+        <table class="rc-fee-table">
+          <thead><tr><th>Fee Item</th><th class="rc-amt-col">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Admission Processing Fee (one-time)</td><td class="rc-amt-col" id="rcvFeeAmount">₦10,000</td></tr>
+          </tbody>
+          <tfoot>
+            <tr class="rc-total-row"><td>Total Paid</td><td class="rc-amt-col" id="rcvTotalPaid">₦10,000</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="rc-meta-grid rc-pay-meta">
+        <div><span>Payment Reference</span><strong id="rcvPayRef">—</strong></div>
+        <div><span>Payment Method</span><strong>Paystack (Card / Bank Transfer)</strong></div>
       </div>
 
       <div class="contact-msg">
-        <strong>Keep your reference number safe.</strong><br/>
-        The school will contact you on <strong id="sucPhoneInline">—</strong> once your application is reviewed.
+        <strong>Keep this receipt safe.</strong><br/>
+        The school will contact you on <strong id="rcvPhoneInline">—</strong> once your application is reviewed.
       </div>
 
-      <button class="btn-restart" onclick="resetForm()">Apply for Another Student</button>
+      <!-- SIGNATURE -->
+      <div class="rc-sign-row">
+        <div class="rc-sign-block"><div class="rc-sign-line"></div><span>Date &amp; Stamp (For: Admissions Office)</span></div>
+      </div>
+
+      <div class="rc-actions no-print">
+        <button class="btn-outline-print" onclick="window.print()">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Receipt
+        </button>
+        <button class="btn-restart" onclick="resetForm()">Apply for Another Student</button>
+      </div>
     </div>
   </div><!-- /screen3 -->
 
@@ -474,10 +607,33 @@ const cfg = {
 const app = initializeApp(cfg);
 const db  = getFirestore(app);
 
+/* mobile nav (matches index.html) */
+function _closeMob(){
+  document.getElementById('hamBtn').classList.remove('open');
+  document.getElementById('mobNav').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+window.toggleMobNav = function(){
+  const open = document.getElementById('mobNav').classList.contains('open');
+  if(open){ _closeMob(); }
+  else{
+    document.getElementById('hamBtn').classList.add('open');
+    document.getElementById('mobNav').classList.add('open');
+    document.getElementById('mobOverlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+};
+window.closeMobNav = _closeMob;
+document.getElementById('mobOverlay').addEventListener('click', _closeMob);
+
 const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
 
 let pendingDocId = null;
 let passportBase64 = null; // stores compressed Base64 string
+let lastResultBase64 = null;  // Junior WAEC / BECE result — image (compressed) or PDF, base64
+let lastResultMime   = '';    // 'image' or 'application/pdf'
+let lastResultFileName = '';
 let currentPanel = 1; // guided flow: 1 Applicant, 2 Guardian, 3 Health & Interests, 4 Documents
 
 const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
@@ -601,9 +757,12 @@ function onStateChange(){
 
 initDobDropdowns();
 initStateDropdown();
-loadClassesForRegistration();
 buildCheckGrid('hobbiesCheckboxes', HOBBIES_LIST, 'hobby');
 buildCheckGrid('sportsCheckboxes', SPORTS_LIST, 'sport');
+loadClassesForRegistration().then(function(){
+  checkForDraft();
+  attachAutosaveListeners();
+});
 
 async function loadClassesForRegistration(){
   const sel = document.getElementById('classApplied');
@@ -619,7 +778,9 @@ async function loadClassesForRegistration(){
     console.warn('Could not load classes for registration:', e.message);
   }
   sel.addEventListener('change', toggleSeniorClassSection);
+  sel.addEventListener('change', toggleLastResultRequirement);
   toggleSeniorClassSection();
+  toggleLastResultRequirement();
 }
 
 // "Senior" classes are anything starting with SS (e.g. SS1A, SS2B) —
@@ -696,6 +857,7 @@ window.handlePassportSelect = function(input){
       // Style dropzone
       document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
       document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
+      saveDraft();
     };
     img.src = e.target.result;
   };
@@ -708,13 +870,138 @@ window.clearPassport = function(){
   document.getElementById('passportPreview').style.display = 'none';
   document.getElementById('passportDropzone').style.borderColor = '';
   document.getElementById('passportDropzone').style.background = '';
+  saveDraft();
 };
+
+/* ══════════════════════════════════════════
+   LAST SCHOOL RESULT — Junior WAEC / BECE
+   Image: compressed via Canvas (like passport, larger max size for legibility)
+   PDF:   stored as-is, but capped small to protect the 1MB Firestore doc limit
+   ══════════════════════════════════════════ */
+const LAST_RESULT_PDF_MAX_BYTES = 500 * 1024; // ~500KB file → ~680KB base64
+
+window.handleLastResultSelect = function(input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const errEl = document.getElementById('lastResultError');
+  errEl.style.display = 'none';
+
+  const isImage = file.type.startsWith('image/');
+  const isPdf   = file.type === 'application/pdf';
+
+  if(!isImage && !isPdf){
+    errEl.textContent = 'Please select an image (JPG, PNG, WEBP) or a PDF file.';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  if(isImage && file.size > 8 * 1024 * 1024){
+    errEl.textContent = 'File too large. Please select an image under 8MB.';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  if(isPdf && file.size > LAST_RESULT_PDF_MAX_BYTES){
+    errEl.textContent = `PDF too large (max ${Math.round(LAST_RESULT_PDF_MAX_BYTES/1024)}KB). Please upload a smaller PDF, or take a clear photo of the result instead.`;
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  if(isImage){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = new Image();
+      img.onload = function(){
+        // Compress via canvas — max 1100px on the long edge, quality 0.72.
+        // Kept larger than the passport photo so the result text stays legible.
+        const canvas = document.createElement('canvas');
+        const MAX = 1100;
+        let w = img.width, h = img.height;
+        if(w > h){ if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; } }
+        else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        lastResultBase64  = canvas.toDataURL('image/jpeg', 0.72);
+        lastResultMime     = 'image';
+        lastResultFileName = file.name;
+        showLastResultPreview();
+        saveDraft();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(e){
+      lastResultBase64  = e.target.result;
+      lastResultMime     = 'application/pdf';
+      lastResultFileName = file.name;
+      showLastResultPreview();
+      saveDraft();
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+function showLastResultPreview(){
+  const preview = document.getElementById('lastResultPreview');
+  const thumb   = document.getElementById('lastResultThumb');
+  const pdfIcon = document.getElementById('lastResultPdfIcon');
+
+  if(lastResultMime === 'image'){
+    thumb.src = lastResultBase64;
+    thumb.style.display = 'block';
+    pdfIcon.style.display = 'none';
+  } else {
+    thumb.style.display = 'none';
+    pdfIcon.style.display = 'block';
+  }
+
+  document.getElementById('lastResultFileName').textContent = lastResultFileName || 'Result document';
+  const sizeKB = Math.round((lastResultBase64.length * 3/4) / 1024);
+  document.getElementById('lastResultFileSize').textContent =
+    (lastResultMime === 'image' ? `Compressed: ~${sizeKB} KB` : `PDF: ~${sizeKB} KB`);
+  preview.style.display = 'flex';
+
+  document.getElementById('lastResultDropzone').style.borderColor = 'var(--ok-b)';
+  document.getElementById('lastResultDropzone').style.background = 'var(--ok-bg)';
+}
+
+window.clearLastResult = function(){
+  lastResultBase64 = null;
+  lastResultMime = '';
+  lastResultFileName = '';
+  document.getElementById('lastResultFileInput').value = '';
+  document.getElementById('lastResultPreview').style.display = 'none';
+  document.getElementById('lastResultDropzone').style.borderColor = '';
+  document.getElementById('lastResultDropzone').style.background = '';
+  saveDraft();
+};
+
+// Only new SS1 applicants are required to upload — other classes may skip
+function isNewSS1(className){
+  return /^SS1/i.test((className||'').trim());
+}
+function toggleLastResultRequirement(){
+  const cls = document.getElementById('classApplied').value;
+  const required = isNewSS1(cls);
+  document.getElementById('lastResultReqMark').style.display = required ? '' : 'none';
+  document.getElementById('lastResultOptMark').style.display = required ? 'none' : '';
+  document.getElementById('lastResultNote').textContent = required
+    ? 'Junior WAEC / BECE result — required for this application'
+    : 'Junior WAEC / BECE result — only required for new SS1 applicants';
+}
 /* ══════════════════════════════════════════
    FORM VALIDATION
    ══════════════════════════════════════════ */
 function getFormData(){
   return {
     firstName:       v('firstName'),
+    middleName:      v('middleName'),
     lastName:        v('lastName'),
     dob:             v('dob'),
     gender:          v('gender'),
@@ -749,6 +1036,10 @@ function getFormData(){
 
 function v(id){ return document.getElementById(id).value.trim(); }
 
+function buildFullName(d){
+  return [d.firstName, d.middleName, d.lastName].filter(Boolean).join(' ');
+}
+
 function validatePanel1(){
   if(!v('firstName'))     return 'First name is required.';
   if(!v('lastName'))      return 'Last name is required.';
@@ -781,6 +1072,9 @@ function validateForm(){
   }
   if(!d.primaryPhone)      return 'Primary phone number is required.';
   if(!passportBase64)      return 'Passport photograph is required.';
+  if(isNewSS1(d.classApplied) && !lastResultBase64){
+    return 'Please upload the Junior WAEC / BECE result — required for new SS1 applicants.';
+  }
   return null;
 }
 
@@ -801,6 +1095,7 @@ window.goPanelNext = function(fromPanel){
   const err = fromPanel === 1 ? validatePanel1() : fromPanel === 2 ? validatePanel2() : validatePanel3();
   if(err){ showAlert('formAlert', 'formAlertMsg', err); scrollToTop(); return; }
   showPanel(fromPanel + 1);
+  saveDraft();
 };
 
 /* ══════════════════════════════════════════
@@ -812,7 +1107,7 @@ window.goToStep2 = function(){
   if(err){ showAlert('formAlert', 'formAlertMsg', err); scrollToTop(); return; }
 
   const d = getFormData();
-  const fullName = `${d.firstName} ${d.lastName}`;
+  const fullName = buildFullName(d);
   document.getElementById('summaryName').textContent  = fullName;
   document.getElementById('summaryClass').textContent = `Applying for ${d.classApplied}`;
   document.getElementById('summaryPhone').textContent = d.primaryPhone;
@@ -879,7 +1174,7 @@ window.initiatePayment = function(){
   }
 
   const d = getFormData();
-  const fullName = `${d.firstName} ${d.lastName}`;
+  const fullName = buildFullName(d);
   // Paystack requires a real-format email — use parent email if provided,
   // otherwise build one from the phone number (always collected) + school domain
   const rawPhone = (d.primaryPhone||'').replace(/[^0-9]/g,'');
@@ -953,10 +1248,11 @@ async function verifyAndSubmit(reference){
     btn.innerHTML = '<span class="spinner"></span> Submitting application…';
 
     const d = getFormData();
-    const fullName = `${d.firstName} ${d.lastName}`;
+    const fullName = buildFullName(d);
 
     const docData = {
       firstName:       d.firstName,
+      middleName:      d.middleName,
       lastName:        d.lastName,
       fullName,
       dob:             d.dob,
@@ -991,6 +1287,9 @@ async function verifyAndSubmit(reference){
       amountPaid:     verifiedKobo ? verifiedKobo / 100 : 10000,
       paymentStatus:  paymentStatus,
       passportPhoto:  passportBase64,
+      lastSchoolResult:     lastResultBase64 || null,
+      lastSchoolResultType: lastResultMime || '',
+      lastSchoolResultName: lastResultFileName || '',
       status:         'pending',
       submittedAt:    serverTimestamp()
     };
@@ -998,12 +1297,41 @@ async function verifyAndSubmit(reference){
     const newRef = await addDoc(collection(db, 'applications'), docData);
     const finalDocId = newRef.id;
 
-    // Show success screen
-    document.getElementById('refNumber').textContent    = finalDocId;
-    document.getElementById('sucName').textContent      = fullName;
-    document.getElementById('sucClass').textContent     = d.classApplied;
-    document.getElementById('sucPhone').textContent     = d.primaryPhone;
-    document.getElementById('sucPhoneInline').textContent = d.primaryPhone;
+    markDraftSubmitted();
+
+    // Show success / receipt screen
+    const guardianDisplay = d.guardianName || d.fatherName || d.motherName || '—';
+    const amountPaidNaira = verifiedKobo ? verifiedKobo / 100 : 10000;
+    const amountStr = '₦' + amountPaidNaira.toLocaleString('en-NG');
+    const statusText = paymentStatus === 'success' ? 'Paid ✓'
+      : paymentStatus === 'needs_review' ? 'Paid — Under Review'
+      : 'Paid — Pending Verification';
+    const dateStr = new Date().toLocaleDateString('en-NG', {day:'numeric', month:'short', year:'numeric'});
+
+    document.getElementById('rcvRef').textContent        = finalDocId;
+    document.getElementById('rcvDate').textContent       = dateStr;
+    document.getElementById('rcvName').textContent       = fullName;
+    document.getElementById('rcvClass').textContent      = d.classApplied;
+    document.getElementById('rcvDob').textContent        = d.dob || '—';
+    document.getElementById('rcvGender').textContent     = d.gender || '—';
+    document.getElementById('rcvGuardian').textContent   = guardianDisplay;
+    document.getElementById('rcvPhone').textContent      = d.primaryPhone;
+    document.getElementById('rcvEmail').textContent      = d.parentEmail || '—';
+    document.getElementById('rcvStatus').textContent     = 'Pending Review';
+    document.getElementById('rcvFeeAmount').textContent  = amountStr;
+    document.getElementById('rcvTotalPaid').textContent  = amountStr;
+    document.getElementById('rcvPayRef').textContent     = reference;
+    document.getElementById('rcvPhoneInline').textContent = d.primaryPhone;
+    // Payment status is shown as part of the meta grid via rcvStatus above;
+    // the fee table always reflects what was actually charged, so add a
+    // subtle note when it wasn't a clean auto-verified success.
+    if(paymentStatus !== 'success'){
+      const noteRow = document.getElementById('rcvPayRef').closest('div');
+      const note = document.createElement('span');
+      note.style.cssText = 'display:block;font-size:.68rem;color:var(--warn);font-weight:600;margin-top:2px';
+      note.textContent = statusText;
+      noteRow.appendChild(note);
+    }
 
     showScreen(3);
 
@@ -1015,11 +1343,230 @@ async function verifyAndSubmit(reference){
 }
 
 /* ══════════════════════════════════════════
+   DRAFT CACHE — per-device localStorage
+   (moderate autosave with a resume-or-start-new prompt)
+   ══════════════════════════════════════════ */
+const DRAFT_KEY     = 'newtownAcademy_admissionDraft_v1';
+const DRAFT_TTL_DAYS = 14; // stale drafts beyond this are ignored & discarded
+let _draftSaveTimer = null;
+let _draftSuppressed = false; // true while the resume modal is up, to avoid racing saves
+
+function collectDraftData(){
+  return {
+    fields:       getFormData(),
+    dobDay:       document.getElementById('dobDay').value,
+    dobMonth:     document.getElementById('dobMonth').value,
+    dobYear:      document.getElementById('dobYear').value,
+    passportBase64: passportBase64,
+    passportFileName: document.getElementById('passportFileName')?.textContent || '',
+    lastResultBase64:  lastResultBase64,
+    lastResultMime:     lastResultMime,
+    lastResultFileName: lastResultFileName,
+    currentPanel: currentPanel,
+    savedAt:      Date.now()
+  };
+}
+
+function isDraftWorthSaving(d){
+  return !!(d.fields.firstName || d.fields.lastName || d.fields.primaryPhone ||
+            d.fields.parentEmail || d.passportBase64 || d.lastResultBase64);
+}
+
+function saveDraft(){
+  if(_draftSuppressed) return;
+  try{
+    const draft = collectDraftData();
+    if(!isDraftWorthSaving(draft)){ return; }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch(e){
+    // Likely quota exceeded — drop the bigger file (result doc) first, then the passport if still too big
+    try{
+      const draft = collectDraftData();
+      draft.lastResultBase64 = null;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch(e2){
+      try{
+        const draft = collectDraftData();
+        draft.lastResultBase64 = null;
+        draft.passportBase64 = null;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch(e3){
+        console.warn('Could not save application draft:', e3.message);
+      }
+    }
+  }
+}
+
+function scheduleDraftSave(){
+  clearTimeout(_draftSaveTimer);
+  _draftSaveTimer = setTimeout(saveDraft, 900); // moderate debounce — not on every keystroke
+}
+
+function clearDraft(){
+  try{ localStorage.removeItem(DRAFT_KEY); } catch(e){}
+}
+
+// Called after a successful submission: keeps the data cached on-device
+// (in case it's useful for reference) but tags it so the resume prompt
+// won't re-offer an already-submitted application. The next time real
+// data is typed for a new entry, saveDraft() naturally overwrites this.
+function markDraftSubmitted(){
+  try{
+    const draft = collectDraftData();
+    draft.submitted = true;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch(e){
+    try{
+      const draft = collectDraftData();
+      draft.submitted = true;
+      draft.lastResultBase64 = null;
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch(e2){
+      try{
+        const draft = collectDraftData();
+        draft.submitted = true;
+        draft.lastResultBase64 = null;
+        draft.passportBase64 = null;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch(e3){
+        console.warn('Could not persist submitted draft:', e3.message);
+      }
+    }
+  }
+}
+
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if(!raw) return null;
+    const draft = JSON.parse(raw);
+    const ageDays = (Date.now() - (draft.savedAt || 0)) / 86400000;
+    if(ageDays > DRAFT_TTL_DAYS){ clearDraft(); return null; }
+    if(!isDraftWorthSaving(draft)) return null;
+    return draft;
+  } catch(e){ return null; }
+}
+
+function attachAutosaveListeners(){
+  document.querySelectorAll('#screen1 input, #screen1 select, #screen1 textarea').forEach(el => {
+    el.addEventListener('input', scheduleDraftSave);
+    el.addEventListener('change', scheduleDraftSave);
+  });
+}
+
+function checkForDraft(){
+  const draft = loadDraft();
+  if(!draft) return;
+  if(draft.submitted) return; // already submitted — sits quietly until a new entry overwrites it
+
+  _draftSuppressed = true; // don't let a stray save overwrite the draft before the user chooses
+
+  const f = draft.fields || {};
+  const nameParts = [f.firstName, f.lastName].filter(Boolean).join(' ');
+  const summaryEl = document.getElementById('draftModalSummary');
+  const rows = [];
+  if(nameParts) rows.push(['Applicant', nameParts]);
+  if(f.classApplied) rows.push(['Class', f.classApplied]);
+  if(f.primaryPhone) rows.push(['Phone', f.primaryPhone]);
+  const stepNames = {1:'Applicant Details',2:'Guardian Info',3:'Health & Interests',4:'Documents'};
+  rows.push(['Last on', stepNames[draft.currentPanel] || 'Applicant Details']);
+  const savedDate = new Date(draft.savedAt);
+  rows.push(['Saved', savedDate.toLocaleDateString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})]);
+
+  summaryEl.innerHTML = rows.length
+    ? rows.map(r => `<div class="dms-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')
+    : '<div class="dms-empty">Some details were saved.</div>';
+
+  document.getElementById('draftModalOverlay').classList.add('show');
+
+  document.getElementById('draftContinueBtn').onclick = function(){
+    restoreDraft(draft);
+    document.getElementById('draftModalOverlay').classList.remove('show');
+    _draftSuppressed = false;
+    showToast('Draft restored — pick up where you left off.');
+  };
+  document.getElementById('draftNewBtn').onclick = function(){
+    clearDraft();
+    document.getElementById('draftModalOverlay').classList.remove('show');
+    _draftSuppressed = false;
+  };
+}
+
+function restoreDraft(draft){
+  const f = draft.fields || {};
+
+  const simpleIds = ['firstName','middleName','lastName','gender','stateOfOrigin','nationality',
+    'bloodGroup','genotype','classApplied','department','careerPath','careerReason',
+    'prevSchool','lastClass','fatherName','motherName','guardianName','guardianRelationship',
+    'primaryPhone','secondaryPhone','parentEmail','homeAddress','emergencyName',
+    'emergencyPhone','allergies','healthConditions','medication'];
+  simpleIds.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && f[id] !== undefined && f[id] !== '') el.value = f[id];
+  });
+
+  // Date of birth
+  if(draft.dobDay)   document.getElementById('dobDay').value = draft.dobDay;
+  if(draft.dobMonth) document.getElementById('dobMonth').value = draft.dobMonth;
+  if(draft.dobYear)  document.getElementById('dobYear').value = draft.dobYear;
+  updateDobHidden();
+
+  // State -> LGA (dependent dropdown)
+  if(f.stateOfOrigin){
+    onStateChange();
+    if(f.lga) document.getElementById('lga').value = f.lga;
+  }
+
+  // Class applied -> senior class section + last-result requirement
+  if(f.classApplied){
+    toggleSeniorClassSection();
+    toggleLastResultRequirement();
+  }
+
+  // Hobbies / sports checkboxes
+  (f.hobbies || []).forEach(val => {
+    const cb = document.querySelector(`#hobbiesCheckboxes input[value="${CSS.escape(val)}"]`);
+    if(cb) cb.checked = true;
+  });
+  (f.favoriteSports || []).forEach(val => {
+    const cb = document.querySelector(`#sportsCheckboxes input[value="${CSS.escape(val)}"]`);
+    if(cb) cb.checked = true;
+  });
+
+  // Passport photo
+  if(draft.passportBase64){
+    passportBase64 = draft.passportBase64;
+    const preview = document.getElementById('passportPreview');
+    document.getElementById('passportThumb').src = passportBase64;
+    document.getElementById('passportFileName').textContent = draft.passportFileName || 'Saved photo';
+    const sizeKB = Math.round((passportBase64.length * 3/4) / 1024);
+    document.getElementById('passportFileSize').textContent = `Restored: ~${sizeKB} KB`;
+    preview.style.display = 'flex';
+    document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
+    document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
+  }
+
+  // Last school result (Junior WAEC / BECE)
+  if(draft.lastResultBase64){
+    lastResultBase64  = draft.lastResultBase64;
+    lastResultMime     = draft.lastResultMime || 'image';
+    lastResultFileName = draft.lastResultFileName || 'Saved result';
+    showLastResultPreview();
+    document.getElementById('lastResultFileSize').textContent =
+      document.getElementById('lastResultFileSize').textContent.replace('Compressed:','Restored:').replace('PDF:','Restored PDF:');
+  }
+
+  // Jump to the panel they were last on
+  const panel = draft.currentPanel && draft.currentPanel >= 1 && draft.currentPanel <= 4 ? draft.currentPanel : 1;
+  showPanel(panel);
+}
+
+/* ══════════════════════════════════════════
    RESET
    ══════════════════════════════════════════ */
 window.resetForm = function(){
   // Clear inputs
-  ['firstName','lastName','dob','gender','stateOfOrigin','lga',
+  ['firstName','middleName','lastName','dob','gender','stateOfOrigin','lga',
    'bloodGroup','genotype','classApplied','prevSchool','lastClass',
    'fatherName','motherName','guardianName','guardianRelationship',
    'primaryPhone','secondaryPhone','parentEmail','homeAddress',
@@ -1039,8 +1586,10 @@ window.resetForm = function(){
 
   // Reset LGA back to its locked "select state first" state
   onStateChange();
+  toggleLastResultRequirement();
 
   clearPassport();
+  clearLastResult();
   pendingDocId = null;
   hideAlert('formAlert');
   hideAlert('payAlert');

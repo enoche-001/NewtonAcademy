@@ -4,9 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="robots" content="noindex,nofollow"/>
-<title>Admin Portal — School Management</title>
+<title>Newtown Academy — Admin Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="admin.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -27,8 +28,8 @@
 <div id="portalScreen">
   <div class="sidebar" id="sidebar">
     <div class="sb-brand">
-      <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
-      <div class="sb-brand-text"><h2>School Admin</h2><span>Dashboard</span></div>
+      <div class="sb-mark"><img src="assets/newtown-academy-logo.jpg" alt="Newtown Academy crest"/></div>
+      <div class="sb-brand-text"><h2>Newtown Academy</h2><span>Admin Dashboard</span></div>
     </div>
     <nav class="sb-nav">
       <div class="nav-label">Overview</div>
@@ -528,10 +529,6 @@
             <label class="toggle"><input type="checkbox" id="annPinned"/><span class="slider"></span></label>
             <span style="font-size:.83rem;color:var(--soft)">Pin this announcement to the top</span>
           </div>
-          <div class="toggle-wrap" style="margin-bottom:16px">
-            <label class="toggle"><input type="checkbox" id="annNotify" checked/><span class="slider"></span></label>
-            <span style="font-size:.83rem;color:var(--soft)">📧 Email parents about this announcement (new posts only)</span>
-          </div>
           <input type="hidden" id="annEditId" value=""/>
           <div style="display:flex;gap:10px">
             <button class="btn btn-p" id="annSaveBtn" onclick="saveAnnouncement()" style="padding:10px 18px">
@@ -570,6 +567,22 @@
         <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         Approve
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT PREVIEW MODAL — in-page viewer with a real Close button,
+     used instead of popping open a new browser tab -->
+<div class="mo mo-doc" id="moDocPreview">
+  <div class="mbox mbox-doc">
+    <div class="doc-preview-hdr">
+      <h3 id="moDocPreviewTitle">Document</h3>
+      <button class="doc-preview-close" onclick="closeDocPreview()" aria-label="Close">✕</button>
+    </div>
+    <div class="doc-preview-body" id="moDocPreviewBody"></div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeDocPreview()">Close</button>
+      <button class="btn btn-edit" id="moDocPreviewOpenBtn" style="flex:1;justify-content:center">Open in New Tab</button>
     </div>
   </div>
 </div>
@@ -625,6 +638,15 @@
       </div>
       <div class="form-group"><label>Class <span style="color:var(--err)">*</span></label>
         <select id="csClass"><option value="">Select class</option></select>
+      </div>
+      <div class="form-group" id="csDeptGroup" style="display:none">
+        <label>Department <span style="color:var(--err)">*</span></label>
+        <select id="csDepartment">
+          <option value="">Select department</option>
+          <option>Science</option>
+          <option>Arts</option>
+          <option>Commercial</option>
+        </select>
       </div>
       <div class="form-group"><label>Session</label>
         <select id="csSession"><option>2024/2025</option><option selected>2025/2026</option><option>2026/2027</option></select>
@@ -757,6 +779,15 @@
         <label>Class</label>
         <select id="stuClass"></select>
       </div>
+      <div class="form-group" id="stuDeptGroup" style="display:none">
+        <label>Department</label>
+        <select id="stuDepartment">
+          <option value="">Select department</option>
+          <option>Science</option>
+          <option>Arts</option>
+          <option>Commercial</option>
+        </select>
+      </div>
       <div class="form-group"><label>Blood Group</label><input type="text" id="stuBloodGroup" placeholder="e.g. O+"/></div>
       <div class="form-group"><label>Genotype</label><input type="text" id="stuGenotype" placeholder="e.g. AA"/></div>
       <div class="form-group">
@@ -873,87 +904,40 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* ══════════════════════════════════════════
-   EMAIL NOTIFICATIONS — via Vercel serverless function
+   EMAILJS — approval-success email only
    ══════════════════════════════════════════
-   1. Add /api/send-email.js to your existing Vercel project (the one
-      that already serves /api/verify for Paystack) — see send-email.js.
-   2. In Vercel → Settings → Environment Variables, add RESEND_API_KEY
-      (get one free at https://resend.com).
-   3. Update SEND_EMAIL_ENDPOINT below if your Vercel URL is different. */
-const SEND_EMAIL_ENDPOINT = "https://school-payment-server.vercel.app/api/send-email";
+   Scoped to application approvals only (not manual student creation,
+   not announcements) to conserve your free-tier send limit. */
+const EMAILJS_SERVICE_ID           = "service_jtplief";
+const EMAILJS_TEMPLATE_CREDENTIALS = "template_wjtty6l";
+const EMAILJS_PUBLIC_KEY           = "RieT2E2Hj35a24vbB";
 const SCHOOL_NAME = "Newtown Academy";
 
-async function postEmail(payload){
-  try{
-    const res = await fetch(SEND_EMAIL_ENDPOINT, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok && res.status !== 207){
-      console.warn('Email send failed with status', res.status);
-      return false;
-    }
-    return true;
-  } catch(e){
-    console.warn('Email send request failed:', e.message);
-    return false;
-  }
+if(window.emailjs){
+  window.emailjs.init(EMAILJS_PUBLIC_KEY);
 }
 
-// Sends the reg number + password to a parent's email after a student is
-// enrolled (via application approval) or manually created. Fails silently
-// (with a toast) if the parent has no email on file or the request fails —
-// this must never block student creation from succeeding.
+// Sends the reg number + password to a parent's email after an
+// application is approved. Fails silently (with a toast) if the parent
+// has no email on file or the send fails — must never block enrollment.
 async function sendCredentialsEmail({toEmail, studentName, regNumber, password, className}){
   if(!toEmail) return;
-  const html = `
-    <p>Congratulations! Your registration into <strong>${SCHOOL_NAME}</strong> has been approved.</p>
-    <p>Below are your login credentials:</p>
-    <p>
-      Student Name: <strong>${studentName}</strong><br/>
-      Class: <strong>${className}</strong><br/>
-      Registration Number: <strong>${regNumber}</strong><br/>
-      Password: <strong>${password}</strong>
-    </p>
-    <p>Please keep these details safe and use them to log in to the student portal.</p>
-    <p>Warm regards,<br/>${SCHOOL_NAME} Admissions Office</p>
-  `;
-  const ok = await postEmail({
-    to: toEmail,
-    subject: `Your ${SCHOOL_NAME} Admission Has Been Approved`,
-    html
-  });
-  if(!ok) showToast('Saved, but the email notification failed to send.', 'error');
-}
-
-// Emails every parent on file when a NEW announcement is posted (not on
-// edits). Collects unique parent emails from the students collection and
-// sends them in one request — the server loops through recipients.
-async function sendAnnouncementEmails({title, body, date}){
+  if(!window.emailjs){
+    console.warn('EmailJS SDK not loaded — skipping credentials email.');
+    return;
+  }
   try{
-    const snap = await getDocs(collection(db,'students'));
-    const emails = new Set();
-    snap.docs.forEach(d=>{
-      const email = (d.data().parentEmail || d.data().email || '').trim();
-      if(email) emails.add(email);
-    });
-    if(emails.size === 0) return;
-    const html = `
-      <p>Dear Parent/Guardian,</p>
-      <p>${SCHOOL_NAME} has posted a new announcement:</p>
-      <p><strong>${title}</strong><br/>Date: ${date}</p>
-      <p>${body}</p>
-      <p>Please log in to the student portal for more details if needed.</p>
-      <p>Warm regards,<br/>${SCHOOL_NAME} Administration</p>
-    `;
-    await postEmail({
-      to: Array.from(emails),
-      subject: `${SCHOOL_NAME}: New Announcement — ${title}`,
-      html
+    await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CREDENTIALS, {
+      to_email: toEmail,
+      student_name: studentName,
+      reg_number: regNumber,
+      password: password,
+      class_name: className,
+      school_name: SCHOOL_NAME
     });
   } catch(e){
-    console.warn('Announcement email batch failed:', e.message);
+    console.warn('Credentials email failed:', e.text || e.message || e);
+    showToast('Enrolled, but the email notification failed to send.', 'error');
   }
 }
 
@@ -997,6 +981,14 @@ setPersistence(auth, browserSessionPersistence).catch(()=>{});
 // under the "Classes" section and loaded live from Firestore — see loadClasses().
 let CLASS_DATA = {};      // { "SS1A": { compulsory:[...], elective:[...] }, ... }
 let CLASS_NAMES = [];     // sorted list of class names
+// "Senior" classes are anything starting with SS (e.g. SS1A, SS2B) — mirrors register.html
+function isSeniorClass(className){
+  return /^SS/i.test((className||'').trim());
+}
+// New SS1 applicants are the ones required to upload a Junior WAEC / BECE result — mirrors register.html
+function isNewSS1(className){
+  return /^SS1/i.test((className||'').trim());
+}
 const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
 const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
 let allAnnouncements = [];
@@ -1309,10 +1301,11 @@ function renderApplications(){
     const badge = status==='approved'?'b-green':status==='rejected'?'b-red':'b-gold';
     const ts = a.submittedAt?.toDate ? a.submittedAt.toDate() : null;
     const dateStr = ts ? ts.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
-    const name = `${escapeHtml(a.firstName||'')} ${escapeHtml(a.lastName||'')}`.trim()||'—';
+    const name = `${escapeHtml(a.firstName||'')} ${escapeHtml(a.middleName||'')} ${escapeHtml(a.lastName||'')}`.replace(/\s+/g,' ').trim()||'—';
+    const deptSub = a.department ? `<br/><span style="font-size:.72rem;color:var(--muted)">${escapeHtml(a.department)}</span>` : '';
     return `<tr>
       <td><strong>${name}</strong></td>
-      <td>${escapeHtml(a.classApplied||'—')}</td>
+      <td>${escapeHtml(a.classApplied||'—')}${deptSub}</td>
       <td>${escapeHtml(a.primaryPhone||a.parentPhone||'—')}</td>
       <td>${dateStr}</td>
       <td><span class="badge ${badge}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
@@ -1333,21 +1326,44 @@ window.viewApplication = function(id){
   if(!a) return;
   currentAppId = id;
   const status = a.status||'pending';
-  document.getElementById('moAppViewTitle').textContent = `${a.firstName||''} ${a.lastName||''}`.trim()||'Application';
+  document.getElementById('moAppViewTitle').textContent = `${a.firstName||''} ${a.middleName||''} ${a.lastName||''}`.replace(/\s+/g,' ').trim()||'Application';
   document.getElementById('moAppViewSub').textContent = `${a.classApplied||'—'} · ${status.charAt(0).toUpperCase()+status.slice(1)}`;
 
   const ts = a.submittedAt?.toDate ? a.submittedAt.toDate() : null;
   const dateStr = ts ? ts.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
 
-  const docLinks = (a.documents||[]).map((url,i)=>
-    `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">Document ${i+1}</a>`
-  ).join('<br/>') || '—';
+  // Passport photo: shown inline as a real preview thumbnail (like before),
+  // tap to view it larger in the in-page document viewer.
+  const passportPreview = a.passportPhoto
+    ? `<div class="doc-passport-preview" onclick="openPassportDoc()">
+         <img src="${a.passportPhoto}" alt="Passport"/>
+         <span>Tap to enlarge</span>
+       </div>`
+    : '';
+
+  // Last School Result: shown as a neat tappable chip — no raw filename,
+  // just an icon + label. Tapping opens it in the in-page document viewer
+  // (not a new browser tab), with a proper Close button.
+  const lastResultChip = a.lastSchoolResult
+    ? `<div class="doc-chip" onclick="openLastResultDoc()">
+         <span class="doc-chip-icon">📄</span>
+         <span class="doc-chip-label">Last School Result<em>(${a.lastSchoolResultType==='application/pdf' ? 'PDF' : 'Image'})</em></span>
+         <span class="doc-chip-arrow">›</span>
+       </div>`
+    : (isNewSS1(a.classApplied)
+        ? `<div class="doc-chip-warn">⚠ No Last School Result uploaded — required for new SS1 applicants</div>`
+        : '');
+
+  const documentsSection = (passportPreview || lastResultChip)
+    ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}</div></div>`
+    : `<div class="doc-section"><div class="doc-chip-empty">No documents uploaded</div></div>`;
 
   document.getElementById('moAppViewBody').innerHTML = `
-    ${a.passportPhoto ? `<div style="margin-bottom:16px"><img src="${a.passportPhoto}" alt="Passport" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--border)"/></div>` : ''}
+    ${documentsSection}
     <div class="section-sub" style="margin-top:0">Personal Information</div>
     <div class="info-grid">
       <div class="info-item"><label>First Name</label><span>${escapeHtml(a.firstName||'—')}</span></div>
+      <div class="info-item"><label>Middle Name</label><span>${escapeHtml(a.middleName||'—')}</span></div>
       <div class="info-item"><label>Last Name</label><span>${escapeHtml(a.lastName||'—')}</span></div>
       <div class="info-item"><label>Date of Birth</label><span>${escapeHtml(a.dob||'—')}</span></div>
       <div class="info-item"><label>Gender</label><span>${escapeHtml(a.gender||'—')}</span></div>
@@ -1355,6 +1371,13 @@ window.viewApplication = function(id){
       <div class="info-item"><label>Date Submitted</label><span>${dateStr}</span></div>
       <div class="info-item"><label>Blood Group</label><span>${escapeHtml(a.bloodGroup||'—')}</span></div>
       <div class="info-item"><label>Genotype</label><span>${escapeHtml(a.genotype||'—')}</span></div>
+      ${isSeniorClass(a.classApplied) ? `
+      <hr class="info-divider"/>
+      <div class="section-sub" style="grid-column:1/-1;margin-top:0">Senior Class Details</div>
+      <div class="info-item"><label>Department</label><span>${escapeHtml(a.department||'—')}</span></div>
+      <div class="info-item"><label>Career Path</label><span>${escapeHtml(a.careerPath||'—')}</span></div>
+      <div class="info-item" style="grid-column:1/-1"><label>Why This Career Path</label><span>${escapeHtml(a.careerReason||'—')}</span></div>
+      ` : ''}
       <hr class="info-divider"/>
       <div class="section-sub" style="grid-column:1/-1;margin-top:0">Parent / Guardian</div>
       <div class="info-item"><label>Father's Name</label><span>${escapeHtml(a.fatherName||'—')}</span></div>
@@ -1380,8 +1403,6 @@ window.viewApplication = function(id){
       <div class="info-item"><label>Allergies</label><span>${escapeHtml(a.allergies||'None reported')}</span></div>
       <div class="info-item"><label>Health Challenges</label><span>${escapeHtml(a.healthConditions||'None reported')}</span></div>
       <div class="info-item"><label>Current Medication</label><span>${escapeHtml(a.medication||'None')}</span></div>
-      <hr class="info-divider"/>
-      <div class="info-item" style="grid-column:1/-1"><label>Uploaded Documents</label><span>${docLinks}</span></div>
     </div>
   `;
 
@@ -1391,6 +1412,61 @@ window.viewApplication = function(id){
   document.getElementById('moAppRejectBtn').style.display  = isPending?'':'none';
 
   openMo('moAppView');
+};
+
+// Converts a base64 data: URI into a Blob so the browser can render it
+// as a real file inside the in-page viewer (image <img> or PDF <iframe>).
+function dataURLtoBlob(dataUrl){
+  const [header, base64] = dataUrl.split(',');
+  const mimeMatch = header.match(/data:(.*?);base64/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++){ bytes[i] = binary.charCodeAt(i); }
+  return new Blob([bytes], {type: mime});
+}
+
+let _docPreviewBlobUrl = null;
+
+// Opens a document (image or PDF) in the in-page preview modal — has a
+// real Close/Cancel button, and an optional "Open in New Tab" for anyone
+// who still wants the full native viewer.
+window.openDocBlob = function(dataUrl, mime, title){
+  try{
+    if(_docPreviewBlobUrl){ URL.revokeObjectURL(_docPreviewBlobUrl); _docPreviewBlobUrl = null; }
+    const blob = dataURLtoBlob(dataUrl.includes(',') ? dataUrl : `data:${mime};base64,${dataUrl}`);
+    const blobUrl = URL.createObjectURL(blob);
+    _docPreviewBlobUrl = blobUrl;
+    const isPdf = (mime||'').includes('pdf');
+
+    document.getElementById('moDocPreviewTitle').textContent = title || 'Document';
+    document.getElementById('moDocPreviewBody').innerHTML = isPdf
+      ? `<iframe src="${blobUrl}" title="${escapeAttr(title||'Document')}"></iframe>`
+      : `<img src="${blobUrl}" alt="${escapeAttr(title||'Document')}"/>`;
+    document.getElementById('moDocPreviewOpenBtn').onclick = () => window.open(blobUrl, '_blank');
+
+    openMo('moDocPreview');
+  } catch(e){
+    showToast('Could not open document: ' + e.message, 'error');
+  }
+};
+
+window.closeDocPreview = function(){
+  closeMo('moDocPreview');
+  document.getElementById('moDocPreviewBody').innerHTML = '';
+  if(_docPreviewBlobUrl){ URL.revokeObjectURL(_docPreviewBlobUrl); _docPreviewBlobUrl = null; }
+};
+
+window.openPassportDoc = function(){
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a || !a.passportPhoto) return;
+  openDocBlob(a.passportPhoto, 'image/jpeg', 'Passport Photo');
+};
+
+window.openLastResultDoc = function(){
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a || !a.lastSchoolResult) return;
+  openDocBlob(a.lastSchoolResult, a.lastSchoolResultType || 'application/pdf', 'Last School Result');
 };
 
 window.triggerReject = function(){
@@ -1442,6 +1518,7 @@ window.confirmApprove = async function(){
 
     const studentData = {
       firstName: a.firstName||'',
+      middleName: a.middleName||'',
       lastName:  a.lastName||'',
       dob:       a.dob||'',
       gender:    a.gender||'',
@@ -1451,6 +1528,9 @@ window.confirmApprove = async function(){
       nationality: a.nationality||'Nigerian',
       bloodGroup:a.bloodGroup||'',
       genotype:  a.genotype||'',
+      department: a.department||'',
+      careerPath: a.careerPath||'',
+      careerReason: a.careerReason||'',
       prevSchool:a.prevSchool||'',
       lastClass: a.lastClass||'',
       fatherName:  a.fatherName||'',
@@ -1536,10 +1616,11 @@ function renderStudents(){
     const badge = status==='active'?'b-green':'b-red';
     const name = `${escapeHtml(s.firstName||'')} ${escapeHtml(s.lastName||'')}`.trim()||'—';
     const subCount = (s.subjects||[]).length;
+    const deptSub = s.department ? `<br/><span style="font-size:.72rem;color:var(--muted)">${escapeHtml(s.department)}</span>` : '';
     return `<tr>
       <td><span style="font-family:monospace;font-size:.8rem;color:var(--navy2)">${escapeHtml(s.regNumber||'—')}</span></td>
       <td><strong>${name}</strong></td>
-      <td>${escapeHtml(s.class||'—')}</td>
+      <td>${escapeHtml(s.class||'—')}${deptSub}</td>
       <td>${subCount} elective${subCount!==1?'s':''}</td>
       <td><span class="badge ${badge}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
       <td>
@@ -1565,6 +1646,8 @@ window.openStudentModal = function(docId){
   document.getElementById('stuDob').value        = s.dob||'';
   document.getElementById('stuGender').value     = s.gender||'';
   document.getElementById('stuClass').value      = CLASS_NAMES.includes(s.class) ? s.class : (CLASS_NAMES[0]||'');
+  document.getElementById('stuDepartment').value = s.department||'';
+  document.getElementById('stuDeptGroup').style.display = isSeniorClass(document.getElementById('stuClass').value) ? '' : 'none';
   document.getElementById('stuBloodGroup').value = s.bloodGroup||'';
   document.getElementById('stuGenotype').value   = s.genotype||'';
   document.getElementById('stuPassword').value   = '';
@@ -1585,6 +1668,8 @@ window.openStudentModal = function(docId){
 document.getElementById('stuClass')?.addEventListener('change', function(){
   buildSubjectCheckboxes('stuSubjects', [], this.value);
   renderCompulsoryNote('stuCompNote', this.value);
+  document.getElementById('stuDeptGroup').style.display = isSeniorClass(this.value) ? '' : 'none';
+  if(!isSeniorClass(this.value)) document.getElementById('stuDepartment').value = '';
 });
 
 window.saveStudentEdits = async function(){
@@ -1596,6 +1681,7 @@ window.saveStudentEdits = async function(){
     dob:        document.getElementById('stuDob').value,
     gender:     document.getElementById('stuGender').value,
     class:      document.getElementById('stuClass').value,
+    department: isSeniorClass(document.getElementById('stuClass').value) ? document.getElementById('stuDepartment').value : '',
     bloodGroup: document.getElementById('stuBloodGroup').value.trim(),
     genotype:   document.getElementById('stuGenotype').value.trim(),
     subjects:   getCheckedSubjects('stuSubjects'),
@@ -1655,6 +1741,8 @@ window.openCreateStudentModal = function(){
   });
   document.getElementById('csGender').value = '';
   document.getElementById('csClass').value = '';
+  document.getElementById('csDepartment').value = '';
+  document.getElementById('csDeptGroup').style.display = 'none';
   document.getElementById('csBloodGroup').value = '';
   document.getElementById('csGenotype').value = '';
   document.getElementById('csSession').value = '2025/2026';
@@ -1728,17 +1816,21 @@ window.clearCsPassport = function(){
 document.getElementById('csClass')?.addEventListener('change', function(){
   buildSubjectCheckboxes('csSubjects', [], this.value);
   renderCompulsoryNote('csCompNote', this.value);
+  document.getElementById('csDeptGroup').style.display = isSeniorClass(this.value) ? '' : 'none';
+  if(!isSeniorClass(this.value)) document.getElementById('csDepartment').value = '';
 });
 
 window.createStudentManually = async function(){
   const firstName = document.getElementById('csFirstName').value.trim();
   const lastName  = document.getElementById('csLastName').value.trim();
   const cls       = document.getElementById('csClass').value;
+  const department= document.getElementById('csDepartment').value;
   const phone     = document.getElementById('csPhone').value.trim();
   const password  = document.getElementById('csPassword').value.trim();
 
   if(!firstName || !lastName) return showToast('First and last name are required', 'error');
   if(!cls)                    return showToast('Please select a class', 'error');
+  if(isSeniorClass(cls) && !department) return showToast('Please select a department for this senior class', 'error');
   if(!phone)                  return showToast('Phone number is required', 'error');
   if(!password)               return showToast('Password is required', 'error');
 
@@ -1758,6 +1850,7 @@ window.createStudentManually = async function(){
       dob:        document.getElementById('csDob').value,
       gender:     document.getElementById('csGender').value,
       class:      cls,
+      department: isSeniorClass(cls) ? department : '',
       session,
       bloodGroup: document.getElementById('csBloodGroup').value,
       genotype:   document.getElementById('csGenotype').value,
@@ -1776,13 +1869,6 @@ window.createStudentManually = async function(){
 
     await addDoc(collection(db, 'students'), payload);
     showToast(`✅ Student created! Reg No: ${regNumber} — copy this now`, 'success');
-    sendCredentialsEmail({
-      toEmail: document.getElementById('csEmail').value.trim(),
-      studentName: `${firstName} ${lastName}`,
-      regNumber,
-      password,
-      className: cls
-    });
     clearCsPassport();
     closeMo('moCreateStudent');
     await loadStudents();
@@ -2048,7 +2134,6 @@ window.saveAnnouncement = async function(){
   const body = document.getElementById('annBody').value.trim();
   const date = document.getElementById('annDate').value;
   const pinned = document.getElementById('annPinned').checked;
-  const notify = document.getElementById('annNotify').checked;
   const editId = document.getElementById('annEditId').value;
 
   if(!title || !body || !date){ showToast('Please fill in title, body, and date.', 'error'); return; }
@@ -2061,7 +2146,6 @@ window.saveAnnouncement = async function(){
     } else {
       await addDoc(collection(db,'announcements'), { title, body, date, pinned, createdAt: serverTimestamp() });
       showToast('Announcement posted', 'success');
-      if(notify) sendAnnouncementEmails({title, body, date});
     }
     resetAnnouncementForm();
     loadAnnouncements();
@@ -2092,7 +2176,6 @@ window.resetAnnouncementForm = function(){
   document.getElementById('annBody').value = '';
   setDefaultAnnDate();
   document.getElementById('annPinned').checked = false;
-  document.getElementById('annNotify').checked = true;
   document.getElementById('annFormTitle').textContent = 'New Announcement';
   document.getElementById('annSaveBtn').innerHTML = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Post Announcement';
   document.getElementById('annCancelBtn').style.display = 'none';
