@@ -462,6 +462,28 @@ tbody tr:hover{background:var(--surface2)}
   font-weight:700;color:var(--navy);background:var(--surface2);
   border-top:2px solid var(--border-strong,var(--border));border-bottom:none;
 }
+.fee-list{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.fee-list-hdr{
+  display:flex;justify-content:space-between;gap:10px;
+  padding:11px 16px;background:var(--surface2);
+  font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);
+}
+.fee-list-row{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+  padding:12px 16px;font-size:.85rem;color:var(--text);
+  border-bottom:1px solid var(--border);
+}
+.fee-list-row:last-child{border-bottom:none}
+.fee-item-name{flex:1 1 auto;min-width:0;word-break:break-word}
+.fee-item-amt{flex:0 0 auto;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.fee-list-total{
+  font-weight:700;color:var(--navy);background:var(--surface2);
+  border-top:2px solid var(--border-strong,var(--border));border-bottom:none;
+}
 .term-pay-row{display:flex;justify-content:flex-end;margin-top:14px}
 .term-pay-row .btn{padding:11px 20px}
 

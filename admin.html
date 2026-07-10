@@ -665,6 +665,9 @@
       <div class="form-group"><label>Genotype</label>
         <select id="csGenotype"><option value="">Select</option><option>AA</option><option>AS</option><option>SS</option><option>AC</option></select>
       </div>
+      <div class="form-group"><label>Religion</label>
+        <select id="csReligion"><option value="">Select</option><option>Christianity</option><option>Islam</option><option>Other</option></select>
+      </div>
       <div class="form-group"><label>Father's Name</label><input type="text" id="csFatherName" placeholder="Father's full name"/></div>
       <div class="form-group"><label>Mother's Name</label><input type="text" id="csMotherName" placeholder="Mother's full name"/></div>
       <div class="form-group"><label>Phone Number <span style="color:var(--err)">*</span></label><input type="tel" id="csPhone" placeholder="Parent/guardian phone"/></div>
@@ -798,6 +801,9 @@
       </div>
       <div class="form-group"><label>Blood Group</label><input type="text" id="stuBloodGroup" placeholder="e.g. O+"/></div>
       <div class="form-group"><label>Genotype</label><input type="text" id="stuGenotype" placeholder="e.g. AA"/></div>
+      <div class="form-group"><label>Religion</label>
+        <select id="stuReligion"><option value="">Select</option><option>Christianity</option><option>Islam</option><option>Other</option></select>
+      </div>
       <div class="form-group">
         <label>Password</label>
         <div class="pw-wrap">
@@ -1498,6 +1504,7 @@ window.viewApplication = function(id){
       <div class="info-item"><label>Date Submitted</label><span>${dateStr}</span></div>
       <div class="info-item"><label>Blood Group</label><span>${escapeHtml(a.bloodGroup||'—')}</span></div>
       <div class="info-item"><label>Genotype</label><span>${escapeHtml(a.genotype||'—')}</span></div>
+      <div class="info-item"><label>Religion</label><span>${escapeHtml(a.religion||'—')}</span></div>
       ${isSeniorClass(a.classApplied) ? `
       <hr class="info-divider"/>
       <div class="section-sub" style="grid-column:1/-1;margin-top:0">Senior Class Details</div>
@@ -1679,9 +1686,10 @@ window.confirmApprove = async function(){
   if(!a) return;
 
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Enrolling…';
+  let regNumber;
   try{
     // Random unique reg number, not tied to class or a running count
-    const regNumber = await generateUniqueRegNumber();
+    regNumber = await generateUniqueRegNumber();
 
     const studentData = {
       firstName: a.firstName||'',
@@ -1695,6 +1703,7 @@ window.confirmApprove = async function(){
       nationality: a.nationality||'Nigerian',
       bloodGroup:a.bloodGroup||'',
       genotype:  a.genotype||'',
+      religion:  a.religion||'',
       department: a.department||'',
       careerPath: a.careerPath||'',
       careerReason: a.careerReason||'',
@@ -1732,7 +1741,18 @@ window.confirmApprove = async function(){
     // Keep the public homepage student counter (index.html) in sync without
     // ever letting the public read the actual students collection.
     await setDoc(doc(db,'settings','publicStats'), { studentCount: increment(1) }, { merge:true });
+  } catch(e){
+    console.error('Enrolment failed:', e); showToast('Enrolment failed. Please try again.', 'error');
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm &amp; Enrol';
+    return;
+  }
 
+  // The student record is already saved at this point — anything below is
+  // just UI follow-up (toast, email, dashboard refresh). A failure here
+  // must never be reported to the admin as "enrolment failed", since the
+  // student was in fact created.
+  try{
     showToast(`Enrolled! Reg: ${regNumber}`,'success');
     sendCredentialsEmail({
       toEmail: a.parentEmail||'',
@@ -1744,7 +1764,9 @@ window.confirmApprove = async function(){
     closeMo('moApprove');
     await Promise.all([loadApplications(), loadStudents(), loadOverviewStats()]);
   } catch(e){
-    console.error('Enrolment failed:', e); showToast('Enrolment failed. Please try again.', 'error');
+    console.error('Enrolled, but the dashboard refresh failed:', e);
+    showToast(`Enrolled (Reg: ${regNumber}) — refresh the page to see the updated lists.`,'success');
+    closeMo('moApprove');
   } finally{
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm &amp; Enrol';
@@ -1821,6 +1843,7 @@ window.openStudentModal = function(docId){
   document.getElementById('stuDeptGroup').style.display = isSeniorClass(document.getElementById('stuClass').value) ? '' : 'none';
   document.getElementById('stuBloodGroup').value = s.bloodGroup||'';
   document.getElementById('stuGenotype').value   = s.genotype||'';
+  document.getElementById('stuReligion').value   = s.religion||'';
   document.getElementById('stuPassword').value   = '';
   buildSubjectCheckboxes('stuSubjects', s.subjects||[], document.getElementById('stuClass').value);
   renderCompulsoryNote('stuCompNote', document.getElementById('stuClass').value);
@@ -1855,6 +1878,7 @@ window.saveStudentEdits = async function(){
     department: isSeniorClass(document.getElementById('stuClass').value) ? document.getElementById('stuDepartment').value : '',
     bloodGroup: document.getElementById('stuBloodGroup').value.trim(),
     genotype:   document.getElementById('stuGenotype').value.trim(),
+    religion:   document.getElementById('stuReligion').value,
     subjects:   getCheckedSubjects('stuSubjects'),
     hobbies:    getCheckedSubjects('stuHobbies'),
     favoriteSports: getCheckedSubjects('stuSports'),
@@ -1916,6 +1940,7 @@ window.openCreateStudentModal = function(){
   document.getElementById('csDeptGroup').style.display = 'none';
   document.getElementById('csBloodGroup').value = '';
   document.getElementById('csGenotype').value = '';
+  document.getElementById('csReligion').value = '';
   document.getElementById('csSession').value = '2025/2026';
   buildSubjectCheckboxes('csSubjects', [], '');
   renderCompulsoryNote('csCompNote', '');
@@ -2009,9 +2034,10 @@ window.createStudentManually = async function(){
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Creating…';
 
+  let regNumber;
   try{
     // Random unique reg number, not tied to class or a running count
-    const regNumber = await generateUniqueRegNumber();
+    regNumber = await generateUniqueRegNumber();
 
     const session = document.getElementById('csSession').value;
     const payload = {
@@ -2025,6 +2051,7 @@ window.createStudentManually = async function(){
       session,
       bloodGroup: document.getElementById('csBloodGroup').value,
       genotype:   document.getElementById('csGenotype').value,
+      religion:   document.getElementById('csReligion').value,
       fatherName: document.getElementById('csFatherName').value.trim(),
       motherName: document.getElementById('csMotherName').value.trim(),
       phone:      phone,
@@ -2039,13 +2066,26 @@ window.createStudentManually = async function(){
     };
 
     await addDoc(collection(db, 'students'), payload);
+  } catch(e){
+    console.error(e); showToast('Something went wrong. Please try again.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Create Student';
+    return;
+  }
+
+  // The student record is already saved at this point — a failure below is
+  // just a UI refresh glitch, not a lost record, so it must not be reported
+  // to the admin as a creation failure.
+  try{
     showToast(`Student created! Reg No: ${regNumber} — copy this now`, 'success');
     clearCsPassport();
     closeMo('moCreateStudent');
     await loadStudents();
     loadOverviewStats();
   } catch(e){
-    console.error(e); showToast('Something went wrong. Please try again.', 'error');
+    console.error('Student created, but the dashboard refresh failed:', e);
+    showToast(`Student created (Reg No: ${regNumber}) — refresh the page to see the updated list.`, 'success');
+    closeMo('moCreateStudent');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Create Student';

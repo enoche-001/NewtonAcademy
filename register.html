@@ -139,6 +139,15 @@
           <input type="text" id="nationality" value="Nigerian"/>
         </div>
         <div class="fg">
+          <label>Religion</label>
+          <select id="religion">
+            <option value="">Select</option>
+            <option>Christianity</option>
+            <option>Islam</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="fg">
           <label>Blood Group</label>
           <select id="bloodGroup">
             <option value="">Select</option>
@@ -964,6 +973,7 @@ function getFormData(){
     stateOfOrigin:   v('stateOfOrigin'),
     lga:             v('lga'),
     nationality:     v('nationality') || 'Nigerian',
+    religion:        v('religion'),
     bloodGroup:      v('bloodGroup'),
     genotype:        v('genotype'),
     classApplied:    v('classApplied'),
@@ -1216,6 +1226,7 @@ async function verifyAndSubmit(reference){
       stateOfOrigin:   d.stateOfOrigin,
       lga:             d.lga,
       nationality:     d.nationality,
+      religion:        d.religion || '',
       bloodGroup:      d.bloodGroup,
       genotype:        d.genotype,
       classApplied:    d.classApplied,
@@ -1443,7 +1454,7 @@ function checkForDraft(){
 function restoreDraft(draft){
   const f = draft.fields || {};
 
-  const simpleIds = ['firstName','middleName','lastName','gender','stateOfOrigin','nationality',
+  const simpleIds = ['firstName','middleName','lastName','gender','stateOfOrigin','nationality','religion',
     'bloodGroup','genotype','classApplied','department','careerPath','careerReason',
     'prevSchool','lastClass','fatherName','motherName','guardianName','guardianRelationship',
     'primaryPhone','secondaryPhone','parentEmail','homeAddress','emergencyName',

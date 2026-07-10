@@ -228,6 +228,7 @@
               <div class="info-item"><label>State of Origin</label><span id="pfState">—</span></div>
               <div class="info-item"><label>Blood Group</label><span id="pfBloodGroup">—</span></div>
               <div class="info-item"><label>Genotype</label><span id="pfGenotype">—</span></div>
+              <div class="info-item"><label>Religion</label><span id="pfReligion">—</span></div>
             </div>
             <div class="stage-btn-row">
               <button class="btn btn-p" onclick="showProfileStage(2)">Next: Guardian Info
@@ -876,8 +877,8 @@ function renderPayments(feeBlocks){
       </div>`;
     }
 
-    const rows = breakdown.map((item,i)=>`
-      <tr><td class="fee-num-col">${i+1}</td><td>${escapeHtml(item.name)}</td><td class="fee-amt-col">₦${item.amount.toLocaleString()}</td></tr>
+    const rows = breakdown.map(item=>`
+      <div class="fee-list-row"><span class="fee-item-name">${escapeHtml(item.name)}</span><span class="fee-item-amt">₦${item.amount.toLocaleString()}</span></div>
     `).join('');
 
     const payment = findPayment(term);
@@ -901,12 +902,10 @@ function renderPayments(feeBlocks){
 
     return `<div class="term-block">
       <div class="term-block-hdr"><h3>${term} Term — ${displaySession}</h3>${badgeHtml}</div>
-      <div class="twrap">
-        <table class="rc-subj-table fee-table">
-          <thead><tr><th class="fee-num-col">#</th><th>Fee Item</th><th class="fee-amt-col">Amount</th></tr></thead>
-          <tbody>${rows}</tbody>
-          <tfoot><tr class="fee-total-row"><td colspan="2">Total</td><td class="fee-amt-col">₦${total.toLocaleString()}</td></tr></tfoot>
-        </table>
+      <div class="fee-list">
+        <div class="fee-list-hdr"><span>Fee Item</span><span>Amount</span></div>
+        ${rows}
+        <div class="fee-list-row fee-list-total"><span>Total</span><span>₦${total.toLocaleString()}</span></div>
       </div>
       <div class="term-pay-row">${actionHtml}</div>
     </div>`;
@@ -1024,42 +1023,48 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
     return;
   }
   showToast('Verifying payment…', 'success');
+
+  let confirmedAmount = amount; // default to what was charged
+  let verifyStatus = 'pending'; // will upgrade to 'success' if verify passes
+
   try{
-    let confirmedAmount = amount; // default to what was charged
-    let verifyStatus = 'pending'; // will upgrade to 'success' if verify passes
+    const verifyRes = await fetch(VERIFY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference })
+    });
+    const verifyData = await verifyRes.json();
 
-    try{
-      const verifyRes = await fetch(VERIFY_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reference })
-      });
-      const verifyData = await verifyRes.json();
-
-      if(verifyRes.ok && verifyData.status){
-        const verifiedAmountKobo = verifyData.data?.amount;
-        const expectedKobo = Math.round(amount * 100);
-        if(!verifiedAmountKobo || verifiedAmountKobo === expectedKobo){
-          // Amount matches (or server didn't return amount) — treat as confirmed
-          confirmedAmount = verifiedAmountKobo ? verifiedAmountKobo / 100 : amount;
-          verifyStatus = 'success';
-        } else {
-          // Amount mismatch — record as needs_review for admin
-          verifyStatus = 'needs_review';
-        }
+    if(verifyRes.ok && verifyData.status){
+      const verifiedAmountKobo = verifyData.data?.amount;
+      const expectedKobo = Math.round(amount * 100);
+      if(!verifiedAmountKobo || verifiedAmountKobo === expectedKobo){
+        // Amount matches (or server didn't return amount) — treat as confirmed
+        confirmedAmount = verifiedAmountKobo ? verifiedAmountKobo / 100 : amount;
+        verifyStatus = 'success';
+      } else {
+        // Amount mismatch — record as needs_review for admin
+        verifyStatus = 'needs_review';
       }
-      // If verifyRes not ok, we still record with pending status below
-    } catch(verifyErr){
-      // Verify endpoint unreachable — record payment as pending for admin to confirm
-      console.warn('Verify endpoint failed:', verifyErr.message);
     }
+    // If verifyRes not ok, we still record with pending status below
+  } catch(verifyErr){
+    // Verify endpoint unreachable — record payment as pending for admin to confirm
+    console.warn('Verify endpoint failed:', verifyErr.message);
+  }
 
+  // ── Step 1: the actual database write. This is the ONLY step that, if
+  // it fails, means the payment genuinely wasn't recorded — so this is the
+  // only step allowed to show the "contact the office with this reference"
+  // message. Everything after this point (toast, receipt, refresh) is just
+  // UI convenience and must never claim the payment was lost if it wasn't.
+  const newDocRef = doc(db, 'payments', reference);
+  try{
     // Always record the payment so the student is not left without a record.
     // Use the Paystack reference as the doc ID (instead of addDoc's random ID)
     // so that if this function ever runs twice for the same reference
     // (double-click, retry, duplicate callback), the second call overwrites
     // the same document instead of creating a second payment record.
-    const newDocRef = doc(db, 'payments', reference);
     await setDoc(newDocRef, {
       studentId: student.id,
       regNumber: student.regNumber,
@@ -1073,7 +1078,17 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
       status: verifyStatus,
       date: serverTimestamp()
     }, { merge: true });
+  } catch(writeErr){
+    console.error('Payment record write failed:', writeErr);
+    showToast('Payment was made but could not be saved. Please provide this reference to the school office: '+reference, 'error');
+    return;
+  }
 
+  // ── Step 2: display only. The payment is already safely in Firestore at
+  // this point — if anything below throws, tell the student their payment
+  // is fine and just refresh, instead of alarming them with a false
+  // "couldn't be saved" message.
+  try{
     if(verifyStatus === 'success'){
       showToast('Payment successful!', 'success');
     } else if(verifyStatus === 'needs_review'){
@@ -1095,8 +1110,9 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
 
     openReceipt(newDocRef.id);
     loadPayments();
-  } catch(e){
-    showToast('Payment was made but could not be saved. Please provide this reference to the school office: '+reference, 'error');
+  } catch(displayErr){
+    console.error('Payment saved, but the receipt view failed to open:', displayErr);
+    showToast('Payment saved successfully (Ref: '+reference+'). Refresh the page to view your receipt.', 'success');
   }
 }
 
@@ -1185,6 +1201,7 @@ function renderProfileData(data){
   if(stateEl) stateEl.textContent = data.stateOfOrigin || '—';
   document.getElementById('pfBloodGroup').textContent = data.bloodGroup || '—';
   document.getElementById('pfGenotype').textContent = data.genotype || '—';
+  document.getElementById('pfReligion').textContent = data.religion || '—';
 
   const parentDisplay = data.parentName ||
     [data.fatherName, data.motherName].filter(Boolean).join(' / ') || '—';
