@@ -1023,9 +1023,7 @@ window.doLogin = async function(){
   try{
     await signInWithEmailAndPassword(auth, email, pw);
   } catch(e){
-    // TEMP DEBUG: showing the real error so it can be read on mobile
-    // without devtools. Revert to the generic message once diagnosed.
-    showLAlert('DEBUG: ' + e.code + ' — ' + e.message);
+    showLAlert(e.code==='auth/invalid-credential' ? 'Invalid email or password.' : 'Login failed. Try again.');
     btn.disabled = false; btn.textContent = 'Sign In';
   }
 };
