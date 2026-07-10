@@ -669,9 +669,9 @@ tbody tr:hover{background:#f7f9fd}
 .tag-input-row{display:flex;gap:8px}
 .tag-input-row input{flex:1}
 .subj-suggest-dd{
-  display:none;position:absolute;top:calc(100% + 4px);left:0;right:46px;
+  display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
   max-height:190px;overflow-y:auto;background:#fff;border:1.5px solid var(--border);
-  border-radius:var(--r-sm);box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:40;
+  border-radius:var(--r-sm);box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:9999;
 }
 .subj-suggest-dd.show{display:block}
 .subj-suggest-item{padding:9px 12px;font-size:.82rem;color:var(--text);cursor:pointer}
