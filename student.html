@@ -1267,7 +1267,8 @@ function showToast(msg, type='success'){
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
   t.className = 'toast '+type+' show';
-  setTimeout(()=> t.classList.remove('show'), 3200);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove('show'), 3200);
 }
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
