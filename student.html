@@ -359,7 +359,7 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
 // Same Firebase project used by admin.html (school-8b30a)
@@ -375,7 +375,13 @@ const app = initializeApp(cfg);
 // Persistent local cache (IndexedDB) — repeat visits and flaky mobile data
 // read from device storage first instead of waiting on the network.
 const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  // Without this, setDoc/addDoc THROWS if any field being written is
+  // undefined (e.g. student.class missing on some records) instead of
+  // just omitting that field. That silent throw is what was causing
+  // "payment made but could not be saved" on an otherwise-successful
+  // payment — the write never even reached Firestore.
+  ignoreUndefinedProperties: true
 });
 
 // Matches the SHA-256 hashing done in admin.html when a student's
@@ -1067,9 +1073,9 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
     // the same document instead of creating a second payment record.
     await setDoc(newDocRef, {
       studentId: student.id,
-      regNumber: student.regNumber,
-      studentName: student.name,
-      class: student.class,
+      regNumber: student.regNumber || '',
+      studentName: student.name || '',
+      class: student.class || '',
       term,
       session: currentOpenSession || CURRENT_SESSION,
       breakdown,
@@ -1080,7 +1086,7 @@ async function verifyAndRecordPayment(reference, term, breakdown, amount){
     }, { merge: true });
   } catch(writeErr){
     console.error('Payment record write failed:', writeErr);
-    showToast('Payment was made but could not be saved. Please provide this reference to the school office: '+reference, 'error');
+    showToast('Payment made but could not be saved (' + (writeErr.code || writeErr.message || 'unknown error') + '). Please give this reference to the school office: ' + reference, 'error', 9000);
     return;
   }
 
@@ -1263,12 +1269,15 @@ window.showProfileStage = function(n){
 };
 
 /* ============ HELPERS ============ */
-function showToast(msg, type='success'){
+function showToast(msg, type='success', duration){
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
   t.className = 'toast '+type+' show';
   clearTimeout(t._timer);
-  t._timer = setTimeout(()=> t.classList.remove('show'), 3200);
+  // Errors default to staying up much longer than success messages, since
+  // they often contain a reference number the user needs time to read/copy.
+  const ms = duration || (type === 'error' ? 8000 : 3200);
+  t._timer = setTimeout(()=> t.classList.remove('show'), ms);
 }
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
