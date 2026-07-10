@@ -844,23 +844,23 @@
 
     <div class="form-group" style="margin-top:14px">
       <label>Compulsory Subjects <span style="color:var(--soft);font-weight:400">(auto-added for every student in this class)</span></label>
-      <div class="tag-input-row">
-        <input type="text" id="clsCompInput" placeholder="Type a subject and press Enter" list="subjSuggestions"/>
+      <div class="tag-input-row" style="position:relative">
+        <input type="text" id="clsCompInput" placeholder="Type a subject and press Enter" autocomplete="off"/>
         <button type="button" class="btn-cancel" style="flex:none;padding:9px 14px" onclick="addClassTag('compulsory')">Add</button>
+        <div class="subj-suggest-dd" id="clsCompSuggest"></div>
       </div>
       <div class="subj-grid" id="clsCompTags"></div>
     </div>
 
     <div class="form-group" style="margin-top:14px">
       <label>Elective Subjects <span style="color:var(--soft);font-weight:400">(admin picks per student)</span></label>
-      <div class="tag-input-row">
-        <input type="text" id="clsElecInput" placeholder="Type a subject and press Enter" list="subjSuggestions"/>
+      <div class="tag-input-row" style="position:relative">
+        <input type="text" id="clsElecInput" placeholder="Type a subject and press Enter" autocomplete="off"/>
         <button type="button" class="btn-cancel" style="flex:none;padding:9px 14px" onclick="addClassTag('elective')">Add</button>
+        <div class="subj-suggest-dd" id="clsElecSuggest"></div>
       </div>
       <div class="subj-grid" id="clsElecTags"></div>
     </div>
-
-    <datalist id="subjSuggestions"></datalist>
 
     <div class="mactions">
       <button class="btn-cancel" onclick="closeMo('moClass')">Cancel</button>
@@ -987,6 +987,7 @@ setPersistence(auth, browserSessionPersistence).catch(()=>{});
 // under the "Classes" section and loaded live from Firestore — see loadClasses().
 let CLASS_DATA = {};      // { "SS1A": { compulsory:[...], elective:[...] }, ... }
 let CLASS_NAMES = [];     // sorted list of class names
+let ALL_SUBJECTS = [];    // flat sorted list of every subject seen across all classes, for autocomplete
 // "Senior" classes are anything starting with SS (e.g. SS1A, SS2B) — mirrors register.html
 function isSeniorClass(className){
   return /^SS/i.test((className||'').trim());
@@ -1155,8 +1156,7 @@ function populateClassDropdowns(){
   // Suggestions for the free-text subject inputs in the Class modal
   const allSubjects = new Set();
   Object.values(CLASS_DATA).forEach(c=>{ (c.compulsory||[]).forEach(s=>allSubjects.add(s)); (c.elective||[]).forEach(s=>allSubjects.add(s)); });
-  const dl = document.getElementById('subjSuggestions');
-  if(dl) dl.innerHTML = [...allSubjects].sort().map(s=>`<option value="${escapeAttr(s)}"></option>`).join('');
+  ALL_SUBJECTS = [...allSubjects].sort();
 }
 
 function renderClassesTable(){
@@ -1208,6 +1208,7 @@ window.addClassTag = function(type){
   if(!arr.includes(val)) arr.push(val);
   input.value = '';
   renderClassFormTags();
+  hideSubjSuggest(inputId);
   input.focus();
 };
 window.removeClassTag = function(type, subject){
@@ -1218,8 +1219,51 @@ window.removeClassTag = function(type, subject){
 ['clsCompInput','clsElecInput'].forEach(id=>{
   document.getElementById(id)?.addEventListener('keydown', e=>{
     if(e.key==='Enter'){ e.preventDefault(); addClassTag(id==='clsCompInput'?'compulsory':'elective'); }
+    if(e.key==='Escape'){ hideSubjSuggest(id); }
   });
 });
+
+// Custom subject-suggestion dropdown (native <input list> datalists render unreliably
+// inside scrollable modals on mobile browsers, so we build our own here).
+function subjSuggestIdFor(inputId){ return inputId==='clsCompInput' ? 'clsCompSuggest' : 'clsElecSuggest'; }
+function hideSubjSuggest(inputId){
+  const dd = document.getElementById(subjSuggestIdFor(inputId));
+  if(dd){ dd.innerHTML=''; dd.classList.remove('show'); }
+}
+function renderSubjSuggest(inputId){
+  const input = document.getElementById(inputId);
+  const dd = document.getElementById(subjSuggestIdFor(inputId));
+  if(!input || !dd) return;
+  const q = input.value.trim().toLowerCase();
+  const type = inputId==='clsCompInput' ? 'compulsory' : 'elective';
+  const already = type==='compulsory' ? classFormCompulsory : classFormElective;
+  const matches = ALL_SUBJECTS.filter(s => !already.includes(s) && (!q || s.toLowerCase().includes(q))).slice(0, 8);
+  if(!matches.length){ hideSubjSuggest(inputId); return; }
+  dd.innerHTML = matches.map(s=>`<div class="subj-suggest-item" data-val="${escapeAttr(s)}">${escapeHtml(s)}</div>`).join('');
+  dd.classList.add('show');
+  dd.querySelectorAll('.subj-suggest-item').forEach(item=>{
+    item.addEventListener('mousedown', e=>{
+      e.preventDefault();
+      input.value = item.dataset.val;
+      addClassTag(type);
+      hideSubjSuggest(inputId);
+    });
+  });
+}
+['clsCompInput','clsElecInput'].forEach(id=>{
+  const input = document.getElementById(id);
+  if(!input) return;
+  input.addEventListener('input', ()=>renderSubjSuggest(id));
+  input.addEventListener('focus', ()=>renderSubjSuggest(id));
+});
+document.addEventListener('click', e=>{
+  ['clsCompInput','clsElecInput'].forEach(id=>{
+    const input = document.getElementById(id);
+    const dd = document.getElementById(subjSuggestIdFor(id));
+    if(input && dd && !input.contains(e.target) && !dd.contains(e.target)) hideSubjSuggest(id);
+  });
+});
+
 
 window.openCreateClassModal = function(){
   document.getElementById('moClassTitle').textContent = 'Add Class';
