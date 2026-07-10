@@ -1336,21 +1336,12 @@ window.triggerDeleteClass = function(name){
 
 /* ============ OVERVIEW ============ */
 async function loadOverviewStats(){
+  // Each stat is fetched independently so that one failing collection
+  // (e.g. a missing index, a permissions hiccup) doesn't leave the
+  // entire dashboard stuck on "—" forever.
   try{
-    const [stuSnap, appSnap] = await Promise.all([
-      getDocs(collection(db,'students')),
-      getDocs(collection(db,'applications'))
-    ]);
-    const totalStu = stuSnap.size;
-    document.getElementById('s-students').textContent = totalStu.toLocaleString();
-    const pending = appSnap.docs.filter(d=>(d.data().status||'pending')==='pending').length;
-    document.getElementById('s-applications').textContent = pending;
-    if(pending>0){
-      const el=document.getElementById('s-apps-trend');
-      el.className='stat-trend trend-down';
-      el.innerHTML='<svg viewBox="0 0 24 24"><polyline points="18 9 12 15 6 9"/></svg><span>'+pending+' pending</span>';
-    }
-    document.getElementById('s-payments').textContent = '₦0';
+    const stuSnap = await getDocs(collection(db,'students'));
+    document.getElementById('s-students').textContent = stuSnap.size.toLocaleString();
     // Class breakdown bar chart
     const classCounts={};
     CLASS_NAMES.forEach(c=>classCounts[c]=0);
@@ -1365,12 +1356,37 @@ async function loadOverviewStats(){
           <div class="ov-bar-track"><div class="ov-bar-fill ${fills[i%fills.length]}" style="width:${Math.round(classCounts[c]/maxCount*100)}%"></div></div>
         </div>`).join('') : '<p class="empty">No classes created yet</p>';
     }
-    // Results count
-    try{
-      const resSnap=await getDocs(collection(db,'results'));
-      document.getElementById('s-results').textContent=resSnap.size.toLocaleString();
-    } catch(e){ document.getElementById('s-results').textContent='—'; }
-  } catch(e){ console.warn('Stats load skipped:',e.message); }
+  } catch(e){
+    console.warn('Student stats failed:', e.message);
+    document.getElementById('s-students').textContent = '0';
+    const barList=document.getElementById('classBarList');
+    if(barList) barList.innerHTML = '<p class="empty">Couldn\'t load enrolment data</p>';
+  }
+
+  try{
+    const appSnap = await getDocs(collection(db,'applications'));
+    const pending = appSnap.docs.filter(d=>(d.data().status||'pending')==='pending').length;
+    document.getElementById('s-applications').textContent = pending;
+    if(pending>0){
+      const el=document.getElementById('s-apps-trend');
+      el.className='stat-trend trend-down';
+      el.innerHTML='<svg viewBox="0 0 24 24"><polyline points="18 9 12 15 6 9"/></svg><span>'+pending+' pending</span>';
+    }
+  } catch(e){
+    console.warn('Application stats failed:', e.message);
+    document.getElementById('s-applications').textContent = '0';
+  }
+
+  // Total Payments Collected is computed and written by loadPayments()
+  // from the real payments collection — it must NOT be touched here.
+  // (Previously this hard-coded '₦0' and raced with loadPayments() since
+  // both run in the same Promise.all, which is why the card always
+  // showed ₦0 regardless of actual collections.)
+
+  try{
+    const resSnap=await getDocs(collection(db,'results'));
+    document.getElementById('s-results').textContent=resSnap.size.toLocaleString();
+  } catch(e){ document.getElementById('s-results').textContent='0'; }
 }
 
 /* ============ APPLICATIONS ============ */

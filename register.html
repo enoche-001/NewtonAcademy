@@ -1259,9 +1259,6 @@ async function verifyAndSubmit(reference){
     const guardianDisplay = d.guardianName || d.fatherName || d.motherName || '—';
     const amountPaidNaira = verifiedKobo ? verifiedKobo / 100 : 10000;
     const amountStr = '₦' + amountPaidNaira.toLocaleString('en-NG');
-    const statusText = paymentStatus === 'success' ? 'Paid ✓'
-      : paymentStatus === 'needs_review' ? 'Paid — Under Review'
-      : 'Paid — Pending Verification';
     const dateStr = new Date().toLocaleDateString('en-NG', {day:'numeric', month:'short', year:'numeric'});
 
     document.getElementById('rcvRef').textContent        = finalDocId;
@@ -1278,16 +1275,10 @@ async function verifyAndSubmit(reference){
     document.getElementById('rcvTotalPaid').textContent  = amountStr;
     document.getElementById('rcvPayRef').textContent     = reference;
     document.getElementById('rcvPhoneInline').textContent = d.primaryPhone;
-    // Payment status is shown as part of the meta grid via rcvStatus above;
-    // the fee table always reflects what was actually charged, so add a
-    // subtle note when it wasn't a clean auto-verified success.
-    if(paymentStatus !== 'success'){
-      const noteRow = document.getElementById('rcvPayRef').closest('div');
-      const note = document.createElement('span');
-      note.style.cssText = 'display:block;font-size:.68rem;color:var(--warn);font-weight:600;margin-top:2px';
-      note.textContent = statusText;
-      noteRow.appendChild(note);
-    }
+    // Note: the receipt intentionally does not surface the internal
+    // payment verification status (success / needs_review / pending) to
+    // parents — that distinction is for the admin's Payments tab only.
+    // The receipt just confirms the payment reference and amount paid.
 
     showScreen(3);
 

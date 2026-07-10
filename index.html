@@ -23,6 +23,17 @@
   <div class="ann-popup-date" id="ann-popup-date"></div>
 </div>
 
+<!-- ═══════ ANNOUNCEMENT DETAIL MODAL ═══════ -->
+<div id="ann-modal-overlay" class="ann-modal-overlay">
+  <div class="ann-modal" role="dialog" aria-modal="true" aria-labelledby="ann-modal-title">
+    <button class="ann-modal-close" id="ann-modal-close" aria-label="Close">✕</button>
+    <div id="ann-modal-pin" class="ann-modal-pin">Pinned</div>
+    <div class="ann-modal-date" id="ann-modal-date"></div>
+    <h3 id="ann-modal-title"></h3>
+    <p id="ann-modal-body"></p>
+  </div>
+</div>
+
 <!-- ═══════ SCROLL PROGRESS ═══════ -->
 <div id="scrollProgress" aria-hidden="true"></div>
 
@@ -633,21 +644,43 @@ function truncate(str, n){
   if(!str) return '';
   return str.length > n ? str.slice(0, n).trim() + '…' : str;
 }
+let announcementItems = [];
 function renderAnnouncements(items){
+  announcementItems = items;
   const grid = document.getElementById('annGrid');
   if(!items.length){
     grid.innerHTML = `<div class="ann-empty">No announcements at this time.</div>`;
     return;
   }
-  grid.innerHTML = items.map(a => `
-    <div class="ann-card">
+  grid.innerHTML = items.map((a, i) => `
+    <div class="ann-card" data-idx="${i}">
       ${a.pinned ? '<div class="ann-pin">Pinned</div>' : ''}
       <div class="ann-date">${formatDate(a.date)}</div>
       <h3>${escapeHtml(a.title || 'Untitled')}</h3>
       <p>${escapeHtml(truncate(a.body || '', 120))}</p>
+      ${(a.body || '').length > 120 ? '<span class="ann-more">See more →</span>' : ''}
     </div>
   `).join('');
+  grid.querySelectorAll('.ann-card').forEach(card=>{
+    card.addEventListener('click', ()=> openAnnouncementModal(announcementItems[+card.dataset.idx]));
+  });
 }
+function openAnnouncementModal(a){
+  if(!a) return;
+  document.getElementById('ann-modal-title').textContent = a.title || 'Untitled';
+  document.getElementById('ann-modal-body').textContent = a.body || '';
+  document.getElementById('ann-modal-date').textContent = formatDate(a.date);
+  document.getElementById('ann-modal-pin').classList.toggle('show', !!a.pinned);
+  document.getElementById('ann-modal-overlay').classList.add('visible');
+}
+function closeAnnouncementModal(){
+  document.getElementById('ann-modal-overlay').classList.remove('visible');
+}
+document.getElementById('ann-modal-close')?.addEventListener('click', closeAnnouncementModal);
+document.getElementById('ann-modal-overlay')?.addEventListener('click', e=>{
+  if(e.target.id === 'ann-modal-overlay') closeAnnouncementModal();
+});
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeAnnouncementModal(); });
 (async function loadAnnouncements(){
   const grid = document.getElementById('annGrid');
   try{
@@ -691,8 +724,17 @@ function renderAnnouncements(items){
     // Show immediately on load
     const popup = document.getElementById('ann-popup');
     popup.classList.add('visible');
+    // Clicking the notice (but not the close button) opens the full text
+    if((pinned.body || '').length > 160){
+      popup.style.cursor = 'pointer';
+      popup.addEventListener('click', (e) => {
+        if(e.target.id === 'ann-popup-close') return;
+        openAnnouncementModal(pinned);
+      });
+    }
     // Close only when user dismisses
-    document.getElementById('ann-popup-close').addEventListener('click', () => {
+    document.getElementById('ann-popup-close').addEventListener('click', (e) => {
+      e.stopPropagation();
       popup.classList.remove('visible');
     });
   } catch(e){
