@@ -1,13 +1,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Core palette */
+  /* Core palette — shared brand: navy (primary) + gold (accent) */
   --ink:#0d1117;
   --ink2:#1c2333;
   --ink3:#2d3748;
-  --indigo:#4f6ef7;
-  --indigo-d:#3b57e8;
-  --indigo-s:#eef1fe;
-  --indigo-m:#c7d0fb;
+  --indigo:#0d1f3c;      /* navy — primary interactive color */
+  --indigo-d:#162e52;    /* navy-mid — hover/darker shade */
+  --indigo-s:#fdf8ec;    /* gold-tinted light background */
+  --indigo-m:#f0d98a;    /* gold-tinted border */
+  --accent:#b8902a;      /* warm gold — the signature accent */
 
   /* Surfaces */
   --bg:#f4f6f9;
@@ -21,11 +22,11 @@
   --muted:#6b7a99;
   --soft:#8896ae;
 
-  /* Sidebar */
-  --sb:#111827;
-  --sb2:#1a2236;
+  /* Sidebar — navy, matching the student dashboard */
+  --sb:#0d1f3c;
+  --sb2:#162e52;
   --sb-border:rgba(255,255,255,.07);
-  --sb-active:rgba(79,110,247,.18);
+  --sb-active:rgba(255,255,255,.13);
   --sb-hover:rgba(255,255,255,.06);
 
   /* Status */
@@ -48,7 +49,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 #loginScreen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
   padding:24px;background:var(--bg);
-  background-image:radial-gradient(ellipse at 50% 0%, rgba(79,110,247,.09) 0%, transparent 55%);
+  background-image:radial-gradient(ellipse at 50% 0%, rgba(13,31,60,.09) 0%, transparent 55%);
 }
 .login-card{
   width:400px;max-width:100%;
@@ -78,7 +79,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   transition:border-color .15s,box-shadow .15s,background .15s;outline:none;
 }
 .fg input::placeholder{color:#9aa7bd}
-.fg input:focus{border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+.fg input:focus{border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(13,31,60,.12)}
 
 .btn-login{
   width:100%;padding:13px;margin-top:6px;
@@ -88,7 +89,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   transition:background .15s,box-shadow .15s,transform .1s;
   letter-spacing:.01em;
 }
-.btn-login:hover{background:var(--indigo-d);box-shadow:0 4px 16px rgba(79,110,247,.35)}
+.btn-login:hover{background:var(--indigo-d);box-shadow:0 4px 16px rgba(13,31,60,.35)}
 .btn-login:active{transform:translateY(1px)}
 .btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
@@ -171,10 +172,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item.active{
   background:var(--sb-active);color:#fff;font-weight:600;
 }
-/* Indigo left accent bar for active */
+/* Gold left accent bar for active nav item — pops against the navy sidebar */
 .nav-item.active::before{
   content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);
-  width:3px;height:20px;background:var(--indigo);border-radius:0 3px 3px 0;
+  width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0;
 }
 .nav-item svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;opacity:.8}
 .nav-item.active svg{opacity:1}
@@ -190,7 +191,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 }
 .uav{
   width:30px;height:30px;border-radius:50%;
-  background:var(--indigo);
+  background:var(--accent);
   display:flex;align-items:center;justify-content:center;
   font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;
 }
@@ -234,14 +235,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   position:relative;overflow:hidden;
 }
 .stat-card::after{display:none}
-.stat-card:hover{border-color:var(--indigo-m);box-shadow:0 4px 20px rgba(79,110,247,.09)}
+.stat-card:hover{border-color:var(--indigo-m);box-shadow:0 4px 20px rgba(13,31,60,.09)}
 
 .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .stat-ic{
   width:38px;height:38px;border-radius:var(--r-sm);
   display:flex;align-items:center;justify-content:center;
 }
-.stat-ic.ic-blue{background:#eef1fe;border:1px solid var(--indigo-m)}
+.stat-ic.ic-blue{background:#fdf8ec;border:1px solid var(--indigo-m)}
 .stat-ic.ic-green{background:#ecfdf5;border:1px solid #a7f3d0}
 .stat-ic.ic-gold{background:#fffbeb;border:1px solid #fde68a}
 .stat-ic.ic-purple{background:#f5f3ff;border:1px solid #ddd6fe}
@@ -369,7 +370,7 @@ tbody tr:hover{background:#f7f9fd}
 .btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 
 .btn-p,.btn-primary{background:var(--indigo);color:#fff}
-.btn-p:hover,.btn-primary:hover{background:var(--indigo-d);box-shadow:0 3px 12px rgba(79,110,247,.3)}
+.btn-p:hover,.btn-primary:hover{background:var(--indigo-d);box-shadow:0 3px 12px rgba(13,31,60,.3)}
 .btn-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-b)}.btn-ok:hover{background:#d1fae5}
 .btn-danger{background:var(--err-bg);color:var(--err);border:1px solid var(--err-b)}.btn-danger:hover{background:#fee2e2}
 .btn-edit{background:var(--bg);color:var(--ink3);border:1px solid var(--border)}.btn-edit:hover{border-color:var(--indigo-m);background:var(--indigo-s);color:var(--indigo)}
@@ -411,7 +412,7 @@ tbody tr:hover{background:#f7f9fd}
   outline:none;transition:border-color .14s,background .14s;
 }
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{
-  border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(79,110,247,.09);
+  border-color:var(--indigo);background:var(--white);box-shadow:0 0 0 3px rgba(13,31,60,.09);
 }
 
 
@@ -542,6 +543,7 @@ tbody tr:hover{background:#f7f9fd}
 .toast svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
 .toast.success{background:var(--ok-bg);border:1px solid var(--ok-b);color:var(--ok)}
 .toast.error{background:var(--err-bg);border:1px solid var(--err-b);color:var(--err)}
+.toast.warning{background:var(--warn-bg);border:1px solid var(--warn-b);color:var(--warn)}
 
 /* ═══════════════════════════════════════
    MISC
@@ -570,8 +572,24 @@ tbody tr:hover{background:#f7f9fd}
 ::-webkit-scrollbar-thumb{background:rgba(107,122,153,.2);border-radius:10px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(107,122,153,.35)}
 
-/* ─ App / student modals ─ */
+/* App / student modals */
 .mbox-lg{width:660px}
+
+/* Document upload — dropzone + preview (Create Student passport upload) */
+.doc-dropzone-sm{
+  border:2px dashed var(--border);border-radius:11px;padding:18px;
+  text-align:center;cursor:pointer;background:var(--bg);transition:all .2s;
+}
+.doc-dropzone-label{font-size:.8rem;font-weight:600;color:var(--text)}
+.doc-dropzone-hint{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+.doc-upload-preview{display:none;margin-top:10px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px}
+.doc-upload-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)}
+.doc-upload-info{flex:1;min-width:0}
+.doc-upload-name{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-upload-size{font-size:.72rem;color:var(--muted);margin-top:2px}
+.doc-upload-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px}
+.doc-upload-error{display:none;font-size:.75rem;color:var(--err);margin-top:6px}
 
 /* Uploaded documents — clean tappable chips, no raw filenames shown */
 .doc-section{margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
@@ -593,16 +611,19 @@ tbody tr:hover{background:#f7f9fd}
   cursor:pointer;transition:all .15s;user-select:none;
 }
 .doc-chip:hover{border-color:var(--indigo-m);background:var(--indigo-s)}
-.doc-chip-icon{font-size:1.15rem;line-height:1}
+.doc-chip-icon{display:flex;flex-shrink:0}
+.doc-chip-icon svg{width:18px;height:18px;fill:none;stroke:var(--indigo);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .doc-chip-label{font-size:.82rem;font-weight:600;color:var(--text)}
 .doc-chip-label em{font-style:normal;font-weight:500;color:var(--muted);font-size:.76rem;margin-left:4px}
 .doc-chip-arrow{margin-left:2px;color:var(--soft);font-size:1rem}
 .doc-chip-empty{font-size:.8rem;color:var(--muted);padding:10px 2px}
 .doc-chip-warn{
+  display:flex;align-items:center;gap:8px;
   font-size:.78rem;font-weight:600;color:var(--err);
   background:var(--err-bg);border:1.5px solid var(--err-b);border-radius:var(--r-md);
   padding:10px 14px;
 }
+.doc-chip-warn svg{width:16px;height:16px;fill:none;stroke:var(--err);stroke-width:2;flex-shrink:0}
 
 /* In-page document viewer — replaces the old "open new tab" popup so
    there's always a visible Close/Cancel control */
@@ -623,8 +644,11 @@ tbody tr:hover{background:#f7f9fd}
   display:flex;align-items:center;justify-content:center;overflow:auto;
 }
 .doc-preview-body img{max-width:100%;max-height:70vh;display:block;margin:0 auto;border-radius:6px}
-.doc-preview-body iframe{width:100%;height:70vh;border:none;border-radius:6px;background:#fff}
-@media(max-width:640px){.mbox-doc{padding:16px}.doc-preview-body{min-height:220px}.doc-preview-body iframe{height:60vh}}
+.doc-preview-body-pdf{display:block;overflow-y:auto;padding:14px;align-items:stretch}
+.doc-pdf-page{max-width:100%;height:auto;display:block;margin:0 auto 14px;box-shadow:0 2px 10px rgba(0,0,0,.15);border-radius:4px}
+.doc-pdf-status{color:var(--muted);font-size:.85rem;padding:50px 20px;text-align:center;width:100%}
+.doc-pdf-error{color:var(--err)}
+@media(max-width:640px){.mbox-doc{padding:16px}.doc-preview-body{min-height:220px}}
 
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:16px}
 .info-item label{display:block;font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}

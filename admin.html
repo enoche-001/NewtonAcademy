@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="admin.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -673,20 +674,20 @@
 
     <div class="form-group" style="margin-top:12px">
       <label>Passport Photo</label>
-      <div id="csPassportDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:18px;text-align:center;cursor:pointer;background:var(--bg);transition:all .2s" onclick="document.getElementById('csPassportFileInput').click()">
+      <div id="csPassportDropzone" class="doc-dropzone-sm" onclick="document.getElementById('csPassportFileInput').click()">
         <input type="file" id="csPassportFileInput" accept="image/*" style="display:none" onchange="handleCsPassportSelect(this)"/>
-        <div style="font-size:.8rem;font-weight:600;color:var(--text)">Click to select passport photo</div>
-        <div style="font-size:.72rem;color:var(--muted);margin-top:2px">JPG, PNG or WEBP, under 5MB</div>
+        <div class="doc-dropzone-label">Click to select passport photo</div>
+        <div class="doc-dropzone-hint">JPG, PNG or WEBP, under 5MB</div>
       </div>
-      <div id="csPassportPreview" style="display:none;margin-top:10px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
-        <img id="csPassportThumb" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)" src="" alt="preview"/>
-        <div style="flex:1;min-width:0">
-          <div id="csPassportFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-          <div id="csPassportFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+      <div id="csPassportPreview" class="doc-upload-preview">
+        <img id="csPassportThumb" class="doc-upload-thumb" src="" alt="preview"/>
+        <div class="doc-upload-info">
+          <div id="csPassportFileName" class="doc-upload-name"></div>
+          <div id="csPassportFileSize" class="doc-upload-size"></div>
         </div>
-        <button onclick="clearCsPassport()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+        <button onclick="clearCsPassport()" class="doc-upload-remove">✕</button>
       </div>
-      <div id="csPassportError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+      <div id="csPassportError" class="doc-upload-error"></div>
     </div>
 
     <div class="form-group" style="margin-top:12px">
@@ -698,7 +699,7 @@
     </div>
 
     <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.78rem;color:var(--muted)">
-      <strong style="color:var(--text)">📋 Note:</strong> A reg number will be auto-generated on save. Copy it from the success notification and give it to the student along with their password.
+      <strong style="color:var(--text)">Note:</strong> A reg number will be auto-generated on save. Copy it from the success notification and give it to the student along with their password.
     </div>
 
     <div class="mo-actions">
@@ -889,7 +890,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyCtUPXwPHj0QTU5CCGYkGt4tIFDPBnt3no",
@@ -901,7 +902,12 @@ const cfg = {
 };
 const app = initializeApp(cfg);
 const auth = getAuth(app);
-const db = getFirestore(app);
+// Persistent local cache (IndexedDB) — reads are served from device storage
+// first when available, so the dashboard survives flaky connections and
+// repeat visits load noticeably faster.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 
 /* ══════════════════════════════════════════
    EMAILJS — approval-success email only
@@ -1024,7 +1030,7 @@ window.doLogin = async function(){
 function showLAlert(msg){ document.getElementById('lMsg').textContent = msg; document.getElementById('lAlert').classList.add('show'); }
 
 window.doLogout = function(){
-  if(confirm('Sign out of the admin portal?')) signOut(auth);
+  showDlg('Sign out?', 'You will need to sign in again to access the admin portal.', ()=>{ closeDlg(); signOut(auth); });
 };
 
 document.getElementById('pwIn')?.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
@@ -1047,11 +1053,65 @@ window.switchTab = (sec)=>{
 window.openSidebar = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sbOv').classList.add('open'); };
 window.closeSidebar = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); };
 
-/* ============ LOAD ALL ============ */
+/* ============ LOAD ALL (cache-first for speed) ============
+   On login we instantly repaint the dashboard from the last-saved
+   snapshot in localStorage (if any) so the admin sees data immediately
+   instead of staring at empty tables while Firestore responds. The real
+   network fetch still runs right after and silently refreshes everything,
+   then re-saves the snapshot. */
+const DASH_CACHE_KEY = 'na_admin_cache_v1';
+
+function hydrateFromCache(){
+  let raw;
+  try{ raw = localStorage.getItem(DASH_CACHE_KEY); } catch(e){ return false; }
+  if(!raw) return false;
+  try{
+    const c = JSON.parse(raw);
+    if(!c || !c.savedAt) return false;
+    CLASS_DATA = c.CLASS_DATA || {};
+    CLASS_NAMES = c.CLASS_NAMES || [];
+    allAnnouncements = c.allAnnouncements || [];
+    allApplications = c.allApplications || [];
+    allStudents = c.allStudents || [];
+    allPayments = c.allPayments || [];
+    populateClassDropdowns();
+    renderClassesTable();
+    renderApplications();
+    renderStudents();
+    renderAnnouncements();
+    renderPayments();
+    if(c.stats){
+      const elS=document.getElementById('s-students'), elA=document.getElementById('s-applications'),
+            elR=document.getElementById('s-results'), bar=document.getElementById('classBarList');
+      if(elS) elS.textContent = c.stats.students;
+      if(elA) elA.textContent = c.stats.pending;
+      if(elR) elR.textContent = c.stats.results;
+      if(bar && c.stats.barHtml) bar.innerHTML = c.stats.barHtml;
+    }
+    return true;
+  } catch(e){ return false; }
+}
+
+function persistCache(){
+  try{
+    const stats = {
+      students: document.getElementById('s-students')?.textContent || '',
+      pending: document.getElementById('s-applications')?.textContent || '',
+      results: document.getElementById('s-results')?.textContent || '',
+      barHtml: document.getElementById('classBarList')?.innerHTML || ''
+    };
+    localStorage.setItem(DASH_CACHE_KEY, JSON.stringify({
+      CLASS_DATA, CLASS_NAMES, allAnnouncements, allApplications, allStudents, allPayments, stats, savedAt: Date.now()
+    }));
+  } catch(e){ /* storage unavailable or full — safe to ignore */ }
+}
+
 async function loadAll(){
+  const hadCache = hydrateFromCache(); // instant repaint from last snapshot, if any
   await loadClasses(); // must resolve first — everything else depends on CLASS_NAMES/CLASS_DATA
   setDefaultAnnDate();
   await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadPaymentAccessSettings(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
+  persistCache();
 }
 
 /* ============ CLASSES ============ */
@@ -1205,7 +1265,7 @@ window.saveClass = async function(){
     closeMo('moClass');
     await loadClasses();
   } catch(e){
-    showToast('Save failed: '+e.message, 'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Class';
@@ -1218,7 +1278,7 @@ window.triggerDeleteClass = function(name){
       await deleteDoc(doc(db,'classes',name));
       showToast('Class deleted', 'success');
       await loadClasses();
-    } catch(e){ showToast('Failed: '+e.message, 'error'); }
+    } catch(e){ showToast('Something went wrong. Please try again.', 'error'); console.error(e); }
     closeDlg();
   });
 };
@@ -1346,12 +1406,12 @@ window.viewApplication = function(id){
   // (not a new browser tab), with a proper Close button.
   const lastResultChip = a.lastSchoolResult
     ? `<div class="doc-chip" onclick="openLastResultDoc()">
-         <span class="doc-chip-icon">📄</span>
+         <span class="doc-chip-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
          <span class="doc-chip-label">Last School Result<em>(${a.lastSchoolResultType==='application/pdf' ? 'PDF' : 'Image'})</em></span>
          <span class="doc-chip-arrow">›</span>
        </div>`
     : (isNewSS1(a.classApplied)
-        ? `<div class="doc-chip-warn">⚠ No Last School Result uploaded — required for new SS1 applicants</div>`
+        ? `<div class="doc-chip-warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>No Last School Result uploaded — required for new SS1 applicants</div>`
         : '');
 
   const documentsSection = (passportPreview || lastResultChip)
@@ -1414,8 +1474,43 @@ window.viewApplication = function(id){
   openMo('moAppView');
 };
 
+// pdf.js — mobile Chrome has no built-in PDF viewer for <iframe>/<embed>,
+// so PDFs are rendered page-by-page onto canvases for a real inline preview.
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+let _pdfRenderToken = 0;
+async function renderPdfPreview(blobUrl){
+  const token = ++_pdfRenderToken;
+  const container = document.getElementById('moDocPreviewBody');
+  container.className = 'doc-preview-body doc-preview-body-pdf';
+  container.innerHTML = '<div class="doc-pdf-status">Loading PDF preview…</div>';
+  try{
+    if(!window.pdfjsLib) throw new Error('PDF viewer failed to load');
+    const pdf = await pdfjsLib.getDocument(blobUrl).promise;
+    if(token !== _pdfRenderToken) return;
+    container.innerHTML = '';
+    for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
+      const page = await pdf.getPage(pageNum);
+      if(token !== _pdfRenderToken) return;
+      const viewport = page.getViewport({scale:1.4});
+      const canvas = document.createElement('canvas');
+      canvas.className = 'doc-pdf-page';
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+      if(token !== _pdfRenderToken) return;
+      container.appendChild(canvas);
+    }
+  } catch(e){
+    if(token !== _pdfRenderToken) return;
+    container.innerHTML = `<div class="doc-pdf-status doc-pdf-error">Couldn't preview this PDF here. Use "Open in New Tab" to view it.</div>`;
+  }
+}
+
 // Converts a base64 data: URI into a Blob so the browser can render it
-// as a real file inside the in-page viewer (image <img> or PDF <iframe>).
+// as a real file inside the in-page viewer (image <img> or PDF canvases).
 function dataURLtoBlob(dataUrl){
   const [header, base64] = dataUrl.split(',');
   const mimeMatch = header.match(/data:(.*?);base64/);
@@ -1440,19 +1535,24 @@ window.openDocBlob = function(dataUrl, mime, title){
     const isPdf = (mime||'').includes('pdf');
 
     document.getElementById('moDocPreviewTitle').textContent = title || 'Document';
-    document.getElementById('moDocPreviewBody').innerHTML = isPdf
-      ? `<iframe src="${blobUrl}" title="${escapeAttr(title||'Document')}"></iframe>`
-      : `<img src="${blobUrl}" alt="${escapeAttr(title||'Document')}"/>`;
+    if(isPdf){
+      openMo('moDocPreview');
+      renderPdfPreview(blobUrl);
+    } else {
+      const body = document.getElementById('moDocPreviewBody');
+      body.className = 'doc-preview-body';
+      body.innerHTML = `<img src="${blobUrl}" alt="${escapeAttr(title||'Document')}"/>`;
+      openMo('moDocPreview');
+    }
     document.getElementById('moDocPreviewOpenBtn').onclick = () => window.open(blobUrl, '_blank');
-
-    openMo('moDocPreview');
   } catch(e){
-    showToast('Could not open document: ' + e.message, 'error');
+    console.error('Could not open document:', e); showToast('Could not open document. Please try again.', 'error');
   }
 };
 
 window.closeDocPreview = function(){
   closeMo('moDocPreview');
+  _pdfRenderToken++; // invalidate any PDF still rendering
   document.getElementById('moDocPreviewBody').innerHTML = '';
   if(_docPreviewBlobUrl){ URL.revokeObjectURL(_docPreviewBlobUrl); _docPreviewBlobUrl = null; }
 };
@@ -1477,7 +1577,7 @@ window.triggerReject = function(){
       closeMo('moAppView');
       await loadApplications();
       loadOverviewStats();
-    } catch(e){ showToast('Failed: '+e.message,'error'); }
+    } catch(e){ showToast('Something went wrong. Please try again.', 'error'); console.error(e); }
     closeDlg();
   });
 };
@@ -1562,6 +1662,9 @@ window.confirmApprove = async function(){
     const regId = regNumber.replace(/\//g,'-');
     await setDoc(doc(db,'students',regId), studentData);
     await updateDoc(doc(db,'applications',currentAppId), {status:'approved', regNumber});
+    // Keep the public homepage student counter (index.html) in sync without
+    // ever letting the public read the actual students collection.
+    await setDoc(doc(db,'settings','publicStats'), { studentCount: increment(1) }, { merge:true });
 
     showToast(`Enrolled! Reg: ${regNumber}`,'success');
     sendCredentialsEmail({
@@ -1574,7 +1677,7 @@ window.confirmApprove = async function(){
     closeMo('moApprove');
     await Promise.all([loadApplications(), loadStudents(), loadOverviewStats()]);
   } catch(e){
-    showToast('Enrolment failed: '+e.message,'error');
+    console.error('Enrolment failed:', e); showToast('Enrolment failed. Please try again.', 'error');
   } finally{
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm &amp; Enrol';
@@ -1593,7 +1696,8 @@ async function loadStudents(){
     allStudents.sort((a,b)=>(a.regNumber||'').localeCompare(b.regNumber||''));
     renderStudents();
   } catch(e){
-    tbody.innerHTML=`<tr><td colspan="6" class="empty"><p>Failed to load: ${escapeHtml(e.message)}</p></td></tr>`;
+    console.error('Could not load students:', e);
+    tbody.innerHTML=`<tr><td colspan="6" class="empty"><p>Couldn't load students. Please refresh the page.</p></td></tr>`;
   }
 }
 
@@ -1702,7 +1806,7 @@ window.saveStudentEdits = async function(){
     await loadStudents();
     loadOverviewStats();
   } catch(e){
-    showToast('Save failed: '+e.message,'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled=false;
     btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Changes';
@@ -1725,7 +1829,7 @@ window.triggerDeactivate = function(){
         closeMo('moStudent');
         await loadStudents();
         loadOverviewStats();
-      } catch(e){ showToast('Failed: '+e.message,'error'); }
+      } catch(e){ showToast('Something went wrong. Please try again.', 'error'); console.error(e); }
       closeDlg();
     }
   );
@@ -1792,7 +1896,7 @@ window.handleCsPassportSelect = function(input){
       document.getElementById('csPassportThumb').src = csPassportBase64;
       document.getElementById('csPassportFileName').textContent = file.name;
       const sizeKB = Math.round((csPassportBase64.length * 3/4) / 1024);
-      document.getElementById('csPassportFileSize').textContent = `Compressed: ~${sizeKB} KB`;
+      document.getElementById('csPassportFileSize').textContent = `${sizeKB} KB`;
       preview.style.display = 'flex';
 
       document.getElementById('csPassportDropzone').style.borderColor = 'var(--ok-b)';
@@ -1868,13 +1972,13 @@ window.createStudentManually = async function(){
     };
 
     await addDoc(collection(db, 'students'), payload);
-    showToast(`✅ Student created! Reg No: ${regNumber} — copy this now`, 'success');
+    showToast(`Student created! Reg No: ${regNumber} — copy this now`, 'success');
     clearCsPassport();
     closeMo('moCreateStudent');
     await loadStudents();
     loadOverviewStats();
   } catch(e){
-    showToast('Failed: ' + e.message, 'error');
+    console.error(e); showToast('Something went wrong. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Create Student';
@@ -1973,7 +2077,7 @@ async function loadPaymentAccessSettings(){
       if(data.term) document.getElementById('paTerm').value = data.term;
     }
   } catch(e){
-    showToast('Failed to load payment access settings: '+e.message, 'error');
+    console.error('Failed to load payment access settings:', e); showToast('Could not load payment access settings.', 'error');
   } finally {
     updatePaStatusLabel();
   }
@@ -1991,7 +2095,7 @@ window.savePaymentAccess = async function(){
     showToast('Payment access settings saved', 'success');
     updatePaStatusLabel();
   } catch(e){
-    showToast('Save failed: '+e.message, 'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Payment Access';
@@ -2020,7 +2124,7 @@ async function loadFeeSettingsForCurrentSelection(){
       note.classList.add('show');
     }
   } catch(e){
-    showToast('Failed to load fee settings: '+e.message, 'error');
+    console.error('Failed to load fee settings:', e); showToast('Could not load fee settings.', 'error');
   }
 }
 
@@ -2061,19 +2165,26 @@ window.saveFeeSettings = async function(){
     if(name) payload.items.push({ name, amount });
   });
   if(hasNegative){ showToast('Fee amounts cannot be negative.', 'error'); return; }
-  if(!payload.items.length && !confirm('No fee items have been added for '+selClass+'. Save anyway?')) return;
 
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
-  try{
-    await setDoc(doc(db, 'feeSettings', id), { ...payload, updatedAt: serverTimestamp() }, { merge: true });
-    showToast('Fee settings saved successfully', 'success');
-    loadFeeSettingsForCurrentSelection();
-  } catch(e){
-    showToast('Save failed: '+e.message, 'error');
-  } finally{
-    btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Fee Settings';
+  const doSave = async ()=>{
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+    try{
+      await setDoc(doc(db, 'feeSettings', id), { ...payload, updatedAt: serverTimestamp() }, { merge: true });
+      showToast('Fee settings saved successfully', 'success');
+      loadFeeSettingsForCurrentSelection();
+    } catch(e){
+      console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
+    } finally{
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Fee Settings';
+    }
+  };
+
+  if(!payload.items.length){
+    showDlg('No fee items added', 'No fee items have been added for '+selClass+'. Save anyway?', ()=>{ closeDlg(); doSave(); });
+    return;
   }
+  doSave();
 };
 
 /* ============ ANNOUNCEMENTS ============ */
@@ -2091,7 +2202,8 @@ async function loadAnnouncements(){
     allAnnouncements.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0));
     renderAnnouncements();
   } catch(e){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>Failed to load: ${e.message}</p></td></tr>`;
+    console.error('Could not load announcements:', e);
+    tbody.innerHTML = `<tr><td colspan="4" class="empty"><p>Couldn't load announcements. Please refresh the page.</p></td></tr>`;
   }
 }
 
@@ -2150,7 +2262,7 @@ window.saveAnnouncement = async function(){
     resetAnnouncementForm();
     loadAnnouncements();
   } catch(e){
-    showToast('Save failed: '+e.message, 'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled = false;
   }
@@ -2188,7 +2300,7 @@ window.confirmDeleteAnnouncement = function(id){
       showToast('Announcement deleted', 'success');
       loadAnnouncements();
     } catch(e){
-      showToast('Delete failed: '+e.message, 'error');
+      console.error('Delete failed:', e); showToast('Delete failed. Please try again.', 'error');
     }
     closeDlg();
   });
@@ -2439,7 +2551,7 @@ window.saveResultSettings = async function(){
     showToast('Result settings saved successfully', 'success');
     await loadResultSettingsForm();
   } catch(e){
-    showToast('Save failed: '+e.message, 'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Result Settings';
@@ -2525,7 +2637,7 @@ window.loadResultsStudents = async function(){
     buildResultsTable();
     document.getElementById('resTableArea').style.display = 'block';
   } catch(e) {
-    showToast('Load failed: ' + e.message, 'error');
+    console.error('Load failed:', e); showToast('Could not load data. Please refresh the page.', 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Load Students';
@@ -2719,7 +2831,7 @@ window.saveStudentResult = async function(){
     closeMo('moResultEntry');
     buildResultsTable();
   } catch(e){
-    showToast('Save failed: '+e.message, 'error');
+    console.error('Save failed:', e); showToast('Save failed. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Result';
@@ -2780,7 +2892,8 @@ window.recalcClassPositions = async function(){
     showToast(publish ? 'Positions recalculated and results published' : 'Positions recalculated (not yet published)', 'success');
     buildResultsTable();
   } catch(e){
-    showToast('Failed: '+e.message, 'error');
+    console.error('Recalculate positions failed:', e);
+    showToast('Something went wrong. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Recalculate Positions &amp; Publish State';
@@ -2884,24 +2997,26 @@ window.renderPayments = function(){
    office when the automatic Paystack verify endpoint can't be reached or
    an amount needs manual review. This is the fallback path so a payment
    never gets stuck invisible to the admin. */
-document.getElementById('payTbody').addEventListener('click', async function(e){
+document.getElementById('payTbody').addEventListener('click', function(e){
   const btn = e.target.closest('.confirm-pay-btn');
   if(!btn) return;
   const id = btn.dataset.id;
   const payment = allPayments.find(p=>p.id===id);
   if(!payment) return;
-  if(!confirm(`Mark this payment of ₦${Number(payment.amount||0).toLocaleString()} for ${payment.studentName||'this student'} as PAID?`)) return;
-  btn.disabled = true;
-  btn.textContent = 'Confirming…';
-  try{
-    await updateDoc(doc(db,'payments',id), { status: 'success', confirmedManually: true, confirmedAt: serverTimestamp() });
-    showToast('Payment marked as paid', 'success');
-    loadPayments();
-  } catch(err){
-    showToast('Could not update payment: '+err.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Mark Paid';
-  }
+  showDlg('Mark as paid?', `Mark this payment of ₦${Number(payment.amount||0).toLocaleString()} for ${payment.studentName||'this student'} as PAID?`, async ()=>{
+    closeDlg();
+    btn.disabled = true;
+    btn.textContent = 'Confirming…';
+    try{
+      await updateDoc(doc(db,'payments',id), { status: 'success', confirmedManually: true, confirmedAt: serverTimestamp() });
+      showToast('Payment marked as paid', 'success');
+      loadPayments();
+    } catch(err){
+      console.error('Could not update payment:', err); showToast('Could not update payment. Please try again.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Mark Paid';
+    }
+  });
 });
 
 window.exportPaymentsCSV = function(){

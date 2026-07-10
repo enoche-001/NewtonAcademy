@@ -342,10 +342,23 @@
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
 
+<!-- CONFIRM DIALOG -->
+<div class="dlg-ov" id="dlgOv">
+  <div class="dlg">
+    <div class="dlg-ic"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <h3 id="dlgTitle">Are you sure?</h3>
+    <p id="dlgMsg">This action cannot be undone.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-danger" id="dlgConfirmBtn">Confirm</button>
+      <button class="dlg-btn dlg-btn-secondary" onclick="closeDlg()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, getDocs, getDoc, doc, addDoc, setDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ============ CONFIG ============ */
 // Same Firebase project used by admin.html (school-8b30a)
@@ -358,7 +371,11 @@ const cfg = {
   appId:"1:162536930811:web:815da7689658b6e5161f5e"
 };
 const app = initializeApp(cfg);
-const db = getFirestore(app);
+// Persistent local cache (IndexedDB) — repeat visits and flaky mobile data
+// read from device storage first instead of waiting on the network.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 
 // Matches the SHA-256 hashing done in admin.html when a student's
 // password is set, so login can compare hash-to-hash instead of storing
@@ -437,7 +454,7 @@ window.doLogin = async function(){
 
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
   try{
-    const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg)));
+    const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg), limit(1)));
     if(snap.empty){
       showLAlert('Registration number not found.');
       return;
@@ -468,7 +485,8 @@ window.doLogin = async function(){
     student = { id: sessionData.studentId, regNumber: sessionData.regNumber, name: sessionData.name, class: sessionData.class, subjects: sessionData.subjects, parentEmail: sessionData.parentEmail||'' };
     showPortal();
   } catch(e){
-    showLAlert('Login failed: '+e.message);
+    console.error('Login error:', e);
+    showLAlert('Something went wrong. Please check your connection and try again.');
   } finally{
     btn.disabled = false; btn.textContent = 'Sign In';
   }
@@ -480,12 +498,22 @@ document.getElementById('pwIn').addEventListener('keydown', e=>{ if(e.key==='Ent
 document.getElementById('regIn').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 window.doLogout = function(){
-  if(confirm('Sign out of the student portal?')){
+  showDlg('Sign out?', 'You will need your registration number and password to sign in again.', ()=>{
+    closeDlg();
     clearSession();
     student = null;
     showLogin();
-  }
+  });
 };
+
+function showDlg(title, msg, onConfirm){
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgMsg').textContent = msg;
+  const btn = document.getElementById('dlgConfirmBtn');
+  btn.onclick = onConfirm;
+  document.getElementById('dlgOv').classList.add('show');
+}
+window.closeDlg = ()=> document.getElementById('dlgOv').classList.remove('show');
 document.getElementById('logoutBtn').addEventListener('click', doLogout);
 
 /* ============ NAV ============ */
@@ -591,10 +619,17 @@ window.loadResult = async function(){
       ));
       docs = snap.docs;
     } catch(e){
-      const snap2 = await getDocs(query(collection(db,'results'), where('studentId','==',student.id)));
+      // Fallback if the composite index above isn't built yet. This still
+      // keeps the published:true filter (required by security rules) and
+      // just filters session/term client-side instead of server-side.
+      const snap2 = await getDocs(query(
+        collection(db,'results'),
+        where('studentId','==',student.id),
+        where('published','==',true)
+      ));
       docs = snap2.docs.filter(d=>{
         const v = d.data();
-        return v.session===session && v.term===term && v.published===true;
+        return v.session===session && v.term===term;
       });
     }
 
@@ -607,7 +642,8 @@ window.loadResult = async function(){
     renderResultCard(result, session, term);
     document.getElementById('resultCard').style.display='block';
   } catch(e){
-    showToast('Failed to load result: '+e.message, 'error');
+    console.error('Failed to load result:', e);
+    showToast('Could not load result. Please try again.', 'error');
   } finally{
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>View Result';
@@ -715,6 +751,8 @@ let currentOpenSession = null; // set from admin's Term Payment Access setting e
 
 window.loadAnnouncements = async function(){
   const box = document.getElementById('annContainer');
+  const cacheKey = 'na_stu_announcements';
+  try{ const cached = localStorage.getItem(cacheKey); if(cached) box.innerHTML = cached; } catch(e){}
   try{
     const snap = await getDocs(query(collection(db,'announcements'), orderBy('date','desc')));
     let items = snap.docs.map(d=>({id:d.id, ...d.data()}));
@@ -727,6 +765,7 @@ window.loadAnnouncements = async function(){
           <h3>No announcements yet</h3>
           <p>Check back later for news and notices from the school.</p>
         </div>`;
+      try{ localStorage.removeItem(cacheKey); } catch(e){}
       return;
     }
 
@@ -740,8 +779,10 @@ window.loadAnnouncements = async function(){
         <p class="ann-body">${escapeHtml(a.body||'')}</p>
       </div>
     `).join('');
+    try{ localStorage.setItem(cacheKey, box.innerHTML); } catch(e){ /* storage full/blocked */ }
   } catch(e){
-    box.innerHTML = `<div class="empty"><p>Failed to load announcements: ${escapeHtml(e.message)}</p></div>`;
+    console.error('Could not load announcements:', e);
+    if(!box.innerHTML) box.innerHTML = `<div class="empty"><p>Couldn't load announcements. Please refresh the page.</p></div>`;
   }
 };
 
@@ -752,7 +793,7 @@ window.loadPayments = async function(){
   try{
     // Load this student's payment history
     try{
-      const paySnap = await getDocs(query(collection(db,'payments'), where('studentId','==',student.id)));
+      const paySnap = await getDocs(query(collection(db,'payments'), where('studentId','==',student.id), limit(50)));
       studentPayments = paySnap.docs.map(d=>({id:d.id, ...d.data()}));
     } catch(e){
       studentPayments = [];
@@ -786,7 +827,8 @@ window.loadPayments = async function(){
 
     renderPayments([{ term: openTerm, session: openSession, feeData }]);
   } catch(e){
-    container.innerHTML = `<div class="empty"><p>Failed to load payment info: ${escapeHtml(e.message)}</p></div>`;
+    console.error('Could not load payment info:', e);
+    container.innerHTML = `<div class="empty"><p>Couldn't load payment info. Please refresh the page.</p></div>`;
   }
 };
 
@@ -1120,7 +1162,66 @@ document.getElementById('printReceiptBtn').addEventListener('click', ()=>{
 window.addEventListener('afterprint', ()=> document.body.classList.remove('printing-modal'));
 
 /* ============ PROFILE ============ */
+function renderProfileData(data){
+  const fullName = `${data.firstName||''} ${data.lastName||''}`.trim() || student.name;
+
+  document.getElementById('profName').textContent = fullName;
+  document.getElementById('profSub').textContent = `${data.regNumber||student.regNumber} · ${data.class||student.class}`;
+
+  const photoUrl = data.photo;
+  const avatar = document.getElementById('profAvatar');
+  if(photoUrl){
+    avatar.innerHTML = `<img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(fullName)}"/>`;
+  } else {
+    avatar.textContent = fullName.charAt(0).toUpperCase();
+  }
+
+  document.getElementById('pfFullName').textContent = fullName || '—';
+  document.getElementById('pfReg').textContent = data.regNumber || '—';
+  document.getElementById('pfClass').textContent = data.class || '—';
+  document.getElementById('pfDob').textContent = formatDate(data.dob) || '—';
+  document.getElementById('pfGender').textContent = data.gender || '—';
+  const stateEl = document.getElementById('pfState');
+  if(stateEl) stateEl.textContent = data.stateOfOrigin || '—';
+  document.getElementById('pfBloodGroup').textContent = data.bloodGroup || '—';
+  document.getElementById('pfGenotype').textContent = data.genotype || '—';
+
+  const parentDisplay = data.parentName ||
+    [data.fatherName, data.motherName].filter(Boolean).join(' / ') || '—';
+  document.getElementById('pfParentName').textContent = parentDisplay;
+  document.getElementById('pfParentPhone').textContent = data.parentPhone || data.primaryPhone || '—';
+  document.getElementById('pfParentEmail').textContent = data.parentEmail || '—';
+  document.getElementById('pfAddress').textContent = data.address || data.homeAddress || '—';
+
+  const hobbiesEl = document.getElementById('pfHobbies');
+  const hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
+  hobbiesEl.innerHTML = hobbies.length
+    ? hobbies.map(h=>`<span class="chip">${escapeHtml(h)}</span>`).join('')
+    : '<span class="chip-empty">Not provided</span>';
+
+  const sportsEl = document.getElementById('pfSports');
+  const sports = Array.isArray(data.favoriteSports) ? data.favoriteSports : [];
+  sportsEl.innerHTML = sports.length
+    ? sports.map(s=>`<span class="chip">${escapeHtml(s)}</span>`).join('')
+    : '<span class="chip-empty">Not provided</span>';
+
+  document.getElementById('pfAllergies').textContent = data.allergies || 'None reported';
+  document.getElementById('pfHealthConditions').textContent = data.healthConditions || 'None reported';
+  document.getElementById('pfMedication').textContent = data.medication || 'None';
+
+  student.parentEmail = data.parentEmail || '';
+}
+
+function profileCacheKey(){ return 'na_stu_profile_'+(student?.regNumber||''); }
+
 window.loadProfile = async function(){
+  // Cache-first: repaint instantly from the last-saved snapshot (if any)
+  // so the profile tab never sits blank while Firestore responds.
+  try{
+    const cached = localStorage.getItem(profileCacheKey());
+    if(cached) renderProfileData(JSON.parse(cached));
+  } catch(e){ /* ignore bad/blocked cache */ }
+
   try{
     const snap = await getDoc(doc(db,'students',student.id));
     if(!snap.exists()){
@@ -1128,61 +1229,12 @@ window.loadProfile = async function(){
       return;
     }
     const data = snap.data();
-    const fullName = `${data.firstName||''} ${data.lastName||''}`.trim() || student.name;
-
-    document.getElementById('profName').textContent = fullName;
-    document.getElementById('profSub').textContent = `${data.regNumber||student.regNumber} · ${data.class||student.class}`;
-
-    const photoUrl = data.photo;
-    const avatar = document.getElementById('profAvatar');
-    if(photoUrl){
-      avatar.innerHTML = `<img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(fullName)}"/>`;
-    } else {
-      avatar.textContent = fullName.charAt(0).toUpperCase();
-    }
-
-    document.getElementById('pfFullName').textContent = fullName || '—';
-    document.getElementById('pfReg').textContent = data.regNumber || '—';
-    document.getElementById('pfClass').textContent = data.class || '—';
-    document.getElementById('pfDob').textContent = formatDate(data.dob) || '—';
-    document.getElementById('pfGender').textContent = data.gender || '—';
-    const stateEl = document.getElementById('pfState');
-    if(stateEl) stateEl.textContent = data.stateOfOrigin || '—';
-    document.getElementById('pfBloodGroup').textContent = data.bloodGroup || '—';
-    document.getElementById('pfGenotype').textContent = data.genotype || '—';
-
-    const parentDisplay = data.parentName || 
-      [data.fatherName, data.motherName].filter(Boolean).join(' / ') || '—';
-    document.getElementById('pfParentName').textContent = parentDisplay;
-    document.getElementById('pfParentPhone').textContent = data.parentPhone || data.primaryPhone || '—';
-    document.getElementById('pfParentEmail').textContent = data.parentEmail || '—';
-    document.getElementById('pfAddress').textContent = data.address || data.homeAddress || '—';
-
-    // Hobbies & Sports (chips)
-    const hobbiesEl = document.getElementById('pfHobbies');
-    const hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
-    hobbiesEl.innerHTML = hobbies.length
-      ? hobbies.map(h=>`<span class="chip">${escapeHtml(h)}</span>`).join('')
-      : '<span class="chip-empty">Not provided</span>';
-
-    const sportsEl = document.getElementById('pfSports');
-    const sports = Array.isArray(data.favoriteSports) ? data.favoriteSports : [];
-    sportsEl.innerHTML = sports.length
-      ? sports.map(s=>`<span class="chip">${escapeHtml(s)}</span>`).join('')
-      : '<span class="chip-empty">Not provided</span>';
-
-    // Health Report
-    document.getElementById('pfAllergies').textContent = data.allergies || 'None reported';
-    document.getElementById('pfHealthConditions').textContent = data.healthConditions || 'None reported';
-    document.getElementById('pfMedication').textContent = data.medication || 'None';
-
-    // Reset profile to first stage each time the tab opens
-    showProfileStage(1);
-
-    // Cache parent email for Paystack checkout
-    student.parentEmail = data.parentEmail || '';
+    renderProfileData(data);
+    showProfileStage(1); // reset to first stage each time the tab opens
+    try{ localStorage.setItem(profileCacheKey(), JSON.stringify(data)); } catch(e){ /* storage full/blocked */ }
   } catch(e){
-    showToast('Failed to load profile: '+e.message, 'error');
+    console.error('Failed to load profile:', e);
+    showToast('Could not load profile. Please try again.', 'error');
   }
 };
 

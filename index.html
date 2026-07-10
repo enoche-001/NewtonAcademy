@@ -7,7 +7,7 @@
 <meta name="description" content="Newtown Academy, Lokoja — a premier boarding school providing world-class education for primary and secondary students in Kogi State, Nigeria."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="index.css"/>
 </head>
 <body>
@@ -517,7 +517,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy, limit }
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, getDocs, getDoc, doc, query, orderBy, limit }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
@@ -529,7 +529,9 @@ const cfg = {
   appId:             "1:162536930811:web:815da7689658b6e5161f5e"
 };
 const app = initializeApp(cfg);
-const db  = getFirestore(app);
+const db  = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -599,11 +601,13 @@ window.toggleFaq = function(q){
   q.parentElement.classList.toggle('open');
 };
 
-/* student count */
+/* student count — reads a single admin-maintained counter doc instead of
+   scanning the whole students collection (which would expose every
+   student's data, including password hashes, to any site visitor) */
 (async function loadStudentCount(){
   try{
-    const snap = await getDocs(collection(db,'students'));
-    const count = snap.size.toLocaleString();
+    const snap = await getDoc(doc(db,'settings','publicStats'));
+    const count = (snap.exists() ? (snap.data().studentCount||0) : 0).toLocaleString();
     document.getElementById('statStudents').textContent = count;
     const ab = document.getElementById('aboutStudents');
     if(ab) ab.textContent = count;
@@ -637,7 +641,7 @@ function renderAnnouncements(items){
   }
   grid.innerHTML = items.map(a => `
     <div class="ann-card">
-      ${a.pinned ? '<div class="ann-pin">📌 Pinned</div>' : ''}
+      ${a.pinned ? '<div class="ann-pin">Pinned</div>' : ''}
       <div class="ann-date">${formatDate(a.date)}</div>
       <h3>${escapeHtml(a.title || 'Untitled')}</h3>
       <p>${escapeHtml(truncate(a.body || '', 120))}</p>

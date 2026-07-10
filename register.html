@@ -6,12 +6,12 @@
 <title>Admission Application — Newtown Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="register.css"/>
 </head>
 <body>
 
-<!-- ═══════ NAV ═══════ -->
+<!-- ═══════ NAV — kept minimal so the application isn't a distraction from itself ═══════ -->
 <nav id="mainNav">
   <div class="nav-inner">
     <a href="index.html" class="brand">
@@ -21,38 +21,12 @@
         <small>Excellence &amp; Character</small>
       </div>
     </a>
-    <ul class="nav-links">
-      <li><a href="index.html#about">About</a></li>
-      <li><a href="index.html#academics">Academics</a></li>
-      <li><a href="index.html#gallery">Gallery</a></li>
-      <li><a href="index.html#admissions">Admissions</a></li>
-      <li><a href="index.html#faq">FAQ</a></li>
-      <li><a href="index.html#contact">Contact</a></li>
-    </ul>
-    <div class="nav-right">
-      <a href="register.html" class="nbtn nbtn-solid">Apply Now</a>
-      <a href="student.html" class="nbtn nbtn-ghost">Student Login</a>
-    </div>
-    <div class="ham" id="hamBtn" onclick="toggleMobNav()"><span></span><span></span><span></span></div>
   </div>
 </nav>
-<div class="mob-overlay" id="mobOverlay"></div>
-<div class="mob-nav" id="mobNav">
-  <a href="index.html#about" onclick="closeMobNav()">About</a>
-  <a href="index.html#academics" onclick="closeMobNav()">Academics</a>
-  <a href="index.html#gallery" onclick="closeMobNav()">Gallery</a>
-  <a href="index.html#admissions" onclick="closeMobNav()">Admissions</a>
-  <a href="index.html#faq" onclick="closeMobNav()">FAQ</a>
-  <a href="index.html#contact" onclick="closeMobNav()">Contact</a>
-  <div class="mob-divider"></div>
-  <div class="mob-cta">
-    <a href="register.html" class="solid">Apply Now</a>
-    <a href="student.html" class="ghost">Student Login</a>
-  </div>
-</div>
 
 <!-- PAGE HEADER -->
 <div class="page-intro">
+
   <h1>Admission Application</h1>
   <p>Complete the form below to apply for admission at Newtown Academy.</p>
 </div>
@@ -98,7 +72,7 @@
     </div>
     <div class="step-item" id="stepItem5">
       <div class="step-num">5</div>
-      <div class="step-label">Payment<span>₦10,000 fee</span></div>
+      <div class="step-label">Payment<span>Secure checkout</span></div>
     </div>
   </div>
 
@@ -373,31 +347,34 @@
 
       <div class="fg" style="margin-bottom:20px">
         <label>Passport Photo <span class="req">*</span></label>
-        <div id="passportDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:24px;text-align:center;cursor:pointer;background:var(--inp);transition:all .2s" onclick="document.getElementById('passportFileInput').click()">
+        <div id="passportDropzone" class="doc-dropzone" onclick="document.getElementById('passportFileInput').click()">
           <input type="file" id="passportFileInput" accept="image/*" style="display:none" onchange="handlePassportSelect(this)"/>
-          <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;margin-bottom:8px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <div style="font-size:.82rem;font-weight:600;color:var(--text)">Click to select passport photo</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:4px">JPG, PNG or WEBP · Max 1MB · Will be compressed automatically</div>
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div class="doc-dropzone-label">Click to select passport photo</div>
+          <div class="doc-dropzone-hint">JPG, PNG or WEBP · Max 1MB</div>
         </div>
 
         <!-- Preview -->
-        <div id="passportPreview" style="display:none;margin-top:12px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
-          <img id="passportThumb" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border)" src="" alt="preview"/>
-          <div style="flex:1;min-width:0">
-            <div id="passportFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-            <div id="passportFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+        <div id="passportPreview" class="doc-upload-preview">
+          <img id="passportThumb" class="doc-upload-thumb" src="" alt="preview"/>
+          <div class="doc-upload-info">
+            <div id="passportFileName" class="doc-upload-name"></div>
+            <div id="passportFileSize" class="doc-upload-size"></div>
           </div>
-          <button onclick="clearPassport()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+          <button onclick="clearPassport()" class="doc-upload-remove">✕</button>
         </div>
-        <div id="passportError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+        <div id="passportError" class="doc-upload-error"></div>
       </div>
 
       <!-- Other docs notice -->
-      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;">
-        <p style="font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:8px">📋 Other Required Documents — Bring Physically on Resumption</p>
-        <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
-          <li style="font-size:.78rem;color:var(--muted)">Birth certificate or sworn affidavit</li>
-          <li style="font-size:.78rem;color:var(--muted)">Previous school report card (last term)</li>
+      <div class="doc-notice">
+        <p class="doc-notice-title">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Other Required Documents — Bring Physically on Resumption
+        </p>
+        <ul>
+          <li>Birth certificate or sworn affidavit</li>
+          <li>Previous school report card (last term)</li>
         </ul>
       </div>
     </div><!-- /form-card -->
@@ -411,26 +388,26 @@
 
       <div class="fg" style="margin-bottom:6px">
         <label>Result Upload <span class="req" id="lastResultReqMark" style="display:none">*</span> <span style="color:var(--muted);font-weight:400;font-size:.78rem" id="lastResultOptMark">(optional)</span></label>
-        <div id="lastResultDropzone" style="border:2px dashed var(--border);border-radius:11px;padding:24px;text-align:center;cursor:pointer;background:var(--inp);transition:all .2s" onclick="document.getElementById('lastResultFileInput').click()">
+        <div id="lastResultDropzone" class="doc-dropzone" onclick="document.getElementById('lastResultFileInput').click()">
           <input type="file" id="lastResultFileInput" accept="image/*,application/pdf" style="display:none" onchange="handleLastResultSelect(this)"/>
-          <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;margin-bottom:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <div style="font-size:.82rem;font-weight:600;color:var(--text)">Click to select result slip</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:4px">JPG, PNG, WEBP or PDF · This is the document the school will review</div>
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div class="doc-dropzone-label">Click to select result slip</div>
+          <div class="doc-dropzone-hint">JPG, PNG, WEBP or PDF · This is the document the school will review</div>
         </div>
 
         <!-- Preview -->
-        <div id="lastResultPreview" style="display:none;margin-top:12px;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px">
-          <div id="lastResultThumbWrap" style="width:52px;height:52px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg)">
-            <img id="lastResultThumb" style="width:100%;height:100%;object-fit:cover;display:none" src="" alt="preview"/>
+        <div id="lastResultPreview" class="doc-upload-preview">
+          <div id="lastResultThumbWrap" class="doc-upload-thumb-wrap">
+            <img id="lastResultThumb" class="doc-upload-thumb-inner" style="display:none" src="" alt="preview"/>
             <svg id="lastResultPdfIcon" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;display:none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
-          <div style="flex:1;min-width:0">
-            <div id="lastResultFileName" style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-            <div id="lastResultFileSize" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+          <div class="doc-upload-info">
+            <div id="lastResultFileName" class="doc-upload-name"></div>
+            <div id="lastResultFileSize" class="doc-upload-size"></div>
           </div>
-          <button onclick="clearLastResult()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px">✕</button>
+          <button onclick="clearLastResult()" class="doc-upload-remove">✕</button>
         </div>
-        <div id="lastResultError" style="display:none;font-size:.75rem;color:var(--err);margin-top:6px"></div>
+        <div id="lastResultError" class="doc-upload-error"></div>
       </div>
     </div><!-- /form-card -->
 
@@ -503,12 +480,9 @@
   <div class="screen" id="screen3">
     <div class="receipt-card" id="receiptCard">
 
-      <div class="rc-confirm no-print">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <h2>Application Submitted!</h2>
-        <p class="s-sub">Your admission application has been received and is now under review. A copy of this receipt has been generated below — you can print it or keep it for your records.</p>
+      <div class="rc-status-pill no-print">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Application Submitted — Now Under Review
       </div>
 
       <!-- LETTERHEAD -->
@@ -585,7 +559,7 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp }
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, addDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
@@ -605,27 +579,9 @@ const cfg = {
   appId:             "1:162536930811:web:815da7689658b6e5161f5e"
 };
 const app = initializeApp(cfg);
-const db  = getFirestore(app);
-
-/* mobile nav (matches index.html) */
-function _closeMob(){
-  document.getElementById('hamBtn').classList.remove('open');
-  document.getElementById('mobNav').classList.remove('open');
-  document.getElementById('mobOverlay').classList.remove('open');
-  document.body.style.overflow='';
-}
-window.toggleMobNav = function(){
-  const open = document.getElementById('mobNav').classList.contains('open');
-  if(open){ _closeMob(); }
-  else{
-    document.getElementById('hamBtn').classList.add('open');
-    document.getElementById('mobNav').classList.add('open');
-    document.getElementById('mobOverlay').classList.add('open');
-    document.body.style.overflow='hidden';
-  }
-};
-window.closeMobNav = _closeMob;
-document.getElementById('mobOverlay').addEventListener('click', _closeMob);
+const db  = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 
 const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
 
@@ -851,7 +807,7 @@ window.handlePassportSelect = function(input){
       document.getElementById('passportThumb').src = passportBase64;
       document.getElementById('passportFileName').textContent = file.name;
       const sizeKB = Math.round((passportBase64.length * 3/4) / 1024);
-      document.getElementById('passportFileSize').textContent = `Compressed: ~${sizeKB} KB`;
+      document.getElementById('passportFileSize').textContent = `${sizeKB} KB`;
       preview.style.display = 'flex';
 
       // Style dropzone
@@ -964,7 +920,7 @@ function showLastResultPreview(){
   document.getElementById('lastResultFileName').textContent = lastResultFileName || 'Result document';
   const sizeKB = Math.round((lastResultBase64.length * 3/4) / 1024);
   document.getElementById('lastResultFileSize').textContent =
-    (lastResultMime === 'image' ? `Compressed: ~${sizeKB} KB` : `PDF: ~${sizeKB} KB`);
+    (lastResultMime === 'image' ? `${sizeKB} KB` : `PDF · ${sizeKB} KB`);
   preview.style.display = 'flex';
 
   document.getElementById('lastResultDropzone').style.borderColor = 'var(--ok-b)';
@@ -1206,7 +1162,7 @@ window.initiatePayment = function(){
       _regPaymentInProgress = false;
       btn.disabled = false;
       btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
-      showToast('Payment window closed. Try again when ready.', 'warn');
+      showToast('Payment window closed. Try again when ready.', 'warning');
     }
   });
   _regPaymentInProgress = true;
@@ -1217,7 +1173,7 @@ async function verifyAndSubmit(reference){
   const btn = document.getElementById('payBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Verifying payment…';
-  showToast('Verifying payment…', 'warn');
+  showToast('Verifying payment…', 'warning');
 
   try{
     // Verify with Vercel endpoint (non-blocking — we still submit if verify is unreachable)
@@ -1336,7 +1292,8 @@ async function verifyAndSubmit(reference){
     showScreen(3);
 
   } catch(e){
-    showAlert('payAlert','payAlertMsg','Submission failed: ' + e.message + '. Reference: ' + reference);
+    console.error('Submission error after payment:', e);
+    showAlert('payAlert','payAlertMsg','Your payment went through, but we could not save your application. Please contact the school office with this payment reference: ' + reference);
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay Registration Fee';
   }
@@ -1552,8 +1509,6 @@ function restoreDraft(draft){
     lastResultMime     = draft.lastResultMime || 'image';
     lastResultFileName = draft.lastResultFileName || 'Saved result';
     showLastResultPreview();
-    document.getElementById('lastResultFileSize').textContent =
-      document.getElementById('lastResultFileSize').textContent.replace('Compressed:','Restored:').replace('PDF:','Restored PDF:');
   }
 
   // Jump to the panel they were last on
@@ -1610,10 +1565,10 @@ function hideAlert(alertId){
   document.getElementById(alertId).classList.remove('show');
 }
 
-function showToast(msg, type='ok'){
+function showToast(msg, type='success'){
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
-  t.className = 'toast t-'+type+' show';
+  t.className = 'toast '+type+' show';
   clearTimeout(t._timer);
   t._timer = setTimeout(()=> t.classList.remove('show'), 3400);
 }
