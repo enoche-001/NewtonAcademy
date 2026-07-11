@@ -399,7 +399,25 @@ async function hashPassword(plain){
 const PAYSTACK_PUBLIC_KEY = "pk_test_0f95979409d37c80f73fa3f8502da39ea04fea58";
 const VERIFY_ENDPOINT = "https://school-payment-server.vercel.app/api/verify";
 
-const CURRENT_SESSION = "2025/2026";
+// These mirror the admin dashboard's Overview → "Change" term control.
+// Both files read the SAME settings/academic Firestore document, so
+// whatever the admin sets there becomes the default term/session shown
+// here (Results tab picker, open payment term fallback) without the
+// student needing to do anything.
+let CURRENT_SESSION = "2025/2026";
+let CURRENT_TERM = "Second";
+async function loadAcademicSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','academic'));
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.session) CURRENT_SESSION = d.session;
+      if(d.term) CURRENT_TERM = d.term;
+    }
+  } catch(e){ console.warn('Could not load academic settings, using defaults:', e.message); }
+  const rs=document.getElementById('resSession'); if(rs) rs.value = CURRENT_SESSION;
+  const rt=document.getElementById('resTerm'); if(rt) rt.value = CURRENT_TERM;
+}
 const TERMS = ["First","Second","Third"];
 const SCHOOL_NAME = "Newtown Academy";
 const SCHOOL_EMAIL_DOMAIN = "newtownacademy.edu.ng"; // fallback email domain if student has no parent email
@@ -421,7 +439,7 @@ function showLogin(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('portalScreen').classList.remove('open');
 }
-function showPortal(){
+async function showPortal(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('portalScreen').classList.add('open');
   document.getElementById('sbAv').textContent = (student.name||'S').charAt(0).toUpperCase();
@@ -429,6 +447,7 @@ function showPortal(){
   document.getElementById('sbReg').textContent = student.regNumber||'';
   document.getElementById('tbName').textContent = student.name||'Student';
   document.getElementById('tbReg').textContent = student.regNumber||'';
+  await loadAcademicSettings();
   switchTab('profile');
 }
 
@@ -475,7 +494,9 @@ window.doLogin = async function(){
       return;
     }
     if((data.status||'active') !== 'active'){
-      showLAlert('Your account is not active. Please contact the school office.');
+      showLAlert(data.status==='graduated'
+        ? 'This account has graduated and no longer has portal access.'
+        : 'Your account is not active. Please contact the school office.');
       return;
     }
 

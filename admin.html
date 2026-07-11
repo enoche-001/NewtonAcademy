@@ -47,6 +47,7 @@
       <div class="nav-label">Academics</div>
       <div class="nav-item" data-sec="students"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</div>
       <div class="nav-item" data-sec="classes"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>Classes</div>
+      <div class="nav-item" data-sec="promotions"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>Promotions</div>
       <div class="nav-item" data-sec="results"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Results</div>
       <div class="nav-item" data-sec="resultSettings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Result Settings</div>
       <div class="nav-label">Finance</div>
@@ -78,6 +79,24 @@
 
       <!-- OVERVIEW -->
       <div class="section active" id="sec-overview">
+        <div class="ov-hero">
+          <div class="ov-hero-l">
+            <h2>Welcome back, <span id="ovWelcomeName">Admin</span></h2>
+            <p id="ovWelcomeDate">Here's what's happening at Newtown Academy today.</p>
+            <div class="ov-term-row">
+              <span class="ov-term-pill" id="ovTermChip">— Term · —</span>
+              <button type="button" class="ov-term-edit" onclick="openTermSettings()" title="Change current term/session">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                Change
+              </button>
+            </div>
+          </div>
+          <div class="ov-hero-r">
+            <div class="ov-hero-chip"><b id="ovChipStudents">—</b><span>Students</span></div>
+            <div class="ov-hero-chip"><b id="ovChipPending">—</b><span>Pending</span></div>
+            <div class="ov-hero-chip"><b id="ovChipClasses">—</b><span>Classes</span></div>
+          </div>
+        </div>
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-top">
@@ -125,25 +144,58 @@
             </div>
           </div>
           <div class="ov-panel">
+            <div class="ov-panel-hdr"><h3>Gender Split</h3><span>All students</span></div>
+            <div class="ov-donut-wrap">
+              <div class="donut-ring">
+                <svg viewBox="0 0 132 132">
+                  <circle class="donut-track" cx="66" cy="66" r="52"/>
+                  <circle class="donut-fill-f" id="donutFemale" cx="66" cy="66" r="52" stroke-dasharray="0 326.7"/>
+                  <circle class="donut-fill-m" id="donutMale" cx="66" cy="66" r="52" stroke-dasharray="0 326.7"/>
+                </svg>
+                <div class="donut-center"><b id="donutTotal">—</b><span>Students</span></div>
+              </div>
+              <div class="ov-donut-legend">
+                <div class="dl-item"><span class="dl-dot dot-male"></span>Male <b id="donutMaleCount">—</b></div>
+                <div class="dl-item"><span class="dl-dot dot-female"></span>Female <b id="donutFemaleCount">—</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overview-row2">
+          <div class="ov-panel">
             <div class="ov-panel-hdr"><h3>Quick Actions</h3><span>Common tasks</span></div>
             <div class="ov-quick-list">
               <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=applications]').click()">
-                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Review pending applications</div>
+                <div class="ov-quick-item-l"><div class="ov-quick-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>Review pending applications</div>
                 <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
               <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=results]').click()">
-                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Enter & publish results</div>
+                <div class="ov-quick-item-l"><div class="ov-quick-ic"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>Enter & publish results</div>
                 <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
               <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=payments]').click()">
-                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>View payment records</div>
+                <div class="ov-quick-item-l"><div class="ov-quick-ic"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>View payment records</div>
                 <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
               <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=announcements]').click()">
-                <div class="ov-quick-item-l"><svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Post an announcement</div>
+                <div class="ov-quick-item-l"><div class="ov-quick-ic"><svg viewBox="0 0 24 24"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>Post an announcement</div>
                 <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             </div>
+          </div>
+          <div class="ov-panel">
+            <div class="ov-panel-hdr"><h3>Recent Activity</h3><span>Latest updates</span></div>
+            <div class="ov-quick-list" id="recentActivityList">
+              <div style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">Loading data…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ov-panel" style="margin-bottom:20px">
+          <div class="ov-panel-hdr"><h3>Top Performers</h3><span id="topPerfLabel">Best in each class</span></div>
+          <div class="ov-top-grid" id="topPerfGrid">
+            <div class="ov-top-empty">Loading data…</div>
           </div>
         </div>
       </div>
@@ -206,6 +258,26 @@
             <thead><tr><th>Class</th><th>Compulsory Subjects</th><th>Elective Subjects</th><th>Actions</th></tr></thead>
             <tbody id="classTbody"><tr><td colspan="4" class="empty"><p>Loading...</p></td></tr></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- PROMOTIONS -->
+      <div class="section" id="sec-promotions">
+        <div class="sec-hdr">
+          <div class="sec-hdr-l"><h2>Promotions</h2><p>Move students up to their next class at the end of a session</p></div>
+        </div>
+        <p class="fs-summary show">Pick where each class should move to for the new session. Classes left on "Don't promote" are skipped entirely. Use "Graduate / Leave school" for a final-year class (this deactivates those students' portal access, same as Deactivate). Only currently-active students are included — inactive/suspended students are skipped automatically. You'll get a full review before anything is saved, and can uncheck individual students there.</p>
+        <div class="twrap">
+          <table>
+            <thead><tr><th>Current Class</th><th>Active Students</th><th>Promote To</th></tr></thead>
+            <tbody id="promoTbody"><tr><td colspan="3" class="empty"><p>Loading...</p></td></tr></tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:16px">
+          <button class="btn btn-primary btn-sm" id="promoPreviewBtn" onclick="openPromotionPreview()">
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Review &amp; Run Promotion
+          </button>
         </div>
       </div>
 
@@ -886,6 +958,49 @@
   </div>
 </div>
 
+<!-- TERM SETTINGS -->
+<div class="mo" id="moTermSettings">
+  <div class="mbox">
+    <h3>Current Term &amp; Session</h3>
+    <p class="mdesc">This is the single term/session used across the admin dashboard's Top Performers panel and the student portal's default Results and Payments view. Changing it updates both immediately.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Session</label>
+        <select id="tsSession">
+          <option value="2024/2025">2024/2025</option>
+          <option value="2025/2026">2025/2026</option>
+          <option value="2026/2027">2026/2027</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Term</label>
+        <select id="tsTerm">
+          <option value="First">First Term</option>
+          <option value="Second">Second Term</option>
+          <option value="Third">Third Term</option>
+        </select>
+      </div>
+    </div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moTermSettings')">Cancel</button>
+      <button class="btn btn-p" id="tsSaveBtn" onclick="saveTermSettings()" style="flex:1;justify-content:center;padding:11px">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROMOTION PREVIEW -->
+<div class="mo" id="moPromoPreview">
+  <div class="mbox mbox-lg">
+    <h3>Review Promotion</h3>
+    <p class="mdesc" id="promoPreviewSummary">—</p>
+    <div id="promoPreviewList" style="max-height:48vh;overflow-y:auto;margin-bottom:18px"></div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeMo('moPromoPreview')">Cancel</button>
+      <button class="btn btn-p" id="promoConfirmBtn" onclick="runPromotion()" style="flex:1;justify-content:center;padding:11px">Confirm &amp; Promote</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM DIALOG -->
 <div class="dlg-ov" id="dlgOv">
   <div class="dlg">
@@ -904,7 +1019,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, serverTimestamp, increment, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyCtUPXwPHj0QTU5CCGYkGt4tIFDPBnt3no",
@@ -1015,13 +1130,74 @@ const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Actin
 const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
 let allAnnouncements = [];
 
+// The single school-wide "current term/session" — set by the admin from
+// the Overview tab and stored at settings/academic in Firestore. Both
+// admin.html and student.html read the SAME document, so once the admin
+// updates it here, the student portal's Results/Payments session-term
+// defaults (and this dashboard's Top Performers panel) update together.
+let CURRENT_SESSION = "2025/2026";
+let CURRENT_TERM = "Second";
+async function loadAcademicSettings(){
+  try{
+    const snap = await getDoc(doc(db,'settings','academic'));
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.session) CURRENT_SESSION = d.session;
+      if(d.term) CURRENT_TERM = d.term;
+    }
+  } catch(e){ console.warn('Could not load academic settings, using defaults:', e.message); }
+  renderCurrentTermUI();
+}
+function renderCurrentTermUI(){
+  const chip = document.getElementById('ovTermChip');
+  if(chip) chip.textContent = `${CURRENT_TERM} Term · ${CURRENT_SESSION}`;
+  // Pre-fill the term/session pickers used elsewhere so admin actions
+  // (entering results, publishing fee settings) default to the same term.
+  const rs=document.getElementById('resSession'); if(rs && !rs.dataset.touched) rs.value = CURRENT_SESSION;
+  const rt=document.getElementById('resTerm'); if(rt && !rt.dataset.touched) rt.value = CURRENT_TERM;
+  const fs=document.getElementById('fsSession'); if(fs && !fs.dataset.touched) fs.value = CURRENT_SESSION;
+  const ft=document.getElementById('fsTerm'); if(ft && !ft.dataset.touched) ft.value = CURRENT_TERM;
+}
+window.openTermSettings = function(){
+  document.getElementById('tsSession').value = CURRENT_SESSION;
+  document.getElementById('tsTerm').value = CURRENT_TERM;
+  openMo('moTermSettings');
+};
+window.saveTermSettings = async function(){
+  const session = document.getElementById('tsSession').value;
+  const term = document.getElementById('tsTerm').value;
+  const btn = document.getElementById('tsSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  try{
+    await setDoc(doc(db,'settings','academic'), { session, term, updatedAt: serverTimestamp() }, { merge: true });
+    CURRENT_SESSION = session; CURRENT_TERM = term;
+    renderCurrentTermUI();
+    await loadOverviewStats(); // refreshes Top Performers to the newly-set term
+    showToast('Current term updated for admin and student portals', 'success');
+    closeMo('moTermSettings');
+  } catch(e){
+    console.error('Failed to save term settings:', e);
+    showToast('Something went wrong. Please try again.', 'error');
+  } finally{
+    btn.disabled = false; btn.innerHTML = 'Save';
+  }
+};
+
 /* ============ AUTH ============ */
+['resSession','resTerm','fsSession','fsTerm'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('change', ()=>{ el.dataset.touched = '1'; });
+});
 onAuthStateChanged(auth, user=>{
   if(user){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('portalScreen').classList.add('open');
     document.getElementById('sbAv').textContent = user.email.charAt(0).toUpperCase();
     document.getElementById('sbName').textContent = user.email.split('@')[0];
+    const welcomeName = document.getElementById('ovWelcomeName');
+    if(welcomeName) welcomeName.textContent = user.email.split('@')[0];
+    const welcomeDate = document.getElementById('ovWelcomeDate');
+    if(welcomeDate) welcomeDate.textContent = "Here's what's happening at Newtown Academy — " + new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
     loadAll();
   } else {
     document.getElementById('loginScreen').style.display='flex';
@@ -1060,9 +1236,10 @@ window.switchTab = (sec)=>{
   document.querySelector(`[data-sec="${sec}"]`)?.classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+sec)?.classList.add('active');
-  const titles={overview:'Overview',applications:'Applications',students:'Students',classes:'Classes',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
-  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',classes:'Create classes and set their compulsory and elective subjects',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
+  const titles={overview:'Overview',applications:'Applications',students:'Students',classes:'Classes',promotions:'Promotions',results:'Results',resultSettings:'Result Settings',feeSettings:'Fee Settings',payments:'Payments',announcements:'Announcements'};
+  const subs={overview:'School dashboard summary',applications:'Review and process admission applications',students:'Manage student records and enrollment',classes:'Create classes and set their compulsory and elective subjects',promotions:'Move students up to their next class at the end of a session',results:'Manage and publish academic results',resultSettings:'Configure grading, weights, and report sections',feeSettings:'Set termly fee items and due dates, class by class',payments:'Track fee payments collected via Paystack',announcements:'Publish school-wide notices'};
   if(sec==='resultSettings') loadResultSettingsForm();
+  if(sec==='promotions') renderPromotionsTable();
   document.getElementById('topTitle').textContent = titles[sec] || sec;
   document.getElementById('topSub').textContent = subs[sec] || '';
 };
@@ -1096,6 +1273,7 @@ function hydrateFromCache(){
     renderStudents();
     renderAnnouncements();
     renderPayments();
+    renderRecentActivity();
     if(c.stats){
       const elS=document.getElementById('s-students'), elA=document.getElementById('s-applications'),
             elR=document.getElementById('s-results'), bar=document.getElementById('classBarList');
@@ -1103,6 +1281,10 @@ function hydrateFromCache(){
       if(elA) elA.textContent = c.stats.pending;
       if(elR) elR.textContent = c.stats.results;
       if(bar && c.stats.barHtml) bar.innerHTML = c.stats.barHtml;
+      const chipS=document.getElementById('ovChipStudents'), chipP=document.getElementById('ovChipPending'), chipC=document.getElementById('ovChipClasses');
+      if(chipS) chipS.textContent = c.stats.students;
+      if(chipP) chipP.textContent = c.stats.pending;
+      if(chipC) chipC.textContent = (c.CLASS_NAMES||[]).length;
     }
     return true;
   } catch(e){ return false; }
@@ -1125,9 +1307,61 @@ function persistCache(){
 async function loadAll(){
   const hadCache = hydrateFromCache(); // instant repaint from last snapshot, if any
   await loadClasses(); // must resolve first — everything else depends on CLASS_NAMES/CLASS_DATA
+  await loadAcademicSettings(); // current term/session — Top Performers and the fee/result pickers key off this
   setDefaultAnnDate();
   await Promise.all([loadOverviewStats(), loadFeeSettingsForCurrentSelection(), loadPaymentAccessSettings(), loadAnnouncements(), loadApplications(), loadStudents(), loadPayments()]);
+  renderPromotionsTable();
+  renderRecentActivity();
   persistCache();
+}
+
+/* Combines the latest applications + payments into a single feed for the
+   Overview "Recent Activity" panel. Purely a read of already-loaded
+   arrays — no extra network calls. */
+function renderRecentActivity(){
+  const list = document.getElementById('recentActivityList');
+  if(!list) return;
+  const items = [];
+  (allApplications||[]).slice(0,8).forEach(a=>{
+    const name = `${a.firstName||''} ${a.lastName||''}`.trim() || 'New applicant';
+    const ts = a.submittedAt?.toMillis ? a.submittedAt.toMillis() : (a.submittedAt?.seconds ? a.submittedAt.seconds*1000 : 0);
+    items.push({
+      ts, kind:'app',
+      icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+      text: `${name} applied for ${escapeHtml(a.classApplied||'admission')}`,
+      sec:'applications'
+    });
+  });
+  (allPayments||[]).slice(0,8).forEach(p=>{
+    if((p.status||'').toLowerCase()!=='success') return;
+    const ts = p.date?.toMillis ? p.date.toMillis() : (p.date ? new Date(p.date).getTime() : 0);
+    const amount = Number(p.amount||0).toLocaleString('en-NG',{style:'currency',currency:'NGN',minimumFractionDigits:0});
+    items.push({
+      ts, kind:'pay',
+      icon:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+      text: `${escapeHtml(p.studentName||p.name||'A student')} paid ${amount}`,
+      sec:'payments'
+    });
+  });
+  items.sort((a,b)=>b.ts-a.ts);
+  const top = items.slice(0,6);
+  list.innerHTML = top.length ? top.map(it=>`
+    <div class="ov-quick-item" style="cursor:pointer" onclick="document.querySelector('[data-sec=${it.sec}]').click()">
+      <div class="ov-quick-item-l"><div class="ov-quick-ic"><svg viewBox="0 0 24 24">${it.icon}</svg></div>${it.text}</div>
+      <span style="font-size:.68rem;color:var(--soft);white-space:nowrap">${it.ts ? timeAgo(it.ts) : ''}</span>
+    </div>`).join('') : '<p class="empty">No recent activity yet</p>';
+}
+
+function timeAgo(ts){
+  const diff = Date.now()-ts;
+  const m = Math.floor(diff/60000);
+  if(m<1) return 'just now';
+  if(m<60) return m+'m ago';
+  const h = Math.floor(m/60);
+  if(h<24) return h+'h ago';
+  const d = Math.floor(h/24);
+  if(d<30) return d+'d ago';
+  return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
 
 /* ============ CLASSES ============ */
@@ -1342,6 +1576,160 @@ window.triggerDeleteClass = function(name){
   });
 };
 
+/* ============ PROMOTIONS ============
+   Bulk-moves every active student in a class to a target class (or marks
+   them graduated) at the end of a session. Two steps: renderPromotionsTable()
+   draws the per-class "promote to" pickers, openPromotionPreview() builds a
+   reviewable list of exactly which students will be affected (admin can
+   uncheck individuals), and runPromotion() writes the changes in batches. */
+const GRADUATE_VALUE = '__GRADUATE__';
+let PROMO_PLAN = []; // [{from, to, students:[...]}] — built by openPromotionPreview(), consumed by runPromotion()
+
+// Best-effort guess at the "next" class for a name like "JSS1A" -> "JSS2A"
+// or "SS2B" -> "SS3B". Only returns a class that actually exists in
+// CLASS_NAMES — otherwise the admin picks manually (or chooses Graduate).
+function guessNextClass(className){
+  const m = (className||'').trim().match(/^([A-Za-z]+)(\d+)([A-Za-z]*)$/);
+  if(!m) return '';
+  const [, prefix, num, suffix] = m;
+  const candidate = `${prefix}${parseInt(num,10)+1}${suffix}`;
+  if(CLASS_NAMES.includes(candidate)) return candidate;
+  const found = CLASS_NAMES.find(c=>c.toLowerCase()===candidate.toLowerCase());
+  return found || '';
+}
+
+function chunkArray(arr, size){
+  const out=[];
+  for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
+  return out;
+}
+
+function renderPromotionsTable(){
+  const tbody = document.getElementById('promoTbody');
+  if(!tbody) return;
+  if(!CLASS_NAMES.length){
+    tbody.innerHTML = `<tr><td colspan="3" class="empty"><p>No classes yet. Add classes first under Classes.</p></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = CLASS_NAMES.map(name=>{
+    const count = (allStudents||[]).filter(s=>s.class===name && (s.status||'active')==='active').length;
+    const guess = guessNextClass(name);
+    const opts = [`<option value="">Don't promote</option>`]
+      .concat(CLASS_NAMES.filter(c=>c!==name).map(c=>
+        `<option value="${escapeAttr(c)}"${c===guess?' selected':''}>${escapeHtml(c)}</option>`
+      ))
+      .join('') + `<option value="${GRADUATE_VALUE}">Graduate / Leave school</option>`;
+    return `<tr>
+      <td><strong>${escapeHtml(name)}</strong></td>
+      <td>${count} active student${count!==1?'s':''}</td>
+      <td><select class="promo-target" data-from="${escapeAttr(name)}">${opts}</select></td>
+    </tr>`;
+  }).join('');
+}
+
+window.openPromotionPreview = function(){
+  const rows = [...document.querySelectorAll('#promoTbody select.promo-target')];
+  const mappings = rows
+    .map(sel=>({from: sel.dataset.from, to: sel.value}))
+    .filter(m=>m.to);
+
+  if(!mappings.length) return showToast('Choose at least one class to promote', 'error');
+
+  PROMO_PLAN = mappings.map(m=>({
+    from: m.from,
+    to: m.to,
+    students: (allStudents||[])
+      .filter(s=>s.class===m.from && (s.status||'active')==='active')
+      .sort((a,b)=>`${a.firstName||''}${a.lastName||''}`.localeCompare(`${b.firstName||''}${b.lastName||''}`))
+  })).filter(p=>p.students.length);
+
+  if(!PROMO_PLAN.length) return showToast('No active students in the selected classes', 'error');
+
+  const totalStudents = PROMO_PLAN.reduce((n,p)=>n+p.students.length, 0);
+  document.getElementById('promoPreviewSummary').textContent =
+    `${totalStudents} active student${totalStudents!==1?'s':''} across ${PROMO_PLAN.length} class${PROMO_PLAN.length!==1?'es':''} will be moved. Uncheck anyone who should stay behind (e.g. a repeat), then confirm.`;
+
+  document.getElementById('promoPreviewList').innerHTML = PROMO_PLAN.map((p,idx)=>{
+    const destLabel = p.to===GRADUATE_VALUE ? 'Graduate / Leave school' : p.to;
+    const rows = p.students.map(s=>{
+      const name = `${escapeHtml(s.firstName||'')} ${escapeHtml(s.lastName||'')}`.trim()||'—';
+      return `<label class="subj-cb">
+        <input type="checkbox" checked data-idx="${idx}" data-doc="${escapeAttr(s._docId)}"/>
+        ${name} <span style="color:var(--muted)">(${escapeHtml(s.regNumber||'—')})</span>
+      </label>`;
+    }).join('');
+    return `<div style="margin-bottom:16px">
+      <div style="font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px">
+        ${escapeHtml(p.from)} → ${escapeHtml(destLabel)} <span style="font-weight:400;color:var(--muted)">(${p.students.length})</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  openMo('moPromoPreview');
+};
+
+window.runPromotion = async function(){
+  const checked = [...document.querySelectorAll('#promoPreviewList input[type=checkbox]:checked')];
+  if(!checked.length) return showToast('Nothing selected to promote', 'error');
+
+  const btn = document.getElementById('promoConfirmBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Promoting…';
+
+  try{
+    const writes = checked.map(cb=>{
+      const plan = PROMO_PLAN[Number(cb.dataset.idx)];
+      const docId = cb.dataset.doc;
+      const student = plan.students.find(s=>s._docId===docId);
+      let payload;
+      if(plan.to === GRADUATE_VALUE){
+        payload = {
+          status: 'graduated',
+          previousClass: plan.from,
+          class: '',
+          graduatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+      } else {
+        const newElectives = (CLASS_DATA[plan.to]?.elective) || [];
+        payload = {
+          class: plan.to,
+          previousClass: plan.from,
+          promotedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          subjects: (student?.subjects||[]).filter(s=>newElectives.includes(s)),
+          department: isSeniorClass(plan.to) ? (student?.department||'') : ''
+        };
+      }
+      return { docId, payload };
+    });
+
+    for(const group of chunkArray(writes, 400)){
+      const batch = writeBatch(db);
+      group.forEach(w=>batch.update(doc(db,'students', w.docId), w.payload));
+      await batch.commit();
+    }
+
+    const promotedCount = writes.filter(w=>w.payload.status!=='graduated').length;
+    const graduatedCount = writes.length - promotedCount;
+    const parts = [];
+    if(promotedCount) parts.push(`${promotedCount} promoted`);
+    if(graduatedCount) parts.push(`${graduatedCount} graduated`);
+    showToast(parts.join(', '), 'success');
+
+    closeMo('moPromoPreview');
+    await loadStudents();
+    loadOverviewStats();
+    renderPromotionsTable();
+  } catch(e){
+    console.error('Promotion failed:', e);
+    showToast('Promotion failed partway through — check the Students list before retrying.', 'error');
+  } finally{
+    btn.disabled = false;
+    btn.innerHTML = 'Confirm &amp; Promote';
+  }
+};
+
 /* ============ OVERVIEW ============ */
 async function loadOverviewStats(){
   // Each stat is fetched independently so that one failing collection
@@ -1350,12 +1738,24 @@ async function loadOverviewStats(){
   try{
     const stuSnap = await getDocs(collection(db,'students'));
     document.getElementById('s-students').textContent = stuSnap.size.toLocaleString();
+    const ovChipStudents=document.getElementById('ovChipStudents');
+    if(ovChipStudents) ovChipStudents.textContent = stuSnap.size.toLocaleString();
+    const ovChipClasses=document.getElementById('ovChipClasses');
+    if(ovChipClasses) ovChipClasses.textContent = CLASS_NAMES.length;
     // Class breakdown bar chart
     const classCounts={};
     CLASS_NAMES.forEach(c=>classCounts[c]=0);
-    stuSnap.docs.forEach(d=>{const c=d.data().className||d.data().class;if(c&&classCounts[c]!==undefined)classCounts[c]++;});
+    let maleCount=0, femaleCount=0;
+    stuSnap.docs.forEach(d=>{
+      const data=d.data();
+      const c=data.className||data.class;
+      if(c&&classCounts[c]!==undefined)classCounts[c]++;
+      const g=(data.gender||'').toLowerCase();
+      if(g==='male'||g==='m') maleCount++;
+      else if(g==='female'||g==='f') femaleCount++;
+    });
     const maxCount=Math.max(...Object.values(classCounts),1);
-    const fills=['fill-blue','fill-green'];
+    const fills=['fill-blue','fill-gold','fill-green','fill-purple'];
     const barList=document.getElementById('classBarList');
     if(barList){
       barList.innerHTML = CLASS_NAMES.length ? CLASS_NAMES.map((c,i)=>`
@@ -1364,6 +1764,24 @@ async function loadOverviewStats(){
           <div class="ov-bar-track"><div class="ov-bar-fill ${fills[i%fills.length]}" style="width:${Math.round(classCounts[c]/maxCount*100)}%"></div></div>
         </div>`).join('') : '<p class="empty">No classes created yet</p>';
     }
+    // Gender donut
+    const genderTotal = maleCount+femaleCount;
+    const circumference = 2*Math.PI*52; // r=52
+    const malePct = genderTotal ? maleCount/genderTotal : 0;
+    const femalePct = genderTotal ? femaleCount/genderTotal : 0;
+    const maleArc = document.getElementById('donutMale');
+    const femaleArc = document.getElementById('donutFemale');
+    if(maleArc && femaleArc){
+      const maleLen = malePct*circumference;
+      const femaleLen = femalePct*circumference;
+      maleArc.style.strokeDasharray = `${maleLen} ${circumference-maleLen}`;
+      maleArc.style.strokeDashoffset = '0';
+      femaleArc.style.strokeDasharray = `${femaleLen} ${circumference-femaleLen}`;
+      femaleArc.style.strokeDashoffset = `-${maleLen}`;
+    }
+    const dTotal=document.getElementById('donutTotal'); if(dTotal) dTotal.textContent=genderTotal.toLocaleString();
+    const dMale=document.getElementById('donutMaleCount'); if(dMale) dMale.textContent=maleCount.toLocaleString();
+    const dFemale=document.getElementById('donutFemaleCount'); if(dFemale) dFemale.textContent=femaleCount.toLocaleString();
   } catch(e){
     console.warn('Student stats failed:', e.message);
     document.getElementById('s-students').textContent = '0';
@@ -1375,6 +1793,8 @@ async function loadOverviewStats(){
     const appSnap = await getDocs(collection(db,'applications'));
     const pending = appSnap.docs.filter(d=>(d.data().status||'pending')==='pending').length;
     document.getElementById('s-applications').textContent = pending;
+    const ovChipPending=document.getElementById('ovChipPending');
+    if(ovChipPending) ovChipPending.textContent = pending;
     if(pending>0){
       const el=document.getElementById('s-apps-trend');
       el.className='stat-trend trend-down';
@@ -1394,7 +1814,63 @@ async function loadOverviewStats(){
   try{
     const resSnap=await getDocs(collection(db,'results'));
     document.getElementById('s-results').textContent=resSnap.size.toLocaleString();
-  } catch(e){ document.getElementById('s-results').textContent='0'; }
+    renderTopPerformers(resSnap.docs.map(d=>d.data()));
+  } catch(e){
+    document.getElementById('s-results').textContent='0';
+    const grid=document.getElementById('topPerfGrid');
+    if(grid) grid.innerHTML='<div class="ov-top-empty">Couldn\'t load results data</div>';
+  }
+}
+
+/* Finds the best (position 1, or highest average) student in each class,
+   scoped to the school-wide CURRENT_SESSION/CURRENT_TERM set by the admin
+   (see loadAcademicSettings/openTermSettings) — not just whatever term
+   happens to have the newest data. */
+function renderTopPerformers(allResults){
+  const grid=document.getElementById('topPerfGrid');
+  const label=document.getElementById('topPerfLabel');
+  if(!grid) return;
+  if(label) label.textContent = `${CURRENT_TERM} Term, ${CURRENT_SESSION}`;
+  const scoped = allResults.filter(r=>r.published && r.session===CURRENT_SESSION && r.term===CURRENT_TERM);
+  const byClass={};
+  scoped.forEach(r=>{
+    const c=r.class||'—';
+    const best=byClass[c];
+    const better = !best ||
+      (r.overallPosition && best.overallPosition ? r.overallPosition<best.overallPosition :
+       (r.percentage||0)>(best.percentage||0));
+    if(better) byClass[c]=r;
+  });
+  const classes = Object.keys(byClass).sort();
+  if(!classes.length){
+    grid.innerHTML=`<div class="ov-top-empty">No published results yet for ${escapeHtml(CURRENT_TERM)} Term, ${escapeHtml(CURRENT_SESSION)}</div>`;
+    return;
+  }
+  grid.innerHTML = classes.map(c=>{
+    const r=byClass[c];
+    const initials=(r.studentName||'—').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+    const posLabel = r.overallPosition ? ordinal(r.overallPosition)+' Position' : 'Top Student';
+    return `
+    <div class="ov-top-card">
+      <div class="ov-top-top">
+        <div class="ov-top-avatar">${escapeHtml(initials||'?')}</div>
+        <div>
+          <div class="ov-top-name">${escapeHtml(r.studentName||'—')}</div>
+          <div class="ov-top-class">${escapeHtml(c)}</div>
+        </div>
+      </div>
+      <div class="ov-top-stats">
+        <div class="ov-top-avg">Average <b>${r.percentage!==undefined?r.percentage:'—'}${r.percentage!==undefined?'%':''}</b></div>
+        <div class="ov-top-badge">${escapeHtml(posLabel)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function ordinal(n){
+  n=Number(n);
+  const s=['th','st','nd','rd'], v=n%100;
+  return n+(s[(v-20)%10]||s[v]||s[0]);
 }
 
 /* ============ APPLICATIONS ============ */
