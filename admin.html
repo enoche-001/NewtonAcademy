@@ -833,6 +833,7 @@
     </div>
 
     <div class="mactions">
+      <button class="btn btn-danger btn-sm" id="moStuDeleteBtn" onclick="triggerDeleteAccount()" style="flex:none;padding:11px 16px">Delete Account</button>
       <button class="btn btn-danger btn-sm" id="moStuDeactivateBtn" onclick="triggerDeactivate()" style="flex:none;padding:11px 16px">Deactivate</button>
       <button class="btn-cancel" onclick="closeMo('moStudent')">Cancel</button>
       <button class="btn btn-p" id="moStuSaveBtn" onclick="saveStudentEdits()" style="flex:1;justify-content:center;padding:11px">
@@ -1475,25 +1476,61 @@ window.viewApplication = function(id){
        </div>`
     : '';
 
+  // Reusable file icon + warning icon, shared by every document chip below.
+  const docChipIcon = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+  const docWarnIcon = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  // birthCertificate / lgaCertificate / medicalReport don't have a stored
+  // mime type (unlike lastSchoolResult), so PDF vs image is inferred from
+  // the file extension on the uploaded Cloudinary URL.
+  const isPdfUrl = (url) => /\.pdf(\?|$)/i.test(url || '');
+
   // Last School Result: shown as a neat tappable chip — no raw filename,
   // just an icon + label. Tapping opens it in the in-page document viewer
   // (not a new browser tab), with a proper Close button.
   const lastResultChip = a.lastSchoolResult
     ? `<div class="doc-chip" onclick="openLastResultDoc()">
-         <span class="doc-chip-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+         <span class="doc-chip-icon">${docChipIcon}</span>
          <span class="doc-chip-label">Last School Result<em>(${a.lastSchoolResultType==='application/pdf' ? 'PDF' : 'Image'})</em></span>
          <span class="doc-chip-arrow">›</span>
        </div>`
     : (isNewSS1(a.classApplied)
-        ? `<div class="doc-chip-warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>No Last School Result uploaded — required for new SS1 applicants</div>`
+        ? `<div class="doc-chip-warn">${docWarnIcon}No Last School Result uploaded — required for new SS1 applicants</div>`
         : '');
 
-  const documentsSection = (passportPreview || lastResultChip)
-    ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}</div></div>`
+  // Birth Certificate, LGA Certificate, Medical Report — same tappable-chip
+  // treatment as Last School Result, so all supporting documents behave
+  // consistently in the preview.
+  const birthCertChip = a.birthCertificate
+    ? `<div class="doc-chip" onclick="openExtraDoc('birthCertificate')">
+         <span class="doc-chip-icon">${docChipIcon}</span>
+         <span class="doc-chip-label">Birth Certificate<em>(${isPdfUrl(a.birthCertificate) ? 'PDF' : 'Image'})</em></span>
+         <span class="doc-chip-arrow">›</span>
+       </div>`
+    : `<div class="doc-chip-warn">${docWarnIcon}No Birth Certificate uploaded</div>`;
+
+  const lgaCertChip = a.lgaCertificate
+    ? `<div class="doc-chip" onclick="openExtraDoc('lgaCertificate')">
+         <span class="doc-chip-icon">${docChipIcon}</span>
+         <span class="doc-chip-label">LGA Certificate<em>(${isPdfUrl(a.lgaCertificate) ? 'PDF' : 'Image'})</em></span>
+         <span class="doc-chip-arrow">›</span>
+       </div>`
+    : `<div class="doc-chip-warn">${docWarnIcon}No LGA Certificate uploaded</div>`;
+
+  const medicalReportChip = a.medicalReport
+    ? `<div class="doc-chip" onclick="openExtraDoc('medicalReport')">
+         <span class="doc-chip-icon">${docChipIcon}</span>
+         <span class="doc-chip-label">Medical Report<em>(${isPdfUrl(a.medicalReport) ? 'PDF' : 'Image'})</em></span>
+         <span class="doc-chip-arrow">›</span>
+       </div>`
+    : (a.healthConditions
+        ? `<div class="doc-chip-warn">${docWarnIcon}No Medical Report uploaded — health challenges were noted</div>`
+        : '');
+
+  const documentsSection = (passportPreview || lastResultChip || birthCertChip || lgaCertChip || medicalReportChip)
+    ? `<div class="doc-section">${passportPreview}<div class="doc-chip-row">${lastResultChip}${birthCertChip}${lgaCertChip}${medicalReportChip}</div></div>`
     : `<div class="doc-section"><div class="doc-chip-empty">No documents uploaded</div></div>`;
 
   document.getElementById('moAppViewBody').innerHTML = `
-    ${documentsSection}
     <div class="section-sub" style="margin-top:0">Personal Information</div>
     <div class="info-grid">
       <div class="info-item"><label>First Name</label><span>${escapeHtml(a.firstName||'—')}</span></div>
@@ -1539,6 +1576,9 @@ window.viewApplication = function(id){
       <div class="info-item"><label>Health Challenges</label><span>${escapeHtml(a.healthConditions||'None reported')}</span></div>
       <div class="info-item"><label>Current Medication</label><span>${escapeHtml(a.medication||'None')}</span></div>
     </div>
+    <hr class="info-divider"/>
+    <div class="section-sub">Uploaded Documents</div>
+    ${documentsSection}
   `;
 
   // Show/hide approve+reject based on status
@@ -1601,25 +1641,35 @@ let _docPreviewBlobUrl = null;
 // Opens a document (image or PDF) in the in-page preview modal — has a
 // real Close/Cancel button, and an optional "Open in New Tab" for anyone
 // who still wants the full native viewer.
-window.openDocBlob = function(dataUrl, mime, title){
+window.openDocBlob = function(source, mime, title){
   try{
     if(_docPreviewBlobUrl){ URL.revokeObjectURL(_docPreviewBlobUrl); _docPreviewBlobUrl = null; }
-    const blob = dataURLtoBlob(dataUrl.includes(',') ? dataUrl : `data:${mime};base64,${dataUrl}`);
-    const blobUrl = URL.createObjectURL(blob);
-    _docPreviewBlobUrl = blobUrl;
-    const isPdf = (mime||'').includes('pdf');
+    // Documents are saved to Firestore as real Cloudinary URLs (not base64),
+    // so only build a Blob when we're actually handed a base64 data URI —
+    // otherwise use the hosted URL directly (pdf.js and <img> can both load
+    // straight from an https URL).
+    const isDataUri = /^data:/.test(source);
+    let displayUrl;
+    if(isDataUri){
+      const blob = dataURLtoBlob(source.includes(',') ? source : `data:${mime};base64,${source}`);
+      displayUrl = URL.createObjectURL(blob);
+      _docPreviewBlobUrl = displayUrl;
+    } else {
+      displayUrl = source;
+    }
+    const isPdf = (mime||'').includes('pdf') || /\.pdf(\?|$)/i.test(source);
 
     document.getElementById('moDocPreviewTitle').textContent = title || 'Document';
     if(isPdf){
       openMo('moDocPreview');
-      renderPdfPreview(blobUrl);
+      renderPdfPreview(displayUrl);
     } else {
       const body = document.getElementById('moDocPreviewBody');
       body.className = 'doc-preview-body';
-      body.innerHTML = `<img src="${blobUrl}" alt="${escapeAttr(title||'Document')}"/>`;
+      body.innerHTML = `<img src="${displayUrl}" alt="${escapeAttr(title||'Document')}"/>`;
       openMo('moDocPreview');
     }
-    document.getElementById('moDocPreviewOpenBtn').onclick = () => window.open(blobUrl, '_blank');
+    document.getElementById('moDocPreviewOpenBtn').onclick = () => window.open(source, '_blank');
   } catch(e){
     console.error('Could not open document:', e); showToast('Could not open document. Please try again.', 'error');
   }
@@ -1642,6 +1692,20 @@ window.openLastResultDoc = function(){
   const a = allApplications.find(x=>x.id===currentAppId);
   if(!a || !a.lastSchoolResult) return;
   openDocBlob(a.lastSchoolResult, a.lastSchoolResultType || 'application/pdf', 'Last School Result');
+};
+
+// Opens Birth Certificate / LGA Certificate / Medical Report. These fields
+// don't carry a stored mime type, so openDocBlob falls back to sniffing
+// the file extension off the URL.
+window.openExtraDoc = function(field){
+  const a = allApplications.find(x=>x.id===currentAppId);
+  if(!a || !a[field]) return;
+  const titles = {
+    birthCertificate: 'Birth Certificate',
+    lgaCertificate:   'LGA Certificate',
+    medicalReport:    'Medical Report'
+  };
+  openDocBlob(a[field], '', titles[field] || 'Document');
 };
 
 window.triggerReject = function(){
@@ -1926,6 +1990,72 @@ window.triggerDeactivate = function(){
     }
   );
 };
+
+// Permanently deletes a student's account: their student record and the
+// original application it came from. NOTE: this does NOT delete the
+// uploaded files from Cloudinary — that requires a signed request using
+// the Cloudinary API secret, which can only run safely on a server (a
+// Cloud Function), and that needs Firebase's paid Blaze plan. Until that's
+// set up, this surfaces the leftover file links so they can be deleted
+// manually from the Cloudinary Media Library instead.
+window.triggerDeleteAccount = function(){
+  const s = allStudents.find(x=>x._docId===currentStuId);
+  if(!s) return;
+  const name = `${s.firstName||''} ${s.lastName||''}`.trim() || 'this student';
+  showDlg(
+    `Permanently delete ${name}'s account?`,
+    'This removes the student record and their original application from the database. Their uploaded files (passport, birth certificate, LGA certificate, medical report, last school result) will still exist in Cloudinary — you\'ll get a list of links to delete them manually afterward. This cannot be undone.',
+    async ()=>{
+      try{
+        const leftoverUrls = await deleteStudentAccountFully(s);
+        showToast('Student account deleted', 'success');
+        closeMo('moStudent');
+        await loadStudents();
+        loadOverviewStats();
+        if(leftoverUrls.length){
+          window.prompt(
+            `Records deleted. ${leftoverUrls.length} uploaded file(s) still remain in Cloudinary (this app can't delete them automatically — see the note in chat). Copy these links to remove them manually from your Cloudinary Media Library:`,
+            leftoverUrls.join('\n')
+          );
+        }
+      } catch(e){
+        console.error('Delete account failed:', e);
+        showToast('Delete failed. Please try again.', 'error');
+      }
+      closeDlg();
+    }
+  );
+};
+
+async function deleteStudentAccountFully(s){
+  // Gather every document URL tied to this student, from both the student
+  // record and (if still present) the original application it was created
+  // from, so the admin has a complete list to clean up in Cloudinary.
+  const urls = new Set();
+  if(s.photo) urls.add(s.photo);
+
+  let appData = null;
+  if(s.applicationId){
+    try{
+      const appSnap = await getDoc(doc(db,'applications', s.applicationId));
+      if(appSnap.exists()) appData = appSnap.data();
+    }catch(e){ console.warn('Could not load linked application for cleanup:', e); }
+  }
+  if(appData){
+    ['passportPhoto','lastSchoolResult','birthCertificate','lgaCertificate','medicalReport'].forEach(f=>{
+      if(appData[f]) urls.add(appData[f]);
+    });
+  }
+
+  await deleteDoc(doc(db,'students', s._docId));
+  if(s.applicationId){
+    await deleteDoc(doc(db,'applications', s.applicationId)).catch(e=>
+      console.warn('Linked application already gone or failed to delete:', e));
+  }
+  await setDoc(doc(db,'settings','publicStats'), { studentCount: increment(-1) }, { merge:true });
+
+  return Array.from(urls);
+}
 
 /* ============ MANUAL STUDENT CREATION ============ */
 let csPassportBase64 = null;

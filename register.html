@@ -382,17 +382,25 @@
           Other Required Documents — Bring Physically on Resumption
         </p>
         <ul>
-          <li>Birth certificate or sworn affidavit</li>
           <li>Previous school report card (last term)</li>
         </ul>
       </div>
+    </div><!-- /form-card -->
+
+    <!-- Birth Certificate, LGA Certificate, Medical Report — uploaded digitally -->
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><h2>Supporting Documents</h2><p>Birth certificate and other required documents</p></div>
+      </div>
+      <div id="extraDocsContainer"><!-- populated by initDocFields() --></div>
     </div><!-- /form-card -->
 
     <!-- Last School Result — Junior WAEC / BECE -->
     <div class="form-card">
       <div class="form-card-hdr">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-        <div><h2>Last School Result</h2><p id="lastResultNote">Junior WAEC / BECE result — required for new SS1 applicants</p></div>
+        <div><h2>Last School Result</h2><p id="lastResultNote">Most recent school result — required for this application</p></div>
       </div>
 
       <div class="fg" style="margin-bottom:6px">
@@ -596,11 +604,203 @@ const db  = initializeFirestore(app, {
 const REGISTRATION_FEE_KOBO = 1000000; // ₦10,000
 
 let pendingDocId = null;
-let passportBase64 = null; // stores compressed Base64 string
-let lastResultBase64 = null;  // Junior WAEC / BECE result — image (compressed) or PDF, base64
+let passportBase64 = null; // stores compressed Base64 string (local preview only — never saved)
+let passportUrl = null;    // Cloudinary URL — this is what actually gets saved
+let lastResultBase64 = null;  // Junior WAEC / BECE result — local preview only
+let lastResultUrl    = null;  // Cloudinary URL — this is what actually gets saved
 let lastResultMime   = '';    // 'image' or 'application/pdf'
 let lastResultFileName = '';
 let currentPanel = 1; // guided flow: 1 Applicant, 2 Guardian, 3 Health & Interests, 4 Documents
+
+/* ══════════════════════════════════════════
+   CLOUDINARY — document uploads
+   Files upload straight from the browser (unsigned preset), and we
+   only ever save the returned URL to Firestore — never the file itself.
+   ══════════════════════════════════════════ */
+const CLOUDINARY_CLOUD_NAME   = 'yf5zq0cw';
+const CLOUDINARY_UPLOAD_PRESET = 'newton_docs';
+let pendingUploads = 0; // tracks in-flight uploads so we can block submission until they finish
+
+function uploadToCloudinary(fileOrBlob, filename, onProgress){
+  pendingUploads++;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`);
+    xhr.upload.onprogress = function(e){
+      if(onProgress && e.lengthComputable) onProgress(Math.round((e.loaded/e.total)*100));
+    };
+    xhr.onload = function(){
+      pendingUploads--;
+      if(xhr.status >= 200 && xhr.status < 300){
+        try{
+          const data = JSON.parse(xhr.responseText);
+          resolve(data.secure_url);
+        } catch(e){ reject(new Error('Unexpected upload response')); }
+      } else {
+        reject(new Error('Upload failed. Please check your connection and try again.'));
+      }
+    };
+    xhr.onerror = function(){
+      pendingUploads--;
+      reject(new Error('Network error during upload. Please try again.'));
+    };
+    const fd = new FormData();
+    fd.append('file', fileOrBlob, filename || 'upload');
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    xhr.send(fd);
+  });
+}
+
+/* Generic document-upload field: handles a dropzone (image or image+PDF),
+   client-side size/type validation, upload to Cloudinary, and preview state.
+   Reused for Birth Certificate, Medical Report, and LGA Certificate so we
+   don't hand-write near-identical markup/handlers three times. */
+const docUrls = {}; // { fieldId: url }
+const DOC_FIELDS = [
+  { id:'birthCert',  label:'Birth Certificate',  hint:'JPG, PNG, WEBP or PDF',           maxMB:8, required:()=>true },
+  { id:'lgaCert',    label:'Local Government (LGA) Identification Certificate', hint:'JPG, PNG, WEBP or PDF', maxMB:8, required:()=>true },
+  { id:'medicalReport', label:'Medical Report', hint:'JPG, PNG, WEBP or PDF · only if health challenges were noted above', maxMB:8, required:()=> v('healthConditions').length > 0 }
+];
+
+function renderDocField(cfg){
+  return `
+    <div class="fg" style="margin-bottom:20px" id="${cfg.id}Field">
+      <label>${cfg.label} <span class="req" id="${cfg.id}ReqMark" style="display:none">*</span> <span style="color:var(--muted);font-weight:400;font-size:.78rem" id="${cfg.id}OptMark">(optional)</span></label>
+      <div id="${cfg.id}Dropzone" class="doc-dropzone" onclick="document.getElementById('${cfg.id}FileInput').click()">
+        <input type="file" id="${cfg.id}FileInput" accept="image/*,application/pdf" style="display:none" onchange="handleDocSelect('${cfg.id}', this)"/>
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="doc-dropzone-label">Click to select file</div>
+        <div class="doc-dropzone-hint">${cfg.hint}</div>
+      </div>
+      <div id="${cfg.id}Preview" class="doc-upload-preview">
+        <div id="${cfg.id}ThumbWrap" class="doc-upload-thumb-wrap">
+          <img id="${cfg.id}Thumb" class="doc-upload-thumb-inner" style="display:none" src="" alt="preview"/>
+          <svg id="${cfg.id}PdfIcon" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;display:none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="doc-upload-info">
+          <div id="${cfg.id}FileName" class="doc-upload-name"></div>
+          <div id="${cfg.id}FileSize" class="doc-upload-size"></div>
+        </div>
+        <button onclick="clearDocField('${cfg.id}')" class="doc-upload-remove">✕</button>
+      </div>
+      <div id="${cfg.id}Error" class="doc-upload-error"></div>
+    </div>`;
+}
+
+function initDocFields(){
+  const container = document.getElementById('extraDocsContainer');
+  if(!container) return;
+  container.innerHTML = DOC_FIELDS.map(renderDocField).join('');
+  document.getElementById('healthConditions').addEventListener('input', refreshDocRequirements);
+  document.getElementById('classApplied').addEventListener('change', refreshDocRequirements);
+  refreshDocRequirements();
+}
+
+function refreshDocRequirements(){
+  DOC_FIELDS.forEach(cfg => {
+    const required = cfg.required();
+    const reqEl = document.getElementById(`${cfg.id}ReqMark`);
+    const optEl = document.getElementById(`${cfg.id}OptMark`);
+    if(!reqEl) return;
+    reqEl.style.display = required ? '' : 'none';
+    optEl.style.display = required ? 'none' : '';
+  });
+}
+
+window.handleDocSelect = function(id, input){
+  const file = input.files[0];
+  if(!file) return;
+  const cfg = DOC_FIELDS.find(c => c.id === id);
+  const errEl = document.getElementById(`${id}Error`);
+  errEl.style.display = 'none';
+
+  const isImage = file.type.startsWith('image/');
+  const isPdf   = file.type === 'application/pdf';
+  if(!isImage && !isPdf){
+    errEl.textContent = 'Please select an image (JPG, PNG, WEBP) or a PDF file.';
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+  if(file.size > cfg.maxMB * 1024 * 1024){
+    errEl.textContent = `File too large. Please select a file under ${cfg.maxMB}MB.`;
+    errEl.style.display = 'block';
+    input.value = '';
+    return;
+  }
+
+  // Show local preview immediately
+  const thumb = document.getElementById(`${id}Thumb`);
+  const pdfIcon = document.getElementById(`${id}PdfIcon`);
+  const preview = document.getElementById(`${id}Preview`);
+
+  const startUpload = (blobOrFile, sizeLabel) => {
+    document.getElementById(`${id}FileName`).textContent = file.name + ' — uploading…';
+    document.getElementById(`${id}FileSize`).textContent = sizeLabel;
+    preview.style.display = 'flex';
+
+    uploadToCloudinary(blobOrFile, file.name, pct => {
+      document.getElementById(`${id}FileName`).textContent = `${file.name} — uploading ${pct}%`;
+    }).then(url => {
+      docUrls[id] = url;
+      document.getElementById(`${id}FileName`).textContent = file.name;
+      document.getElementById(`${id}Dropzone`).style.borderColor = 'var(--ok-b)';
+      document.getElementById(`${id}Dropzone`).style.background = 'var(--ok-bg)';
+      saveDraft();
+    }).catch(err => {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      document.getElementById(`${id}FileName`).textContent = file.name + ' — upload failed, tap to retry';
+      docUrls[id] = null;
+    });
+  };
+
+  if(isImage){
+    // Compress via canvas — max 1400px on the long edge, quality 0.75.
+    // Kept larger than the passport photo so certificate/report text stays
+    // legible, but this still cuts a typical 3-5MB phone photo down to a
+    // few hundred KB, which matters a lot across birthCert/lgaCert/
+    // medicalReport × ~500 students/year on a capped Cloudinary plan.
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 1400;
+        let w = img.width, h = img.height;
+        if(w > h){ if(w > MAX){ h = Math.round(h * MAX/w); w = MAX; } }
+        else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+        thumb.src = canvas.toDataURL('image/jpeg', 0.75);
+        thumb.style.display = 'block';
+        pdfIcon.style.display = 'none';
+
+        canvas.toBlob(blob => {
+          startUpload(blob, `${Math.round(blob.size/1024)} KB (compressed from ${Math.round(file.size/1024)} KB)`);
+        }, 'image/jpeg', 0.75);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // PDFs are uploaded as-is — client-side PDF compression isn't reliable,
+    // so the maxMB cap above is what keeps these bounded.
+    thumb.style.display = 'none';
+    pdfIcon.style.display = 'block';
+    startUpload(file, `PDF · ${Math.round(file.size/1024)} KB`);
+  }
+};
+
+window.clearDocField = function(id){
+  docUrls[id] = null;
+  document.getElementById(`${id}FileInput`).value = '';
+  document.getElementById(`${id}Preview`).style.display = 'none';
+  document.getElementById(`${id}Dropzone`).style.borderColor = '';
+  document.getElementById(`${id}Dropzone`).style.background = '';
+  saveDraft();
+};
 
 const HOBBIES_LIST = ['Reading','Music','Dancing','Art & Drawing','Drama / Acting','Debate','Coding / Computer','Cooking','Photography','Writing','Singing','Gardening'];
 const SPORTS_LIST   = ['Football','Basketball','Volleyball','Table Tennis','Athletics / Track & Field','Badminton','Chess','Swimming','Handball','Lawn Tennis'];
@@ -723,6 +923,7 @@ function onStateChange(){
 
 initDobDropdowns();
 initStateDropdown();
+initDocFields();
 buildCheckGrid('hobbiesCheckboxes', HOBBIES_LIST, 'hobby');
 buildCheckGrid('sportsCheckboxes', SPORTS_LIST, 'sport');
 loadClassesForRegistration().then(function(){
@@ -810,20 +1011,35 @@ window.handlePassportSelect = function(input){
       else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      passportBase64 = canvas.toDataURL('image/jpeg', 0.75);
+      passportBase64 = canvas.toDataURL('image/jpeg', 0.75); // local preview only
 
-      // Show preview
+      // Show preview immediately (before upload finishes)
       const preview = document.getElementById('passportPreview');
       document.getElementById('passportThumb').src = passportBase64;
-      document.getElementById('passportFileName').textContent = file.name;
+      document.getElementById('passportFileName').textContent = file.name + ' — uploading…';
       const sizeKB = Math.round((passportBase64.length * 3/4) / 1024);
       document.getElementById('passportFileSize').textContent = `${sizeKB} KB`;
       preview.style.display = 'flex';
-
-      // Style dropzone
-      document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
-      document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
       saveDraft();
+
+      // Upload the compressed image to Cloudinary — this is what actually gets saved
+      canvas.toBlob(blob => {
+        uploadToCloudinary(blob, file.name, pct => {
+          document.getElementById('passportFileName').textContent = `${file.name} — uploading ${pct}%`;
+        }).then(url => {
+          passportUrl = url;
+          document.getElementById('passportFileName').textContent = file.name;
+          document.getElementById('passportDropzone').style.borderColor = 'var(--ok-b)';
+          document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
+          saveDraft();
+        }).catch(err => {
+          const errEl = document.getElementById('passportError');
+          errEl.textContent = err.message;
+          errEl.style.display = 'block';
+          document.getElementById('passportFileName').textContent = file.name + ' — upload failed, reselect to retry';
+          passportUrl = null;
+        });
+      }, 'image/jpeg', 0.75);
     };
     img.src = e.target.result;
   };
@@ -832,6 +1048,7 @@ window.handlePassportSelect = function(input){
 
 window.clearPassport = function(){
   passportBase64 = null;
+  passportUrl = null;
   document.getElementById('passportFileInput').value = '';
   document.getElementById('passportPreview').style.display = 'none';
   document.getElementById('passportDropzone').style.borderColor = '';
@@ -842,9 +1059,10 @@ window.clearPassport = function(){
 /* ══════════════════════════════════════════
    LAST SCHOOL RESULT — Junior WAEC / BECE
    Image: compressed via Canvas (like passport, larger max size for legibility)
-   PDF:   stored as-is, but capped small to protect the 1MB Firestore doc limit
+   PDF:   uploaded to Cloudinary as-is (no longer constrained by Firestore's
+   1MB document limit now that only the URL is saved, so the cap is generous)
    ══════════════════════════════════════════ */
-const LAST_RESULT_PDF_MAX_BYTES = 500 * 1024; // ~500KB file → ~680KB base64
+const LAST_RESULT_PDF_MAX_BYTES = 5 * 1024 * 1024; // 5MB — plenty for a scanned result
 
 window.handleLastResultSelect = function(input){
   const file = input.files[0];
@@ -891,11 +1109,27 @@ window.handleLastResultSelect = function(input){
         else      { if(h > MAX){ w = Math.round(w * MAX/h); h = MAX; } }
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        lastResultBase64  = canvas.toDataURL('image/jpeg', 0.72);
+        lastResultBase64  = canvas.toDataURL('image/jpeg', 0.72); // local preview only
         lastResultMime     = 'image';
         lastResultFileName = file.name;
         showLastResultPreview();
         saveDraft();
+
+        canvas.toBlob(blob => {
+          uploadToCloudinary(blob, file.name, pct => {
+            document.getElementById('lastResultFileName').textContent = `${file.name} — uploading ${pct}%`;
+          }).then(url => {
+            lastResultUrl = url;
+            document.getElementById('lastResultFileName').textContent = file.name;
+            saveDraft();
+          }).catch(err => {
+            const errEl = document.getElementById('lastResultError');
+            errEl.textContent = err.message;
+            errEl.style.display = 'block';
+            document.getElementById('lastResultFileName').textContent = file.name + ' — upload failed, reselect to retry';
+            lastResultUrl = null;
+          });
+        }, 'image/jpeg', 0.72);
       };
       img.src = e.target.result;
     };
@@ -903,11 +1137,25 @@ window.handleLastResultSelect = function(input){
   } else {
     const reader = new FileReader();
     reader.onload = function(e){
-      lastResultBase64  = e.target.result;
+      lastResultBase64  = e.target.result; // local preview only
       lastResultMime     = 'application/pdf';
       lastResultFileName = file.name;
       showLastResultPreview();
       saveDraft();
+
+      uploadToCloudinary(file, file.name, pct => {
+        document.getElementById('lastResultFileName').textContent = `${file.name} — uploading ${pct}%`;
+      }).then(url => {
+        lastResultUrl = url;
+        document.getElementById('lastResultFileName').textContent = file.name;
+        saveDraft();
+      }).catch(err => {
+        const errEl = document.getElementById('lastResultError');
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+        document.getElementById('lastResultFileName').textContent = file.name + ' — upload failed, reselect to retry';
+        lastResultUrl = null;
+      });
     };
     reader.readAsDataURL(file);
   }
@@ -939,6 +1187,7 @@ function showLastResultPreview(){
 
 window.clearLastResult = function(){
   lastResultBase64 = null;
+  lastResultUrl = null;
   lastResultMime = '';
   lastResultFileName = '';
   document.getElementById('lastResultFileInput').value = '';
@@ -948,18 +1197,19 @@ window.clearLastResult = function(){
   saveDraft();
 };
 
-// Only new SS1 applicants are required to upload — other classes may skip
+// SS1 applicants need the Junior WAEC/BECE result specifically; every other
+// class still needs to upload their most recent result — just not that one.
 function isNewSS1(className){
   return /^SS1/i.test((className||'').trim());
 }
 function toggleLastResultRequirement(){
   const cls = document.getElementById('classApplied').value;
-  const required = isNewSS1(cls);
-  document.getElementById('lastResultReqMark').style.display = required ? '' : 'none';
-  document.getElementById('lastResultOptMark').style.display = required ? 'none' : '';
-  document.getElementById('lastResultNote').textContent = required
+  // Last result upload is now required for every applicant — only the note changes
+  document.getElementById('lastResultReqMark').style.display = '';
+  document.getElementById('lastResultOptMark').style.display = 'none';
+  document.getElementById('lastResultNote').textContent = isNewSS1(cls)
     ? 'Junior WAEC / BECE result — required for this application'
-    : 'Junior WAEC / BECE result — only required for new SS1 applicants';
+    : 'Most recent school result / report card — required for this application';
 }
 /* ══════════════════════════════════════════
    FORM VALIDATION
@@ -1024,7 +1274,7 @@ function validatePanel2(){
   return null;
 }
 function validatePanel3(){
-  return null; // Health & Interests — all fields optional
+  return null; // Health & Interests — all fields optional except Medical Report, checked in panel4/validateForm
 }
 function validateForm(){
   const d = getFormData();
@@ -1038,9 +1288,19 @@ function validateForm(){
     if(!d.department)   return 'Please select a department (Science, Arts, or Commercial).';
   }
   if(!d.primaryPhone)      return 'Primary phone number is required.';
-  if(!passportBase64)      return 'Passport photograph is required.';
-  if(isNewSS1(d.classApplied) && !lastResultBase64){
-    return 'Please upload the Junior WAEC / BECE result — required for new SS1 applicants.';
+
+  if(pendingUploads > 0)   return 'Please wait for document uploads to finish.';
+
+  if(!passportUrl)         return 'Passport photograph is required.';
+  if(!lastResultUrl){
+    return isNewSS1(d.classApplied)
+      ? 'Please upload the Junior WAEC / BECE result — required for new SS1 applicants.'
+      : 'Please upload the applicant\'s most recent school result.';
+  }
+  if(!docUrls.birthCert)   return 'Birth certificate is required.';
+  if(!docUrls.lgaCert)     return 'Local Government (LGA) Identification Certificate is required.';
+  if(d.healthConditions && !docUrls.medicalReport){
+    return 'Please upload a medical report since health challenges were noted.';
   }
   return null;
 }
@@ -1254,10 +1514,13 @@ async function verifyAndSubmit(reference){
       paystackReference: reference,
       amountPaid:     verifiedKobo ? verifiedKobo / 100 : 10000,
       paymentStatus:  paymentStatus,
-      passportPhoto:  passportBase64,
-      lastSchoolResult:     lastResultBase64 || null,
+      passportPhoto:  passportUrl,
+      lastSchoolResult:     lastResultUrl || null,
       lastSchoolResultType: lastResultMime || '',
       lastSchoolResultName: lastResultFileName || '',
+      birthCertificate: docUrls.birthCert || null,
+      lgaCertificate:   docUrls.lgaCert || null,
+      medicalReport:    docUrls.medicalReport || null,
       status:         'pending',
       submittedAt:    serverTimestamp()
     };
@@ -1318,10 +1581,13 @@ function collectDraftData(){
     dobMonth:     document.getElementById('dobMonth').value,
     dobYear:      document.getElementById('dobYear').value,
     passportBase64: passportBase64,
+    passportUrl:    passportUrl,
     passportFileName: document.getElementById('passportFileName')?.textContent || '',
     lastResultBase64:  lastResultBase64,
+    lastResultUrl:      lastResultUrl,
     lastResultMime:     lastResultMime,
     lastResultFileName: lastResultFileName,
+    docUrls:      Object.assign({}, docUrls), // birthCert / lgaCert / medicalReport — tiny strings, cheap to persist
     currentPanel: currentPanel,
     savedAt:      Date.now()
   };
@@ -1496,6 +1762,7 @@ function restoreDraft(draft){
   // Passport photo
   if(draft.passportBase64){
     passportBase64 = draft.passportBase64;
+    passportUrl = draft.passportUrl || null; // restores the already-uploaded Cloudinary URL, no re-upload needed
     const preview = document.getElementById('passportPreview');
     document.getElementById('passportThumb').src = passportBase64;
     document.getElementById('passportFileName').textContent = draft.passportFileName || 'Saved photo';
@@ -1506,12 +1773,30 @@ function restoreDraft(draft){
     document.getElementById('passportDropzone').style.background = 'var(--ok-bg)';
   }
 
-  // Last school result (Junior WAEC / BECE)
+  // Last school result (Junior WAEC / BECE, or most recent result for other classes)
   if(draft.lastResultBase64){
     lastResultBase64  = draft.lastResultBase64;
+    lastResultUrl      = draft.lastResultUrl || null;
     lastResultMime     = draft.lastResultMime || 'image';
     lastResultFileName = draft.lastResultFileName || 'Saved result';
     showLastResultPreview();
+  }
+
+  // Birth Certificate / LGA Certificate / Medical Report
+  if(draft.docUrls){
+    Object.keys(draft.docUrls).forEach(id => {
+      const url = draft.docUrls[id];
+      if(!url) return;
+      docUrls[id] = url;
+      const thumb = document.getElementById(`${id}Thumb`);
+      const pdfIcon = document.getElementById(`${id}PdfIcon`);
+      if(!thumb) return; // field not rendered (shouldn't happen, but stay safe)
+      thumb.src = url; thumb.style.display = 'block'; pdfIcon.style.display = 'none';
+      document.getElementById(`${id}FileName`).textContent = 'Saved document';
+      document.getElementById(`${id}Preview`).style.display = 'flex';
+      document.getElementById(`${id}Dropzone`).style.borderColor = 'var(--ok-b)';
+      document.getElementById(`${id}Dropzone`).style.background = 'var(--ok-bg)';
+    });
   }
 
   // Jump to the panel they were last on
