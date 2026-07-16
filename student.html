@@ -356,6 +356,19 @@
   </div>
 </div>
 
+<!-- NO CONNECTION DIALOG -->
+<div class="dlg-ov" id="netErrOv">
+  <div class="dlg">
+    <div class="dlg-ic warn-ic"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9z"/><path d="M5 13l2 2a8 8 0 0 1 10 0l2-2a11 11 0 0 0-14 0z"/><path d="M9 17l2 2a2.83 2.83 0 0 1 2 0l2-2a5 5 0 0 0-6 0z"/><line x1="2" y1="2" x2="22" y2="22"/></svg></div>
+    <h3>No internet connection</h3>
+    <p>We couldn't reach the school server. Please check your internet connection and try again.</p>
+    <div class="dlg-btns">
+      <button class="dlg-btn dlg-btn-primary" id="netErrRetryBtn">Try Again</button>
+      <button class="dlg-btn dlg-btn-secondary" onclick="closeNetErrDlg()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -478,11 +491,13 @@ window.doLogin = async function(){
 
   if(!reg || !pw){ showLAlert('Please enter your registration number and password.'); return; }
 
+  if(!navigator.onLine){ showNetErrDlg(); return; }
+
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
   try{
     const snap = await getDocs(query(collection(db,'students'), where('regNumber','==',reg), limit(1)));
     if(snap.empty){
-      showLAlert('Registration number not found.');
+      showLAlert('Incorrect registration number or password.');
       return;
     }
     const docSnap = snap.docs[0];
@@ -490,7 +505,7 @@ window.doLogin = async function(){
 
     const pwHash = await hashPassword(pw);
     if(data.password !== pwHash){
-      showLAlert('Incorrect password.');
+      showLAlert('Incorrect registration number or password.');
       return;
     }
     if((data.status||'active') !== 'active'){
@@ -514,12 +529,17 @@ window.doLogin = async function(){
     showPortal();
   } catch(e){
     console.error('Login error:', e);
-    showLAlert('Something went wrong. Please check your connection and try again.');
+    const isNetworkIssue = !navigator.onLine || e.code === 'unavailable' || /network|failed to fetch/i.test(e.message||'');
+    if(isNetworkIssue){ showNetErrDlg(); }
+    else{ showLAlert('Something went wrong. Please try again.'); }
   } finally{
     btn.disabled = false; btn.textContent = 'Sign In';
   }
 };
 function showLAlert(msg){ document.getElementById('lMsg').textContent = msg; document.getElementById('lAlert').classList.add('show'); }
+function showNetErrDlg(){ document.getElementById('netErrOv').classList.add('show'); }
+window.closeNetErrDlg = ()=> document.getElementById('netErrOv').classList.remove('show');
+document.getElementById('netErrRetryBtn').addEventListener('click', ()=>{ closeNetErrDlg(); doLogin(); });
 
 document.getElementById('loginBtn').addEventListener('click', doLogin);
 document.getElementById('pwIn').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
